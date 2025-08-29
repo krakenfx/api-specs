@@ -1,0 +1,48 @@
+required:
+  - nonce
+  - asset
+  - key
+  - amount
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  asset:
+    description: Asset being withdrawn
+    type: string
+  aclass:
+    description: Specify the asset class of the asset being withdrawn
+    type: string
+    enum:
+      - currency
+      - tokenized_asset
+    default: currency
+  key:
+    description: Withdrawal key name, as set up on your account
+    type: string
+  address:
+    description: Optional, crypto address that can be used to confirm address matches key (will return `Invalid withdrawal address` error if different)
+    type: string
+  amount:
+    description: Amount to be withdrawn
+    type: string
+  max_fee:
+    description: Optional, if the processed withdrawal fee is higher than `max_fee`, withdrawal will fail with `EFunding:Max fee exceeded`
+    type: string
+  rebase_multiplier:
+    type: string
+    enum:
+      - rebased
+      - base
+    default: rebased
+    nullable: true
+    description: |
+        Optional parameter for viewing xstocks data. 
+        - `rebased`: Display in terms of underlying equity.
+        - `base`: Display in terms of SPV tokens.
+example:
+    nonce: 1695828271
+    asset: "XBT"
+    key: "btc_2709"
+    amount: "0.725"
+    address: "bc1kar0ssrr7xf3vy5l6d3lydnwkre5og2zz3f5ldq"

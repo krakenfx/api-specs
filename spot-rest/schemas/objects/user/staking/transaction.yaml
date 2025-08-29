@@ -1,0 +1,37 @@
+title: Staking Transaction Info
+type: object
+properties:
+  refid:
+    description: The reference ID of the transaction.
+    type: string
+  type:
+    description: The type of transaction.
+    type: string
+    enum:
+      - bonding
+      - reward
+      - unbonding
+  asset:
+    description: Asset code/name
+    type: string
+  amount:
+    description: The transaction amount
+    type: string
+  time:
+    description: Unix timestamp when the transaction was initiated.
+    type: integer
+  bond_start:
+    description: Unix timestamp from the start of bond period (applicable only to `bonding` transactions).
+    type: integer
+  bond_end:
+    description: Unix timestamp of the end of bond period (applicable only to `bonding` transactions).
+    type: integer
+  status:
+    description: Transaction status
+    type: string
+    enum:
+      - Initial
+      - Pending
+      - Settled
+      - Success
+      - Failure

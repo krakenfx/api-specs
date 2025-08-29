@@ -1,0 +1,21 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Update Account Profile Request
+      description: Update Account Profile Request Body
+      required:
+      - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../../partials/properties/nonce.yaml'
+        asset:
+          description: Base asset used to determine balance
+          type: string
+          default: ZUSD
+        rebase_multiplier:
+          $ref: '../../../../partials/properties/rebase_multiplier.yaml'
+      example:
+          nonce: 1695828490
+          asset: "ZUSD"

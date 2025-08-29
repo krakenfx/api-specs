@@ -1,0 +1,10 @@
+type: string
+enum:
+  - rebased
+  - base
+default: rebased
+nullable: true
+description: |
+    Optional parameter for viewing xstocks data. 
+    - `rebased`: Display in terms of underlying equity.
+    - `base`: Display in terms of SPV tokens.

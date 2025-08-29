@@ -1,0 +1,7 @@
+value:
+  errors:
+  - field: Kraken-Api-Sign
+    type: Invalid signature
+    msg: Invalid API signature
+    severity: E
+    errorClass: API

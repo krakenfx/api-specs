@@ -1,0 +1,24 @@
+title: TickData
+description: |
+  Array of tick data arrays
+  `[int <time>, string <open>, string <high>, string <low>, string <close>, string <vwap>, string <volume>, int <count>]`
+type: array
+items:
+  type: array
+  items: 
+    minItems: 8
+    maxItems: 8
+    oneOf:
+    - type: string
+      title: string
+    - type: integer
+      title: integer
+    example:
+    - 1548115200
+    - '3533.4'
+    - '3543.7'
+    - '3530.7'
+    - '3539.4'
+    - '3539.8'
+    - '83.09287787'
+    - 232

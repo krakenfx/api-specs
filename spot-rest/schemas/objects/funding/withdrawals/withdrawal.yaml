@@ -1,0 +1,63 @@
+title: Withdrawal
+description: Withdrawal
+type: object
+properties:
+  method:
+    description: Name of withdrawal method
+    type: string
+  network:
+    description: Network name based on the funding method used
+    type: string
+  aclass:
+    description: Asset class
+    type: string
+  asset:
+    description: Asset
+    type: string
+  refid:
+    description: Reference ID
+    type: string
+  txid:
+    description: Method transaction ID
+    type: string
+  info:
+    description: Method transaction information
+    type: string
+  amount:
+    description: Amount withdrawn
+    type: string
+  fee:
+    description: Fees paid
+  time:
+    description: Unix timestamp when request was made
+    type: integer
+    format: int32
+  status:
+    description: |
+      Status of withdraw<br>
+      <sup><sub>For information about the status, please refer to the [IFEX financial transaction states](https://github.com/globalcitizen/ifex-protocol/blob/master/draft-ifex-00.txt#L837).</sup></sub>
+    type: string
+    enum: 
+      - Initial
+      - Pending
+      - Settled
+      - Success
+      - Failure
+  status-prop:
+    description: |
+      Addition status properties <sup><sub>(if available)</sup></sub><br>
+        * `cancel-pending` cancelation requested
+        * `canceled` canceled
+        * `cancel-denied` cancelation requested but was denied
+        * `return` a return transaction initiated by Kraken; it cannot be canceled
+        * `onhold` withdrawal is on hold pending review
+    type: string
+    enum:
+      - cancel-pending
+      - canceled
+      - cancel-denied
+      - return
+      - onhold
+  key:
+    description: Withdrawal key name, as set up on your account
+    type: string

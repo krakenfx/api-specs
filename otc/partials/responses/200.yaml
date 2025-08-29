@@ -1,0 +1,8 @@
+description: Success response
+content:
+  application/json:
+    schema:
+      $ref: '../../schemas/responses/200.yaml'
+    example:
+      result: true
+      errors: []

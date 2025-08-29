@@ -1,0 +1,7 @@
+in: query
+name: pair
+description: Asset pair to get data for
+required: true
+schema:
+  type: string
+example: XBTUSD

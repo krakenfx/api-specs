@@ -1,0 +1,71 @@
+type: object
+properties:
+  result:
+    title: OrderEdited
+    type: object
+    properties:
+      descr:
+        description: Order description info
+        type: object
+        properties:
+          order:
+            description: Order description
+            type: string
+      txid:
+        description: |
+          New Transaction ID
+          <br><sup><sub>(if order was added successfully)</sup></sub>
+        type: string
+      newuserref:
+        description: |
+          Original userref if passed with the request
+        type: string
+      olduserref:
+        description: |
+          Original userref if passed with the request
+        type: string
+      orders_cancelled:
+        description: |
+          Number of orders cancelled (either 0 or 1)
+        type: integer
+      originaltxid:
+        description: |
+          Original transaction ID
+        type: string
+      status:
+        description: |
+          Status of the order: Ok or Err
+        type: string
+      volume:
+        description: |
+          Updated volume
+        type: string
+      price:
+        description: |
+          Updated price
+        type: string
+      price2:
+        description: |
+          Updated price2
+        type: string
+      error_message:
+        description: |
+          Error message if unsuccessful
+        type: string
+      
+  error:
+    type: array
+    items:
+      $ref: '../../../../schemas/objects/errors/error.yaml'
+example:
+                    {
+                      "error": [],
+                      "result":
+                        {
+                          "descr":
+                            {
+                              "order": "buy 1.25000000 XBTUSD @ limit 27500.0",
+                            },
+                          "txid": "OU22CG-KLAF2-FWUDD7",
+                        },
+                    }

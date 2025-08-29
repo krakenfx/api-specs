@@ -1,0 +1,42 @@
+type: object
+properties:
+  result:
+    title: withdrawalMethods
+    description: Withdrawal Methods
+    type: array
+    items:
+      type: object
+      properties:
+        asset:
+          description: Name of asset being withdrawn
+          type: string
+        method:
+          description: Name of the withdrawal method
+          type: string
+        network:
+          description: Name of the blockchain or network being withdrawn on
+          type: string
+        minimum:
+          description: Minimum net amount that can be withdrawn right now
+          type: string
+  error:
+    $ref: '../../../../schemas/objects/errors/error.yaml'
+example:
+                {
+                  "error": [],
+                  "result":
+                    [
+                      {
+                        "asset": "XXBT",
+                        "method": "Bitcoin",
+                        "network": "Bitcoin",
+                        "minimum": "0.0004",
+                      },
+                      {
+                        "asset": "XXBT",
+                        "method": "Bitcoin Lightning",
+                        "network": "Lightning",
+                        "minimum": "0.00001",
+                      },
+                    ],
+                }

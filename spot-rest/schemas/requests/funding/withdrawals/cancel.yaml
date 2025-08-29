@@ -1,0 +1,23 @@
+title: Request Withdrawal Cancelation Request Body
+required:
+  - nonce
+  - asset
+  - refid
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  asset:
+    description: Asset being withdrawn
+    type: string
+  # aclass:
+  #   description: Asset class
+  #   type: string
+  #   default: currency
+  refid:
+    description: Withdrawal reference ID
+    type: string
+example:
+                  nonce: 1695828271
+                  asset: "XBT"
+                  refid: "FTQcuak-V6Za8qrWnhzTx67yYHz8Tg"

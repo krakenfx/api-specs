@@ -1,0 +1,56 @@
+title: LedgerEntry
+description: Ledger Entry
+type: object
+properties:
+  refid:
+    description: Reference Id of the parent transaction (trade, deposit, withdrawal, etc.) that caused the ledger entry.
+    type: string
+  time:
+    description: Unix timestamp of ledger
+    type: number
+  type:
+    description: Type of ledger entry
+    type: string
+    enum:
+      - none
+      - trade
+      - deposit
+      - withdrawal
+      - transfer
+      - margin
+      - adjustment
+      - rollover
+      - spend
+      - receive
+      - settled
+      - credit
+      - staking
+      - reward
+      - dividend
+      - sale
+      - conversion
+      - nfttrade
+      - nftcreatorfee
+      - nftrebate
+      - custodytransfer
+      #- marginconversion
+      #- reserve
+      #- blocktrade
+  subtype:
+    description: Additional info relating to the ledger entry type, where applicable
+    type: string
+  aclass:
+    description: Asset class
+    type: string
+  asset:
+    description: Asset
+    type: string
+  amount:
+    description: Transaction amount
+    type: string
+  fee:
+    description: Transaction fee
+    type: string
+  balance:
+    description: Resulting balance
+    type: string

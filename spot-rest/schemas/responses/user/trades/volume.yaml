@@ -1,0 +1,27 @@
+type: object
+properties:
+  result:
+    title: TradeVolume
+    description: Trade Volume
+    type: object
+    properties:
+      currency:
+        description: Fee volume currency (will always be USD)
+        type: string
+      volume:
+        description: Current fee discount volume (in USD, breakdown by subaccount if applicable and logged in to master account)
+        type: string
+      fees:
+        description: Taker fees that will be applied for each `pair` included in the request. Default `None` if `pair` is not requested.
+        type: object
+        additionalProperties:
+          x-additionalPropertiesName: pair
+          $ref: '../../../../schemas/objects/user/volume/fees.yaml'
+      fees_maker:
+        description: Maker fees that will be applied for this each `pair` included in the request. Default `None` if `pair` is not requested.
+        type: object
+        additionalProperties:
+          x-additionalPropertiesName: pair
+          $ref: '../../../../schemas/objects/user/volume/fees.yaml'
+  error:
+      $ref: '../../../../schemas/objects/errors/error.yaml'

@@ -1,0 +1,163 @@
+error: []
+result:
+  ADA:
+    aclass: currency
+    altname: ADA
+    decimals: 8
+    display_decimals: 6
+    collateral_value: 0.9
+    status: "enabled"
+  BCH:
+    aclass: currency
+    altname: BCH
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  DASH:
+    aclass: currency
+    altname: DASH
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  EOS:
+    aclass: currency
+    altname: EOS
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  GNO:
+    aclass: currency
+    altname: GNO
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  KFEE:
+    aclass: currency
+    altname: FEE
+    decimals: 2
+    display_decimals: 2
+    status: "enabled"
+  QTUM:
+    aclass: currency
+    altname: QTUM
+    decimals: 10
+    display_decimals: 6
+    status: "enabled"
+  USDT:
+    aclass: currency
+    altname: USDT
+    decimals: 8
+    display_decimals: 4
+    collateral_value: 0.9
+    status: "enabled"
+  XETC:
+    aclass: currency
+    altname: ETC
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  XETH:
+    aclass: currency
+    altname: ETH
+    decimals: 10
+    display_decimals: 5
+    collateral_value: 1
+    status: "enabled"
+  XLTC:
+    aclass: currency
+    altname: LTC
+    decimals: 10
+    display_decimals: 5
+    collateral_value: 0.7
+    status: "enabled"
+  XMLN:
+    aclass: currency
+    altname: MLN
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  XREP:
+    aclass: currency
+    altname: REP
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  XTZ:
+    aclass: currency
+    altname: XTZ
+    decimals: 8
+    display_decimals: 5
+    collateral_value: 0.5
+    status: "enabled"
+  XXBT:
+    aclass: currency
+    altname: XBT
+    decimals: 10
+    display_decimals: 5
+    collateral_value: 1
+    status: "enabled"
+  XXDG:
+    aclass: currency
+    altname: XDG
+    decimals: 8
+    display_decimals: 2
+    status: "enabled"
+  XXLM:
+    aclass: currency
+    altname: XLM
+    decimals: 8
+    display_decimals: 5
+    status: "enabled"
+  XXMR:
+    aclass: currency
+    altname: XMR
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  XXRP:
+    aclass: currency
+    altname: XRP
+    decimals: 8
+    display_decimals: 5
+    status: "enabled"
+  XZEC:
+    aclass: currency
+    altname: ZEC
+    decimals: 10
+    display_decimals: 5
+    status: "enabled"
+  ZCAD:
+    aclass: currency
+    altname: CAD
+    decimals: 4
+    display_decimals: 2
+    collateral_value: 1
+    status: "enabled"
+  ZEUR:
+    aclass: currency
+    altname: EUR
+    decimals: 4
+    display_decimals: 2
+    collateral_value: 1
+    status: "enabled"
+  ZGBP:
+    aclass: currency
+    altname: GBP
+    decimals: 4
+    display_decimals: 2
+    collateral_value: 1
+    status: "enabled"
+  ZJPY:
+    aclass: currency
+    altname: JPY
+    decimals: 2
+    display_decimals: 0
+    collateral_value: 1
+    status: "enabled"
+  ZUSD:
+    aclass: currency
+    altname: USD
+    decimals: 4
+    display_decimals: 2
+    collateral_value: 1
+    status: "enabled"

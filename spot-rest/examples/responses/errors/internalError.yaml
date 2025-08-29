@@ -1,0 +1,7 @@
+errors:
+- field: null
+  value: null
+  type: Internal Error
+  msg: Internal error
+  severity: E
+  errorClass: General

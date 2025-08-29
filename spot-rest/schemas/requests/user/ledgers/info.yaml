@@ -1,0 +1,61 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Get Ledgers Info Request Body
+      required:
+      - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../../partials/properties/nonce.yaml'
+        asset:
+          description: Filter output by asset or comma delimited list of assets
+          type: string
+          default: all
+        aclass:
+          description: Filter output by asset class
+          type: string
+          default: currency
+        type:
+          description: Type of ledger to retrieve
+          type: string
+          default: all
+          enum:
+          - all
+          - trade
+          - deposit
+          - withdrawal
+          - transfer
+          - margin
+          - adjustment
+          - rollover
+          - credit
+          - settled
+          - staking
+          - dividend
+          - sale
+          - nft_rebate
+          #- margin_conversion
+          #- reserve
+          #- blocktrade
+        start:
+          description: Starting unix timestamp or ledger ID of results (exclusive)
+          type: integer
+        end:
+          description: Ending unix timestamp or ledger ID of results (inclusive)
+          type: integer
+        ofs:
+          description: Result offset for pagination
+          type: integer
+        without_count:
+          description: If true, does not retrieve count of ledger entries. Request can be noticeably faster for users with many ledger entries as this avoids an extra database query.
+          type: boolean
+          default: false
+        rebase_multiplier:
+          $ref: '../../../../partials/properties/rebase_multiplier.yaml'
+      example:
+          nonce: 1695828490
+          type: "trade"
+          start: 1695728276
+          end: 1695828276

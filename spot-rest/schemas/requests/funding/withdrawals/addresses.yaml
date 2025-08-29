@@ -1,0 +1,25 @@
+required:
+  - nonce
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  asset:
+    description: Filter addresses for specific asset
+    type: string
+  aclass:
+    description: Filter addresses for specific asset class
+    type: string
+    enum:
+      - currency
+      - tokenized_asset
+    default: currency
+  method:
+    description: Filter addresses for specific method
+    type: string
+  key:
+    description: Find address for by withdrawal key name, as set up on your account
+    type: string
+  verified:
+    description: Filter by verification status of the withdrawal address. Withdrawal addresses successfully completing email confirmation will have a verification status of true.
+    type: boolean

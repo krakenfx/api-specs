@@ -1,0 +1,43 @@
+type: object
+properties:
+  result:
+    title: withdrawalAddresses
+    description: Withdrawal Addresses
+    type: array
+    items:
+      type: object
+      properties:
+        address:
+          description: Withdrawal address
+          type: string
+        asset:
+          description: Name of asset being withdrawn
+          type: string
+        method:
+          description: Name of the withdrawal method
+          type: string
+        key:
+          description: Withdrawal key name, as set up on your account
+          type: string
+        tag:
+          description: Contains tags for [XRP](https://support.kraken.com/hc/en-us/articles/360000184443-Destination-Tag-for-Ripple-XRP-deposits) deposit addresses and memos for [STX](https://support.kraken.com/hc/en-us/articles/10902306995860-Memo-for-Stacks-STX-deposits), [XLM](https://support.kraken.com/hc/en-us/articles/360000184543-Memo-for-Stellar-Lumens-XLM-deposits), and [EOS](https://support.kraken.com/hc/en-us/articles/360001099203-Memo-for-EOS-deposits) deposit addresses
+          type: string
+        verified:
+          description: Verification status of withdrawal address
+          type: boolean
+  error:
+    $ref: '../../../../schemas/objects/errors/error.yaml'
+example:
+                {
+                  "error": [],
+                  "result":
+                    [
+                      {
+                        "address": "bc1qxdsh4sdd29h6ldehz0se5c61asq8cgwyjf2y3z",
+                        "asset": "XBT",
+                        "method": "Bitcoin",
+                        "key": "btc-wallet-1",
+                        "verified": True,
+                      },
+                    ],
+                }

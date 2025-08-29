@@ -1,0 +1,74 @@
+title: Staking Asset Information
+type: object
+required:
+  - asset
+  - staking_asset
+  - rewards
+properties:
+  asset:
+    description: Asset code/name
+    type: string
+  staking_asset:
+    description: Staking asset code/name
+    type: string
+  method:
+    description: Unique ID of the staking option (used in Stake/Unstake operations)
+    type: string
+  on_chain:
+    description: Whether the staking operation is on-chain or not.
+    type: boolean
+    default: true
+  can_stake:
+    description: Whether the user will be able to stake this asset.
+    type: boolean
+    default: true
+  can_unstake:
+    description: Whether the user will be able to unstake this asset.
+    type: boolean
+    default: true
+  minimum_amount:
+    description: Minimium amounts for staking/unstaking.
+    type: object
+    required:
+      - unstaking
+      - staking
+    properties:
+      unstaking:
+        type: string
+        default: '0'
+      staking:
+        type: string
+        default: '0'
+  lock:
+    description: Describes the locking periods and percentages for staking/unstaking operations.
+    type: object
+    properties:
+      unstaking:
+        type: array
+        items:
+          $ref: './lock.yaml'
+      staking:
+        type: array
+        items:
+          $ref: './lock.yaml'
+      lockup:
+        type: array
+        items:
+          $ref: './lock.yaml'
+  enabled_for_user:
+    type: boolean
+    default: true
+  disabled:
+    type: boolean
+  rewards:
+    description: Describes the rewards earned while staking.
+    type: object
+    properties:
+      reward:
+        description: Reward earned while staking
+        type: string
+      type:
+        description: Reward type
+        type: string
+        enum:
+          - percentage

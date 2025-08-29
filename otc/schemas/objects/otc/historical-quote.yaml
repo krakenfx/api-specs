@@ -1,0 +1,59 @@
+type: object
+description: A historical OTC quote.
+
+properties:
+  $ref: '../../objects/otc/quote-props.yaml'
+  trade_id:
+    type:
+      - string
+      - null
+    description: The Trade ID of the quote. Only present once the associated trade has been booked for an accepted quote
+    example: "TR123ABS"
+  status:
+    type:
+      - string
+      - null
+    description: The status of the quote
+    enum:
+      - Modified
+      - Deleted
+    example: null
+  acceptance:
+    description: Acceptance
+    type: object
+    properties:
+      status:
+        type: string
+        description: The acceptance status of the quote.
+        enum:
+          - accepted
+          - rejected
+          - expired
+        example: accepted
+      time:
+        description: Unix timestamp in milliseconds.
+        type: integer
+        format: int64
+        example: 1736257135382
+    required:
+      - status
+      - time
+  settlement_status:
+    type: string
+    description: The settlement status of the quote.
+    enum:
+      - settled
+      - unsettled
+    example: settled
+required:
+  - quote_id
+  - base
+  - quote
+  - type
+  - amount
+  - price
+  - total
+  - acceptance
+  - settlement
+  - settlement_status
+additionalProperties: false

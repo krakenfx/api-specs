@@ -1,0 +1,25 @@
+type: object
+description: An active OTC quote.
+
+properties:
+  $ref: '../../objects/otc/quote-props.yaml'
+  expires: 
+    description: Expiration time of the quote.
+    type: object
+    properties:
+      time:
+        description: Unix timestamp in milliseconds.
+        type: integer
+        format: int64
+        example: 1715155200000
+    required:
+      - time
+required:
+  - quote_id
+  - base
+  - quote
+  - type
+  - amount
+  - settlement
+  - expires
+additionalProperties: false

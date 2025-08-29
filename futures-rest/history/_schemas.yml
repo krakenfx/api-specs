@@ -1,0 +1,244 @@
+AccountLogEntry:
+  description: Account log entry
+  type: object
+  properties:
+    asset:
+      description: Asset related with the entry.
+      type: string
+    booking_uid:
+      description: UID of the log entry.
+      type: string
+      format: uuid
+    collateral:
+      description: Currency of the associated entry.
+      type: [string, "null"]
+    contract:
+      type: [string, "null"]
+    date:
+      $ref: "#/Rfc3339DateTime"
+    execution:
+      description: |
+        UID of the associated execution or transfer.
+
+        For orders and trades, this is always a UUID. However, this field is also populated with
+        "cross-exchange transfer" references, which are not always UUIDs.
+      type: [string, "null"]
+    fee:
+      description: Fee paid
+      type: [number, "null"]
+      format: double
+    funding_rate:
+      description: Absolute funding rate at time of entry.
+      type: [number, "null"]
+      format: double
+    id:
+      description: Log entry ID.
+      type: integer
+      format: int64
+      minimum: 1
+    info:
+      description: Short description of the entry.
+      type: string
+      enum:
+        - futures trade
+        - futures liquidation
+        - futures assignor
+        - futures assignee
+        - futures unwind counterparty
+        - futures unwind bankrupt
+        - covered liquidation
+        - funding rate change
+        - conversion
+        - interest payment
+        - transfer
+        - cross-exchange transfer
+        - kfee applied
+        - subaccount transfer
+        - settlement
+        - admin transfer
+    margin_account:
+      description: Name of the wallet associated with the entry.
+      type: string
+    mark_price:
+      description: Mark price at the time the trade was executed.
+      type: [number, "null"]
+      format: double
+    new_average_entry_price:
+      description: Average entry price of the position after this trade.
+      type: [number, "null"]
+      format: double
+    new_balance:
+      description: |
+        New balance of wallet or new size of the position after the described in info action.
+      type: number
+      format: double
+    old_average_entry_price:
+      description: Average entry price of the position prior to this trade.
+      type: [number, "null"]
+      format: double
+    old_balance:
+      description: Account balance before the described in info action.
+      type: number
+      format: double
+    realized_funding:
+      description: Funding realized due to change in position size or end of funding rate period.
+      type: [number, "null"]
+      format: double
+    realized_pnl:
+      description: PnL that is realized by reducing the position.
+      type: [number, "null"]
+      format: double
+    trade_price:
+      description: Price at which the trade was executed.
+      type: [number, "null"]
+      format: double
+    conversion_spread_percentage:
+      description: Percentage conversion spread used in a currency conversion.
+      type: [number, "null"]
+      format: double
+    liquidation_fee:
+      description: |
+        Liquidation fee associated with a liquidation/assignment entry.
+
+        Not applicable for inverse futures.
+      type: [number, "null"]
+      format: double
+    exchange_rate:
+      description: The exchange rate used for the conversion, USD quote.
+      type: [number]
+      format: double
+    conversion_fee:
+      description: The percentage fee charged for the conversion. E.g. 0.05 = 0.05%.
+      type: [number]
+      format: double
+    exchange_rate_from:
+      description: The currency code of the base currency in the exchange rate.
+      type: [string]
+  required:
+    - asset
+    - booking_uid
+    - collateral
+    - contract
+    - date
+    - execution
+    - fee
+    - funding_rate
+    - id
+    - info
+    - margin_account
+    - mark_price
+    - new_average_entry_price
+    - new_balance
+    - old_average_entry_price
+    - old_balance
+    - realized_funding
+    - realized_pnl
+    - trade_price
+    - conversion_spread_percentage
+    - liquidation_fee
+AccountUid:
+  description: UID of the account
+  type: string
+  format: uuid
+Decimal:
+  type: string
+  format: decimal
+  example: "1234.56789"
+HistoricalPositionUpdateElement:
+  type: object
+  properties:
+    accountUid:
+      description: Account UID
+      type: string
+    tradeable:
+      type: string
+    oldPosition:
+      type: string
+    oldAverageEntryPrice:
+      type: [string, "null"]
+    newPosition:
+      type: string
+    newAverageEntryPrice:
+      type: string
+    fillTime:
+      type: [integer, "null"]
+      format: timestamp-milliseconds
+    fee:
+      type: string
+    feeCurrency:
+      type: string
+    realizedPnL:
+      type: string
+    positionChange:
+      type: string
+      enum: [open, close, increase, decrease, reverse, noChange]
+    executionUid:
+      type: string
+    executionPrice:
+      type: string
+    executionSize:
+      type: string
+    tradeType:
+      type: string
+      enum: [userExecution, liquidation, assignment, unwind]
+    fundingRealizationTime:
+      type: integer
+      format: timestamp-milliseconds
+    realizedFunding:
+      type: string
+    settlementPrice:
+      type: string
+    timestamp:
+      $ref: "#/TimestampMilliseconds"
+    updateReason:
+      type: string
+      enum: [trade, fundingRealisation, settlement]
+  required:
+    - accountUid
+    - tradeable
+    - oldPosition
+    - newPosition
+    - newAverageEntryPrice
+    - positionChange
+    - timestamp
+    - updateReason
+MarkPriceChanged:
+  type: object
+  properties:
+    price:
+      $ref: "#/Decimal"
+  required:
+    - price
+PriceElement:
+  type: object
+  properties:
+    uid:
+      type: string
+    timestamp:
+      $ref: "_schemas.yml#/TimestampMilliseconds"
+    event:
+      $ref: "#/MarkPriceChanged"
+  required:
+    - uid
+    - timestamp
+    - event
+RegulatoryData:
+  type: object
+  properties:
+    venue:
+      type: string
+    counterparty:
+      type: string
+    externalUid:
+      type: string
+      format: uuid
+  required: []
+Rfc3339DateTime:
+  description: RFC 3339 formatted date-time
+  type: string
+  format: date-time
+  example: 2019-08-24T14:15:22Z
+TimestampMilliseconds:
+  type: integer
+  format: timestamp-milliseconds
+  example: 1604937694000

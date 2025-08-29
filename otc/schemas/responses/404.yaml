@@ -1,0 +1,8 @@
+title: 404 Not Found
+description: Not found
+type: object
+properties:
+  errors:
+    type: array
+    items:
+      $ref: '../objects/errors/error.yaml'

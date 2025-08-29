@@ -1,0 +1,34 @@
+title: CreditLinesMonitor
+description: Credit monitor with summary information across all assets
+type: object
+properties:
+  total_credit_usd:
+    description: "Total credit across all assets represented in USD"
+    type: string
+    nullable: true
+    example: "100000.0000"
+  total_credit_used_usd:
+    description: "Total credit used across all assets represented in USD"
+    type: string
+    nullable: true
+    example: "25000.0000"
+  total_collateral_value_usd:
+    description: "Sum of asset balance in USD * collateral"
+    type: string
+    nullable: true
+    example: "150000.0000"
+  equity_usd:
+    description: "Total collateral - total credit (in USD)"
+    type: string
+    nullable: true
+    example: "125000.0000"
+  ongoing_balance:
+    description: "Total collateral / total credit (in USD)"
+    type: string
+    nullable: true
+    example: "1.5000"
+  debt_to_equity:
+    description: "Total credit used / equity (in USD)"
+    type: string
+    nullable: true
+    example: "0.2000" 

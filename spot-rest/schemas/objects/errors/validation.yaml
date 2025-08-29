@@ -1,0 +1,10 @@
+title: Field Validation Error
+description: Field validation error
+type: object
+properties:
+  field:
+    description: The field name
+    type: string
+  error:
+    description: Error message
+    type: string

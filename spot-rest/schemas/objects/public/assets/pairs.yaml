@@ -1,0 +1,90 @@
+title: AssetPair
+description: Trading Asset Pair
+type: object
+x-additionalPropertiesName: pair
+properties:
+  altname:
+    description: Alternate pair name
+    type: string
+  wsname:
+    description: WebSocket pair name (if available)
+    type: string
+  aclass_base:
+    description: Asset class of base component
+    type: string
+  base:
+    description: Asset ID of base component
+    type: string
+  aclass_quote:
+    description: Asset class of quote component
+    type: string
+  quote:
+    description: Asset ID of quote component
+    type: string
+  lot:
+    description: Volume lot size
+    type: string
+    deprecated: true
+  pair_decimals:
+    description: Number of decimal places for prices in this pair
+    type: integer
+  cost_decimals:
+    description: Number of decimal places for cost of trades in pair (quote asset terms)
+    type: integer
+  lot_decimals:
+    description: Number of decimal places for volume (base asset terms)
+    type: integer
+  lot_multiplier:
+    description: Amount to multiply lot volume by to get currency volume
+    type: integer
+  leverage_buy:
+    description: Array of leverage amounts available when buying
+    type: array
+    items:
+      type: integer
+  leverage_sell:
+    description: Array of leverage amounts available when selling
+    type: array
+    items:
+      type: integer
+  fees:
+    description: Fee schedule array in `[<volume>, <percent fee>]` tuples
+    type: array
+    items:
+      type: array
+      items:
+        type: number
+  fees_maker:
+    description: Maker fee schedule array in `[<volume>, <percent fee>]`  tuples (if on maker/taker)
+    type: array
+    items:
+      type: array
+      items:
+        type: number
+  fee_volume_currency:
+    description: Volume discount currency
+    type: string
+  margin_call:
+    description: Margin call level
+    type: integer
+  margin_stop:
+    description: Stop-out/liquidation margin level
+    type: integer
+  ordermin:
+    description: Minimum order size (in terms of base currency)
+    type: string
+  costmin:
+    description: Minimum order cost (in terms of quote currency) 
+    type: string
+  tick_size:
+    description: Minimum increment between valid price levels
+    type: string
+  status:
+    description: 'Status of asset. Possible values: `online`, `cancel_only`, `post_only`, `limit_only`, `reduce_only`.'
+    type: string
+  long_position_limit:
+    description: Maximum long margin position size (in terms of base currency)
+    type: integer
+  short_position_limit:
+    description: Maximum short margin position size (in terms of base currency)
+    type: integer

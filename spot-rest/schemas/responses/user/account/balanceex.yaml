@@ -1,0 +1,12 @@
+type: object
+properties:
+  result:
+    title: ExtendedBalance
+    description: Extended Balance
+    type: object
+    properties:
+      asset:
+        type: object
+        $ref: '../../../../schemas/objects/user/account/balanceex.yaml'
+  error:
+    $ref: '../../../../schemas/objects/errors/error.yaml'

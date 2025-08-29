@@ -1,0 +1,38 @@
+title: OrderBook
+description: Asset Pair Order Book Entries
+type: object
+properties:
+  asks:
+    description: Ask side array of entries `[<price>, <volume>, <timestamp>]`
+    type: array
+    items:
+      type: array
+      items:
+        minItems: 3
+        maxItems: 3
+        oneOf:
+        - type: string
+          title: string
+        - type: integer
+          title: integer
+        example:
+        - '3539.90000'
+        - '0.801'
+        - 1548119951
+  bids:
+    description: Bid side array of entries `[<price>, <volume>, <timestamp>]`
+    type: array
+    items:
+      type: array
+      items:
+        minItems: 3
+        maxItems: 3
+        oneOf:
+        - type: string
+          title: string
+        - type: integer
+          title: integer
+        example:
+        - '3538.70000'
+        - '0.798'
+        - 1548119924

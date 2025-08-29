@@ -1,0 +1,50 @@
+title: Amend Order Request Body
+required:
+  - nonce
+type: object
+properties:
+  txid:
+    description: The Kraken identifier for the order to be amended. Either `txid` or `cl_ord_id` is required.
+    type: string
+  cl_ord_id:
+    description: The client identifier for the order to be amended. Either `txid` or `cl_ord_id` is required.
+    type: string
+  order_qty:
+    description: The new order quantity in terms of the base asset.
+    type: string
+  display_qty:
+    description: For `iceberg` orders only, it defines the new quantity to show in the book while the rest of order quantity remains hidden. Minimum value is 1 / 15 of remaining order quantity.
+    type: string
+  limit_price:
+    description: |
+      The new limit price restriction on the order (for order types that support limit price only).
+
+      The relative pricing can be set by using the `+`, `-` prefixes and/or `%` suffix. 
+      * &bull; `+` adds the amount from the reference price, i.e. market rises 50 USD `"+50"`.
+      * &bull; `-` subtracts the amount from the reference price, i.e. market drops 100 USD `"-100"`.
+    type: string
+  trigger_price:
+    description: |
+      The new trigger price to activate the order (for triggered order types only). 
+
+      The relative pricing can be set by using the `+`, `-` prefixes and/or `%` suffix. 
+      * &bull; `+` adds the amount from the reference price, i.e. market rises 50 USD `"+50"`.
+      * &bull; `-` subtracts the amount from the reference price, i.e. market drops 100 USD `"-100"`.
+    type: string
+  pair:
+    description: The `pair` is required on amends for non-crypto pairs, i.e. provide the pair symbol for xstocks.
+    type: string
+  post_only:
+    description: |
+      An optional flag for `limit_price` amends. If `true`, the limit price change will be rejected if the order cannot be posted passively in the book.
+    type: boolean
+    default: false
+  deadline:
+    type: string
+    description: RFC3339 timestamp (e.g. 2021-04-01T00:18:45Z) after which the matching engine should reject the new order request, in presence of latency or order queueing. min now() + 2 seconds, max now() + 60 seconds.  
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+example:
+  nonce: 1695828490
+  cl_ord_id: "6d1b345e-2821-40e2-ad83-4ecb18a06876"
+  order_qty: "1.25"

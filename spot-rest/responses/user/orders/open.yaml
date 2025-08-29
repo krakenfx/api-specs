@@ -1,0 +1,19 @@
+error: []
+result:
+  open:
+    O7ICPO-F4CLJ-MVBLHC:
+      refid: ''
+      userref: ''
+      status: open
+      opentm: 1373750306.9819
+      starttm: 0
+      expiretm: 0
+      descr:
+        order: sell 3.00000000 XBTUSD @ limit 500.00000
+      vol: "3.00000000"
+      vol_exec: "0.00000000"
+      cost: "0.00000"
+      fee: "0.00000"
+      price: "0.00000"
+      misc: ''
+      oflags: ''

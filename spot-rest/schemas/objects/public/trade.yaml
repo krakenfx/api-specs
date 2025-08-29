@@ -1,0 +1,21 @@
+title: TickData
+description: |
+  Array of trade entries
+  `[<price>, <volume>, <time>, <buy/sell>, <market/limit>, <miscellaneous>, <trade_id>]`
+type: array
+items:
+  type: array
+  items:
+    oneOf:
+    - type: string
+      title: string
+    - type: number
+      title: number
+    example:
+    - '1205.00000'
+    - '2.28253070'
+    - 1668714225.5189962
+    - 'b'
+    - 'l'
+    - ''
+    - 41557503
