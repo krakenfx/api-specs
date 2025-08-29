@@ -1,0 +1,25 @@
+title: FeeTierInfo
+description: Fee Tier Info
+type: object
+properties:
+  fee:
+    description: Current fee (in percent)
+    type: string
+  min_fee:
+    description: minimum fee for pair (if not fixed fee)
+    type: string
+  max_fee:
+    description: maximum fee for pair (if not fixed fee)
+    type: string
+  next_fee:
+    description: next tier's fee for pair (if not fixed fee,  null if at lowest fee tier)
+    type: string
+    nullable: true
+  tier_volume:
+    description: volume level of current tier (if not fixed fee. null if at lowest fee tier)
+    type: string
+    nullable: true
+  next_volume:
+    description: volume level of next tier (if not fixed fee. null if at lowest fee tier)
+    type: string
+    nullable: true

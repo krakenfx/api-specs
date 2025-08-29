@@ -1,0 +1,15 @@
+type: object
+properties:
+  result:
+    anyOf:
+      - $ref: '../../../../schemas/objects/funding/deposits/deposit.yaml'
+      - properties:
+          deposit:
+            $ref: '../../../../schemas/objects/funding/deposits/deposit.yaml'
+          next_cursor:
+            description: If pagination is set via `cursor` parameter, provides next input to use for `cursor` in pagination
+            type: string
+  error:
+    $ref: '../../../../schemas/objects/errors/error.yaml'
+example:
+  $ref: "../../../../examples/responses/funding/deposits/recent.yaml"

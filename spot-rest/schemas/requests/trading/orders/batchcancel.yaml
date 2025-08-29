@@ -1,0 +1,30 @@
+title: Batch Cancel Open Orders Request Body
+required:
+  - nonce
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  orders:
+   type: array
+   items:
+    type: object
+    properties:
+     txid:
+      description: Open order transaction IDs (txid) or user references (userref), up to a maximum of 50 total unique IDs/references.
+      oneOf:
+        - type: string
+          title: string
+        - type: integer
+          title: integer
+  cl_ord_ids:
+   type: array
+   items:
+    type: object
+    properties:
+     cl_ord_id:
+      description:  An alphanumeric client order identifier which uniquely identifies an open order for each client. Up to a maximum of 50 total unique IDs/references.
+      type: string
+example:
+  nonce: 1695828490
+  orders: ["OP5V2Y-RYKVL-ET3V3B" , "OP5V2Y-7YKVL-ET3V3B"]

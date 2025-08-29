@@ -1,0 +1,42 @@
+quote_id:
+  description: The id of the quote.
+  type: string
+  example: "00001c47-8f59-4099-b6f8-b637437ef1ab"
+client_order_id:
+  description: The client order ID when quote was requested by an external partner client.  
+  type:
+    - string
+    - null
+  example: "7264675290025181184"
+base:
+  description: Base (amount) asset of the pair.
+  type: string
+  example: "BTC"
+quote:
+  description: Quote asset of the pair.
+  type: string
+  example: "USD"
+type:
+  description: Buy or sell.
+  type: string
+  enum:
+    - buy
+    - sell
+price:
+  description: The unit price.
+  type: string
+  example: "100000.25"
+amount:
+  description: Quantity of the base asset.
+  type: string
+  example: "2.5"
+total:
+  description: Quantity of the quote asset.
+  type: string
+  example: "250000.625"
+settlement:
+  description: If the settlement is automated or flexible. Only automated is currently supported through the API.
+  type: string
+  enum:
+    - automated
+    - flexible

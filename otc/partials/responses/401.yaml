@@ -1,0 +1,12 @@
+description: Authorization information is missing or invalid
+content:
+  application/json:
+    schema:
+      $ref: '../../schemas/responses/401.yaml'
+    examples:
+      Invalid API Key:
+        $ref: '../../examples/responses/errors/invalidApiKey.yaml'
+      Invalid API Signature:
+        $ref: '../../examples/responses/errors/invalidApiSignature.yaml'
+      Invalid API Nonce:
+        $ref: '../../examples/responses/errors/invalidApiNonce.yaml'

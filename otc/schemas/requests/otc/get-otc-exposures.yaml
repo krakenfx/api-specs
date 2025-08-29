@@ -1,0 +1,10 @@
+# No request body required for getOtcExposures.
+title: Get OTC Exposures Request Body
+description: Request schema for retrieving OTC exposures data. This endpoint does not require any request body parameters.
+type: object
+properties: 
+    nonce:
+      $ref: "../../../partials/properties/nonce.yaml"
+additionalProperties: false
+required:
+  - nonce

@@ -1,0 +1,14 @@
+title: TradeHistory
+description: Trade History
+type: object
+properties:
+  count:
+    description: Amount of available trades matching criteria
+    type: integer
+  trades:
+    description: Trade info
+    type: object
+    additionalProperties:
+      x-additionalPropertiesName: txid
+      $ref: './trade.yaml'
+  

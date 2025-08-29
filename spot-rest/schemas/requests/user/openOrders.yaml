@@ -1,0 +1,29 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Get Open Orders Request Body
+      required:
+      - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../partials/properties/nonce.yaml'
+        trades:
+          description: Whether or not to include trades related to position in output
+          type: boolean
+          default: false
+        userref:
+          description: Restrict results to given user reference
+          type: integer
+          format: int32
+        cl_ord_id:
+          description: Restrict results to given client order id
+          type: string
+        rebase_multiplier:
+          $ref: '../../../partials/properties/rebase_multiplier.yaml'
+      example:
+          nonce: 1234567
+          trades: True
+          cl_ord_id: 9cc788d8-9c00-4b25-94d3-26d93603948d
+

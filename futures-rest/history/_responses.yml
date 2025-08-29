@@ -1,0 +1,50 @@
+HistoryResponse:
+  description: History response
+  content:
+    application/json:
+      schema:
+        type: object
+        required:
+          - elements
+          - len
+        properties:
+          elements:
+            type: array
+            items:
+              type: object
+              required:
+                - uid
+                - timestamp
+                - event
+              properties:
+                uid:
+                  type: string
+                timestamp:
+                  type: integer
+                  format: int64
+                sequenceNumber:
+                  type: integer
+                  format: int64
+                event: {} # TODO
+          accountUid:
+            type: string
+            format: uuid
+          len:
+            type: integer
+            x-rustType: usize
+            minimum: 0
+          continuationToken:
+            type: string
+RateLimited:
+  description: Rate limited.
+  content:
+    text/plain:
+      schema:
+        type: string
+  headers:
+    rate-limit-reset:
+      description: |-
+        Time remaining (in seconds) until repeat request (i.e., same cost) will be accepted.
+      schema:
+        type: integer
+        minimum: 1

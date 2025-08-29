@@ -1,0 +1,38 @@
+title: Create OTC Quote Request Body
+description: "Request to create a new OTC quote. You must specify either the amount of base asset you want to trade or the total amount of quote asset you want to spend/receive, but not both."
+type: object
+properties:
+  nonce:
+    $ref: "../../../partials/properties/nonce.yaml"
+  base:
+    type: string
+    description: The asset you want to buy or sell (e.g., BTC, ETH).
+    example: "BTC"
+  quote:
+    type: string
+    description: The asset used to price the base asset (e.g., USD, USDT).
+    example: "USD"
+  amount:
+    type: string
+    description: The quantity of base asset you want to trade. Cannot be used together with the total field.
+    example: "2.5"
+  total:
+    type: string
+    description: The total amount of quote asset you want to spend (for buy orders) or receive (for sell orders). Cannot be used together with the amount field.
+    example: "200000.5"
+  type:
+    type: string
+    description: The direction of the trade. Use 'buy' to purchase the base asset with the quote asset, or 'sell' to sell the base asset for the quote asset.
+    enum:
+      - buy
+      - sell
+  # #note Only auto settlements is currently supported in the EAPI.
+  # flexible_settlement: 
+  #   type: bool
+  #   description: Specifies if this quote will use flexible or automated settlement.
+additionalProperties: false
+required:
+  - nonce
+  - base
+  - quote
+  - type

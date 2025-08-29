@@ -1,0 +1,116 @@
+AccountUidPath:
+  description: Account UID
+  name: accountUid
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+AlgoIdPath:
+  description: Algorithm ID
+  name: algoId
+  in: path
+  required: true
+  schema:
+    type: string
+    example: M1V4ZS2OQ51EIH8D4XB1JI4PMA03G0Q
+ContractTypesQuery:
+  description: |-
+    Contract type(s) to return statuses for.
+
+    By default, includes all futures instrument types.
+
+    Multi-value example: `?contractType=futures_inverse&contractType=futures_vanilla`
+  name: contractType
+  in: query
+  required: false
+  style: form
+  explode: true
+  schema:
+    type: array
+    items:
+      $ref: "_schemas.yml#/ContractType"
+  x-internalOnly: true # may remove when instrument endpoints contract type filter is enabled in prod
+CountryCodeIso2Path:
+  description: ISO-2 country code, upper case
+  name: country
+  in: path
+  required: true
+  schema:
+    type: string
+    example: GB
+CurrencyPairPath:
+  name: currencyPair
+  in: path
+  required: true
+  schema:
+    type: string
+    example: BTC:USD
+CurrencyPath:
+  description: Currency code, the string identifier for a currency.
+  name: code
+  in: path
+  required: true
+  schema:
+    type: string
+    example: BTC
+DocumentNamePath:
+  description: Name of document to be signed
+  name: documentName
+  in: path
+  required: true
+  schema:
+    $ref: _schemas.yml#/PlatformDocumentName
+FeeScheduleUidPath:
+  description: Fee schedule UID
+  name: feeScheduleUid
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+IndexProviderUidPath:
+  description: Index Provider UID
+  name: indexProviderUid
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+IndexUidPath:
+  description: Index UID
+  name: indexUid
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid
+MarketSymbolPath:
+  description: Market symbol.
+  name: symbol
+  in: path
+  required: true
+  schema:
+    $ref: _schemas.yml#/MarketSymbol
+MarketSymbolQueryRequired:
+  description: Market symbol.
+  name: symbol
+  in: query
+  required: true
+  schema:
+    $ref: _schemas.yml#/MarketSymbol
+PlatformPath:
+  description: Platform name
+  name: platform
+  in: path
+  required: true
+  schema:
+    $ref: _schemas.yml#/PlatformName
+UserAppUidPath:
+  description: Application UID.
+  name: userAppUid
+  in: path
+  required: true
+  schema:
+    type: string
+    format: uuid

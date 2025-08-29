@@ -1,0 +1,20 @@
+title: CreditLinesAsset
+description: Credit line details for a specific asset
+type: object
+properties:
+  balance:
+    description: "Current balance for the asset"
+    type: string
+    example: "1000.5000"
+  credit_limit:
+    description: "Credit limit for the asset"
+    type: string
+    example: "50000.0000"
+  credit_used:
+    description: "Currently used credit for the asset"
+    type: string
+    example: "12500.0000"
+  available_credit:
+    description: "Available credit for the asset"
+    type: string
+    example: "37500.0000" 

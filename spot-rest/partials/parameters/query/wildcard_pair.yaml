@@ -1,0 +1,7 @@
+in: query
+name: pair
+description: "Asset pair to get data for (optional, default: all tradeable exchange pairs)"
+required: false
+schema:
+  type: string
+example: XBTUSD

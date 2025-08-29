@@ -1,0 +1,7 @@
+description: Internal Error
+content:
+  application/json:
+    schema:
+      $ref: '../../schemas/responses/500.yaml'
+    example:
+      $ref: '../../examples/responses/errors/internalError.yaml'

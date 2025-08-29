@@ -1,0 +1,21 @@
+title: depositMethod
+description: Deposit Method
+type: object
+properties:
+  method:
+    description: Name of deposit method
+    type: string
+  limit:
+    description: Maximum net amount that can be deposited right now, or false if no limit
+  fee:
+    description: Amount of fees that will be paid
+    type: string
+  address-setup-fee:
+    description: Whether or not method has an address setup fee
+    type: string
+  gen-address:
+    type: boolean
+    description: Whether new addresses can be generated for this method.
+  minimum:
+    type: string
+    description: Minimum net amount that can be deposited right now

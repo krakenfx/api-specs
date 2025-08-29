@@ -1,0 +1,526 @@
+AdminAccessLevel:
+  description: Tier of access granted with an admin role.
+  type: string
+  enum:
+    - READ_ONLY
+    - READ_AND_WRITE
+    - FULL_ACCESS
+AdminRole:
+  description: Role given to an account that enables access to a set of admin resources.
+  type: string
+  enum:
+    - GENERAL
+    - ACCOUNT_ACCESS
+    - KYC
+    - TRADING
+    - ADVANCED_TRADING
+    - ADVANCED_KYC
+    - TRANSFERS
+    - FIAT
+    - AUDIT_LOG_DETAILS
+    - HOLDS
+    - SURVEILLANCE
+    - OTHER
+    - ADMIN_MANAGEMENT
+    - EMAIL_TEMPLATES
+    - FEES_ACCOUNT_CHANGES
+    - MARKET
+    - MTF_MEMBER_DETAILS
+    - COMPETITIONS
+    - LEADERBOARD
+    - REGION_RESTRICTIONS
+    - ACCOUNT_RESTRICTIONS
+    - EXTERNAL_CUSTODY
+    - MARKET_RESTRICTIONS
+    - BROKER_API
+AssetSymbol:
+  description: Asset symbol
+  type: string
+  pattern: "[A-Z0-9]+"
+  example: BTC
+BigDecimalString:
+  type: string
+  format: big-decimal
+  example: "12.0353200"
+ContractType:
+  type: string
+  enum:
+    - futures_inverse
+    - futures_vanilla
+    - flexible_futures
+    # - options
+CountryCodeAlpha2:
+  description: Alpha-2 country code, upper case.
+  type: string
+  example: GB
+CountryCodeIso2:
+  description: ISO-2 country code, upper case.
+  type: string
+  example: GB
+CurrencyCode:
+  description: Currency code, upper case.
+  type: string
+  example: EUR
+DecimalDouble:
+  type: number
+  format: double
+  example: 12.03532
+DecimalString:
+  type: string
+  format: decimal
+  example: "12.0353200"
+Error:
+  type: object
+  properties:
+    code:
+      type: [number, "null"]
+    message:
+      type: string
+  required:
+    - code
+    - message
+ErrorResponse:
+  type: object
+  properties:
+    result:
+      type: string
+      enum: [error]
+    serverTime:
+      type: string
+      format: date-time
+    errors:
+      type: array
+      items:
+        $ref: "#/Error"
+  required:
+    - result
+    - serverTime
+    - errors
+IdentifierSchema:
+  type: string
+  enum:
+    - CONCAT
+    - NIDN
+    - CCPT
+IndexCode:
+  description: Index code
+  type: string
+  pattern: "[0-9A-Za-z-_:]+"
+  example: LTCUSD_RTI
+MarketSymbol:
+  description: Market symbol
+  type: string
+  pattern: "[A-Z0-9_.]+"
+  example: PF_BTCUSD
+NonNegativeDecimalDouble:
+  type: number
+  format: double
+  example: 12.03532
+  minimum: 0.0
+OpenPositionJson:
+  type: object
+  properties:
+    symbol:
+      type: string
+      description: The symbol of the Futures.
+    side:
+      type: string
+      enum:
+        - long
+        - short
+      description: The direction of the position.
+    size:
+      format: double
+      type: number
+      description: The size of the position.
+    price:
+      format: double
+      type: number
+      description: The average price at which the position was entered into.
+    fillTime:
+      type: string
+      description: |-
+        The date and time the position was entered into (Deprecated field, fills endpoint for
+        fill time is recommended).
+    unrealizedFunding:
+      type: [number, "null"]
+      format: double
+      description: Unrealised funding on the position.
+    pnlCurrency:
+      x-kfOnly: true
+      type: [string, "null"]
+      enum:
+        - USD
+        - EUR
+        - GBP
+        - USDC
+        - USDT
+        - BTC
+        - ETH
+      description: |-
+        Selected pnl currency for the position (default: USD)
+    maxFixedLeverage:
+      x-kfOnly: true
+      type: [number, "null"]
+      format: double
+      description: Max leverage selected for isolated position.
+    greeks:
+      x-kfOnly: true
+      x-internalOnly: true
+      $ref: "#/OptionGreeks"
+      description: The position Greeks, if this is an option position.
+  required:
+    - symbol
+    - side
+    - size
+    - price
+    - fillTime
+    - unrealizedFunding
+OptionGreeks:
+  description: Option Greeks
+  type: object
+  properties:
+    iv:
+      type: number
+      format: double
+      description:
+        The implied volatility. Displays an IV of -1.0 whenever the IV is impossible to calculate or
+        outside of the bounds allowed.
+    delta:
+      type: number
+      format: double
+    gamma:
+      type: [number, "null"]
+      format: double
+    vega:
+      type: [number, "null"]
+      format: double
+    theta:
+      type: [number, "null"]
+      format: double
+    rho:
+      type: [number, "null"]
+      format: double
+  required:
+    - iv
+    - delta
+    - gamma
+    - vega
+    - theta
+    - rho
+OptionIvInstrument:
+  type: object
+  properties:
+    instrument:
+      type: string
+    price:
+      type: number
+      format: double
+  required:
+    - instrument
+    - price
+OptionIvInstrumentWithIv:
+  type: object
+  properties:
+    instrument:
+      type: string
+    price:
+      type: number
+      format: double
+    iv:
+      type: number
+      format: double
+      description:
+        Returns an IV of -1.0 whenever the IV request is impossible to calculate or outside of the
+        bounds allowed.
+  required:
+    - instrument
+    - price
+    - iv
+OptionsUserLimits:
+  type: object
+  properties:
+    maxNetPositionDelta:
+      $ref: "#/DecimalDouble"
+    limitsPerBaseCurrency:
+      description: User limits per option contract base currency
+      type: object
+      additionalProperties:
+        $ref: "#/OptionsUserLimitsPerBaseCurrency"
+  required:
+    - maxNetPositionDelta
+    - limitsPerBaseCurrency
+OptionsUserLimitsPerBaseCurrency:
+  type: object
+  properties:
+    maxTotalPositionSize:
+      $ref: "#/DecimalDouble"
+    maxTotalOpenOrdersSize:
+      $ref: "#/DecimalDouble"
+  required:
+    - maxTotalPositionSize
+    - maxTotalOpenOrdersSize
+OrderDirection:
+  description: Order direction
+  type: string
+  enum:
+    - buy
+    - sell
+OrderType:
+  description: Order type.
+  type: string
+  enum:
+    - limit
+    - market
+    - stop
+    - take_profit
+    - post
+    - ioc
+    - fok
+    - trailing_stop
+PlatformDocumentName:
+  type: string
+  minLength: 3
+  maxLength: 60
+  pattern: "[a-z_]+"
+  example: terms_and_conditions
+PlatformName:
+  type: string
+  minLength: 3
+  maxLength: 30
+  pattern: "[a-z_]+"
+  example: mtf
+PortfolioMarginBreakdown:
+  description: Breakdown of components that make up the portfolio margin calculation.
+  type: object
+  properties:
+    totalCrossAssetNettedMarketRisk:
+      type: number
+      format: double
+    totalMarketRisk:
+      type: number
+      format: double
+    totalScenarioPnls:
+      type: array
+      items:
+        type: number
+        format: double
+    totalAbsoluteOptionPositionDeltaNotional:
+      type: number
+      format: double
+    netPortfolioDelta:
+      type: number
+      format: double
+    totalPremium:
+      type: number
+      format: double
+    isBuyOnly:
+      type: boolean
+    futuresMaintenanceMargin:
+      type: number
+      format: double
+  required:
+    - totalCrossAssetNettedMarketRisk
+    - totalMarketRisk
+    - totalAbsoluteOptionPositionDeltaNotional
+    - netPortfolioDelta
+    - totalPremium
+    - isBuyOnly
+    - futuresMaintenanceMargin
+PortfolioMarginingParameters:
+  type: object
+  properties:
+    crossAssetNettingFactor:
+      $ref: "#/DecimalDouble"
+    extremePriceShockMultiplier:
+      $ref: "#/DecimalDouble"
+    volShockMultiplicationFactor:
+      $ref: "#/DecimalDouble"
+    volShockExponentFactor:
+      $ref: "#/DecimalDouble"
+    optionExpiryTimeShockHours:
+      type: number
+      format: uint64
+    optionsInitialMarginFactor:
+      $ref: "#/DecimalDouble"
+    totalOptionOrdersConsideredInInitialMarginCalc:
+      type: number
+      format: uint64
+    priceShockLevels:
+      type: array
+      items:
+        $ref: "#/DecimalDouble"
+    optionsUserLimits:
+      $ref: "#/OptionsUserLimits"
+  required:
+    - crossAssetNettingFactor
+    - extremePriceShockMultiplier
+    - volShockMultiplicationFactor
+    - volShockExponentFactor
+    - optionExpiryTimeShockHours
+    - optionsInitialMarginFactor
+    - totalOptionOrdersConsideredInInitialMarginCalc
+    - priceShockLevels
+    - optionsUserLimits
+PortfolioSimulationPosition:
+  type: object
+  properties:
+    instrument:
+      type: string
+      example: PF_BTCUSD
+    size:
+      $ref: "#/DecimalDouble"
+    entryPrice:
+      $ref: "#/DecimalDouble"
+  required:
+    - instrument
+    - size
+    - entryPrice
+PortfolioSimulationRequest:
+  type: object
+  properties:
+    positions:
+      type: array
+      items:
+        $ref: "#/PortfolioSimulationPosition"
+  required:
+    - positions
+PortfolioSimulationResponse:
+  type: object
+  properties:
+    maintenanceMargin:
+      type: number
+      format: double
+    initialMargin:
+      type: number
+      format: double
+    pnl:
+      type: number
+      format: double
+    portfolioMarginBreakdown:
+      $ref: "#/PortfolioMarginBreakdown"
+    greeks:
+      type: object
+      additionalProperties:
+        $ref: "#/OptionGreeks"
+  required:
+    - maintenanceMargin
+    - initialMargin
+    - pnl
+    - portfolioMarginBreakdown
+    - greeks
+ReportName:
+  description: Report name.
+  type: string
+  enum:
+    - client-balances
+    - client-positions
+    - client-open-orders
+    - funding-pnl-fees
+    - net-transfers-deposits
+    - net-transfers-withdrawals
+    - market-data
+    - flex-conversions
+ResponseJson:
+  type: object
+  properties:
+    result:
+      type: string
+      enum: [success]
+    serverTime:
+      type: string
+      format: date-time
+  required:
+    - result
+    - serverTime
+Rfc3339DateTime:
+  description: RFC 3339 formatted date-time
+  type: string
+  format: date-time
+  example: 2019-08-24T14:15:22Z
+Rfc3339DateTimeZoneless:
+  description: RFC 3339 formatted date-time (without timezone)
+  type: string
+  example: 2019-08-24T14:15:22
+SimpleInvestorType:
+  description: Investor type
+  type: string
+  enum:
+    - RETAIL
+    - PROFESSIONAL
+SimulateIvRequest:
+  type: object
+  properties:
+    options:
+      type: array
+      items:
+        $ref: "#/OptionIvInstrument"
+  required:
+    - options
+SimulateIvResponse:
+  type: object
+  properties:
+    options:
+      type: array
+      items:
+        $ref: "#/OptionIvInstrumentWithIv"
+  required:
+    - options
+TeOrderDirection:
+  description: Order direction
+  type: string
+  enum:
+    - BUY
+    - SELL
+TeOrderType:
+  description: Order type.
+  type: string
+  enum:
+    - LIMIT
+    - IMMEDIATE_OR_CANCEL
+    - POST_ONLY
+    - LIQUIDATION
+    - ASSIGNMENT
+    - STOP
+    - UNWIND
+    - MARKET
+    - COVERED_LIQUIDATION
+    - HEDGE_IMMEDIATE_OR_CANCEL
+    - HEDGE_ASSIGNMENT
+TeTriggerOffsetUnit:
+  description: Trigger offset unit.
+  type: string
+  enum:
+    - QUOTE_CURRENCY
+    - PERCENT
+TeTriggerSide:
+  description: Trigger side.
+  type: string
+  enum:
+    - TRIGGER_ABOVE
+    - TRIGGER_BELOW
+TeTriggerSignal:
+  description: Trigger signal.
+  type: string
+  enum:
+    - MARK_PRICE
+    - LAST_PRICE
+    - SPOT_PRICE
+TeTriggerType:
+  description: Trigger type.
+  type: string
+  enum:
+    - TAKE_PROFIT
+    - STOP_LOSS
+TriggerSignal:
+  description: Trigger signal.
+  type: string
+  enum:
+    - mark
+    - index
+    - last
+UtcTimestampMilliseconds:
+  description: UTC Timestamp (milliseconds)
+  type: number
+  format: uint64
+  example: 1701466700000

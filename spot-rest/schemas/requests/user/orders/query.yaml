@@ -1,0 +1,25 @@
+title: Query Orders Info Request Body
+required:
+  - nonce
+  - txid
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  trades:
+    description: Whether or not to include trades related to position in output
+    type: boolean
+    default: false
+  userref:
+    description: Restrict results to given user reference id
+    type: integer
+    format: int32
+  txid:
+    description: The Kraken order identifier. To query multiple orders, use comma delimited list of up to 50 ids.
+    type: string
+  consolidate_taker:
+    description: Whether or not to consolidate trades by individual taker trades
+    type: boolean
+    default: true
+  rebase_multiplier:
+    $ref: '../../../../partials/properties/rebase_multiplier.yaml'

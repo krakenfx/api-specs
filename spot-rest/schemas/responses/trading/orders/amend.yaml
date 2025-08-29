@@ -1,0 +1,23 @@
+type: object
+properties:
+  result:
+    title: OrderAmended
+    type: object
+    properties:
+      amend_id:
+        description: |
+          The unique Kraken identifier generated for this amend transaction.
+        type: string
+      
+  error:
+    type: array
+    items:
+      $ref: '../../../../schemas/objects/errors/error.yaml'
+example:
+  {
+    "error": [],
+    "result":
+      {
+        "amend_id": "TEZA4R-DSDGT-IJBOJK",
+      },
+  }

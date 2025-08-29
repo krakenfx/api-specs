@@ -1,0 +1,23 @@
+title: Update OTC Quote Request Body
+description: Request body for updating the status of an existing OTC quote.
+type: object
+properties:
+  nonce:
+    $ref: "../../../partials/properties/nonce.yaml"
+  quote_id:
+    type: string
+    description: The unique identifier of the quote to update.
+    example: "00001c47-8f59-4099-b6f8-b637437ef1ab"
+    format: uuid
+  status:
+    type: string
+    description: The status of the quote, accepted or rejected.
+    enum:
+      - accepted
+      - rejected
+    example: "accepted"
+additionalProperties: false
+required:
+  - nonce
+  - quote_id
+  - status

@@ -1,0 +1,562 @@
+---
+openapi: 3.0.4
+
+info:
+  title: Kraken Connect
+  version: 1.0.0
+
+servers:
+  - url: https://api.kraken.com/oauth
+    description: Production Server
+  - url: https://api.vip.uat.lobster.kraken.com/oauth
+    description: User Acceptance Testing Server
+
+paths:
+  /oauth/authorize:
+    get:
+      tags:
+        - OAuth
+      operationId: getOAuthCode
+      summary: Get Authorization Code
+      servers:
+        - url: https://id.kraken.com
+      security: []
+      description: |
+        Redirect users to this URL in their browser to start the OAuth flow.
+      parameters:
+        - $ref: "#/components/parameters/ClientId"
+        - $ref: "#/components/parameters/RedirectUri"
+        - $ref: "#/components/parameters/ResponseType"
+        - $ref: "#/components/parameters/Scope"
+        - $ref: "#/components/parameters/State"
+        - $ref: "#/components/parameters/PreferTheme"
+      responses:
+        "302":
+          $ref: "#/components/responses/OAuthAuthorizeRedirect"
+  /{language}/oauth/authorize:
+    get:
+      tags:
+        - OAuth
+      operationId: getOAuthCodeWithLanguage
+      summary: Get Authorization Code (with language)
+      servers:
+        - url: https://id.kraken.com
+      security: []
+      description: |
+        Redirect users to this URL in their browser to start the OAuth flow with a specific language preference.
+      parameters:
+        - in: path
+          name: language
+          required: true
+          schema:
+            type: string
+            enum:
+              - en-us
+              - es-es
+              - fil-ph
+              - fr
+              - de
+              - it-it
+              - nl
+              - pl
+              - pt-br
+              - ru-ru
+              - tr-tr
+              - uk-ua
+              - vi-vn
+              - zh-cn
+          description: Language code for the authorization page
+        - $ref: "#/components/parameters/ClientId"
+        - $ref: "#/components/parameters/RedirectUri"
+        - $ref: "#/components/parameters/ResponseType"
+        - $ref: "#/components/parameters/Scope"
+        - $ref: "#/components/parameters/State"
+        - $ref: "#/components/parameters/PreferTheme"
+      responses:
+        "302":
+          $ref: "#/components/responses/OAuthAuthorizeRedirect"
+  /token:
+    post:
+      tags:
+        - OAuth
+      operationId: getOAuthToken
+      summary: Get Access Token
+      description: |
+        Retrieve the access token.
+      security:
+        - BasicAuth: []
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+                - grant_type
+              properties:
+                grant_type:
+                  description: Type of grant
+                  enum:
+                    - authorization_code
+                    - refresh_token
+                  type: string
+                code:
+                  description: The authorization code (If grant_type = `authorization_code`)
+                  type: string
+                redirect_uri:
+                  description: The redirect URI used to obtain the authorization code  (If grant_type = `authorization_code`)
+                  type: string
+                refresh_token:
+                  description: The refresh token (If grant_type = `refresh_token`)
+                  type: string
+      parameters:
+        - in: header
+          name: Authorization
+          description: |
+            Basic access authentication.
+
+            **Format:** `Basic <credentials>`
+
+            Where `<credentials>` is the base64-encoding of `<client ID>:<client secret>`.
+
+            For public clients, `<client secret>` is empty. As such, credentials would be equivalent to `<client ID>:`.
+
+            For confidential clients, `<client secret>` is the client secret that has been base64 decrypted by your RSA private key.
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/x-www-form-urlencoded:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    description: Access token to call other endpoints. Valid within 24 hours for private clients or 4 hours for public clients.
+                    type: string
+                    example: 2YotnFZFEjr1zCsicMWpAA
+                  token_type:
+                    description: Type of token issued
+                    enum:
+                      - bearer
+                    type: string
+                  expires_in:
+                    description: Lifetime in seconds of the access token.
+                    type: number
+                    example: 14400
+                  refresh_token:
+                    description: Used to obtain new access tokens using the same authorization grant. Valid within 30 days.
+                    type: string
+                    example: tGzv3JOkF0XG5Qx2TlKWIA
+  /userinfo:
+    get:
+      tags:
+        - OAuth
+      operationId: getOAuthInfo
+      summary: Get User Info
+      description: |
+        Returns the email address and IIBAN of the user.
+        
+        **Scopes required:** `account.info:basic`
+      security:
+        - OAuth2: [account.info:basic]
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    title: UserInfo
+                    type: object
+                    properties:
+                      email:
+                        description: The email address
+                        type: string
+                        minLength: 1
+                        maxLength: 128
+                        format: email
+                      iban:
+                        description: IBAN
+                        type: string
+  /fast-api-key:
+    post:
+      tags:
+        - Fast API
+      operationId: createFastAPIKey
+      summary: Create Key
+      description: |
+        Creates a Fast API key.
+
+        **Scopes required:** `account.fast-api-key:write`
+      security:
+        - OAuth2: [account.fast-api-key:write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/APIKeyParameters"
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    allOf:
+                      - type: object
+                        properties:
+                          secret:
+                            description: This is only returned once when the API key is created
+                            type: string
+                      - $ref: "#/components/schemas/APIKeyInfo"
+                      
+    delete:
+      tags:
+        - Fast API
+      operationId: removeFastApikey
+      summary: Delete Key
+      description: |
+        Deletes a Fast API key.
+
+        **Scopes required:** `account.fast-api-key:write`
+      security:
+        - OAuth2: [account.fast-api-key:write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                api_key_name:
+                  $ref: "#/components/schemas/ApiKeyName"
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    default: true
+    put:
+      tags:
+        - Fast API
+      operationId: updateFastApiKey
+      summary: Update Key
+      description: |
+        Updates a Fast API key.
+
+        **Scopes required:** `account.fast-api-key:write`
+      security:
+        - OAuth2: [account.fast-api-key:write]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              allOf:
+                - type: object
+                  properties:
+                    new_api_key_name:
+                      description: New API key description
+                      type: string
+                      minimum: 1
+                      maxLength: 32
+                      nullable: true
+                - $ref: "#/components/schemas/APIKeyParameters"
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    default: true
+    get:
+      tags:
+        - Fast API
+      operationId: listFastApiKey
+      summary: List Keys
+      description: |
+        List all Fast API keys.
+
+        **Scopes required:** `account.fast-api-key:read`
+      security:
+        - OAuth2: [account.fast-api-key:read]
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/APIKeyInfo"
+
+components:
+  parameters:
+    ClientId:
+      in: query
+      name: client_id
+      schema:
+        type: string
+      description: Your client ID
+      required: true
+    RedirectUri:
+      in: query
+      name: redirect_uri
+      schema:
+        type: string
+      description: The redirect URI for returning the user after authorization
+      required: true
+    ResponseType:
+      in: query
+      name: response_type
+      schema:
+        type: string
+        enum:
+          - code
+      description: The OAuth response type. For authorization code flow, this must be `code`.
+      required: false
+    Scope:
+      in: query
+      name: scope
+      schema:
+        type: string
+      description: A space-separated list of scopes you want to authorize (optional). If empty, all scopes registered for your Client ID will be requested.
+      required: false
+    State:
+      in: query
+      name: state
+      schema:
+        type: string
+      description: An opaque value to maintain state (optional). If provided, this value will be set as a query argument on the Redirect URI when the user is redirected back to your service.
+      required: false
+    PreferTheme:
+      in: query
+      name: preferTheme
+      schema:
+        type: string
+        enum:
+          - dark
+          - light
+      description: Sets the theme color of the authorization page.
+      required: false
+
+  responses:
+    OAuthAuthorizeRedirect:
+      description: |
+        If the user authorizes, the server redirects the user's browser to your provided **redirect_uri** with an authorization code using the `application/x-www-form-urlencoded` format.
+
+        Example:
+        * Success: `https://example.com/callback?code=AUTHORIZATION_CODE&state=YOUR_STATE`
+        * Error: `https://example.com/callback?error=access_denied&state=YOUR_STATE`
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            oneOf:
+              - title: Success Response
+                type: object
+                properties:
+                  code:
+                    description: A one-time use authorization code
+                    type: string
+                  state:
+                    description: If the state parameter was provided, the exact value will be returned.
+                    type: string
+              - title: Error Response
+                type: object
+                properties:       
+                  error:
+                    description: |
+                      Error code
+                      * `invalid_request` - The request is missing a required parameter, includes an invalid parameter value, includes a parameter more than once, or is otherwise malformed
+                      * `unauthorized_client` - Client is not authorized to request an authorization code using this method.
+                      * `access_denied` - Request was denied by Kraken's authorization server.
+                      * `unsupported_response_type` - Unsupported request method
+                      * `invalid_scope` - The requested scope is invalid, unknown, or malformed.
+                      * `server_error` - Kraken encountered an unexpected condition that prevented it from fulfilling the request
+                      * `temporarily_unavailable` - Kraken is unable to handle the request due to temporary overloading or maintenance.
+                    enum:
+                      - invalid_request
+                      - unauthorized_client
+                      - access_denied
+                      - unsupported_response_type
+                      - invalid_scope
+                      - server_error
+                      - temporarily_unavailable
+                    type: string
+                  state:
+                    description: If the state parameter was provided, the exact value will be returned.
+                    type: string
+      headers:
+        Location:
+          description: The URL to redirect the user's browser to
+          schema:
+            type: string
+
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: https://www.kraken.com/oauth/authorize
+          tokenUrl: https://api.kraken.com/oauth/token
+          scopes:
+            account.fast-api-key:funds-query: See your account balance
+            account.fast-api-key:funds-add: Deposit funds to your account
+            account.fast-api-key:funds-withdraw: Withdraw funds from your account
+            account.fast-api-key:funds-earn: Transfer funds to earn rewards
+            #account.fast-api-key:withdrawal-address-add: Add withdrawal address without email confirmation (sensitive w/ badge)
+            #account.fast-api-key:withdrawal-address-update: Update / remove withdrawal address without email confirmation (sensitive w/ badge)
+            account.fast-api-key:trades-query-open: View open orders & trades
+            account.fast-api-key:trades-query-closed: View closed orders & trades
+            account.fast-api-key:trades-modify: Create and modify orders
+            account.fast-api-key:trades-close: Cancel and modify orders
+            account.fast-api-key:ledger-query: View your ledger history
+            account.fast-api-key:export-data: Export your ledger history
+            account.fast-api-key:write: Authorize the 3rd party app to create or remove a fast API key
+            account.info:basic: See your account information
+
+  schemas:
+    ApiKeyName:
+      type: string
+      description: API key description
+      minLength: 1
+      maxLength: 32
+    APIKeyParameters:
+      type: object
+      properties:
+        api_key_name:
+          $ref: "#/components/schemas/ApiKeyName"
+        ip_allowlist:
+          description: IP allowlist for the API key, supports CIDR notation for IPv4 and IPv6.
+          type: array
+          items:
+            type: string
+        nonce_window:
+          description: Nonce amount to accept from highest nonce
+          type: number
+          minimum: 0
+          nullable: true
+        permissions:
+          description: What this API key can and can't do
+          type: object
+          properties:
+            export_data:
+              description: Export data
+              type: boolean
+              nullable: true
+            funds_add:
+              description: Add to funds
+              type: boolean
+              nullable: true
+            funds_earn:
+              description: Staking/unstaking
+              type: boolean
+              nullable:  true
+            funds_query:
+              description: Query funds info
+              type: boolean
+              nullable: true
+            funds_withdraw:
+              description: Withdraw funds
+              type: boolean
+              nullable: true
+            ledger_query:
+              description: Query ledger
+              type: boolean
+              nullable: true
+            trades_close:
+              description: Cancel trades, close positions
+              type: boolean
+              nullable: true
+            trades_modify:
+              description: Add and cancel trades
+              type: boolean
+              nullable: true
+            trades_query_closed:
+              description: Query closed orders/positions info
+              type: boolean
+              nullable: true
+            trades_query_open:
+              description: Query open orders/positions info
+              type: boolean
+              nullable: true
+            # Uncomment these lines once the API endpoints are public.
+            #withdrawal_address_add:
+            #  description: Withdraw-address addition
+            #  type: boolean
+            #  nullable: true
+            #withdrawal_address_update:
+            #  description: Withdraw-address update
+            #  type: boolean
+            #  nullable: true
+        query_from:
+          description: Unix timestamp indicating allowable starting time for queries, or 0 if no restriction
+          type: number
+          nullable: true
+        query_to:
+          description: Unix timestamp indicating allowable ending time for queries, or 0 if no restriction
+          type: number
+          nullable: true
+        valid_until:
+          description: Unix timestamp indicating when key expires, or 0 if no expiration
+          type: number
+          nullable: true
+    APIKeyInfo:
+      type: object
+      properties:
+        api_key:
+          description: Only set once at the time of API key creation This is only returned once when the API key is created
+          type: string
+        api_key_name:
+          $ref: "#/components/schemas/ApiKeyName"
+        created_time:
+          type: string
+        id:
+          description: "API Key Description encoded using a modified base64 encoding: The 62nd and 63rd characters are '_' and ',' as opposed to '+' and '/'. Padding character is '-'."
+          type: string
+        ip_allowlist:
+          type: array
+          items:
+            type: string
+        last_used:
+          type: number
+        modified_time:
+          type: string
+        nonce:
+          type: number
+          minimum: 0
+        nonce_window:
+          type: number
+          minimum: 0
+        oauth_client:
+          type: string
+        permissions:
+          type: object
+        purpose:
+          type: string
+          default: "standard"
+        query_from:
+          type: number
+        query_to:
+          type: number
+        valid_until:
+          type: number

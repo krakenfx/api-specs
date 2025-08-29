@@ -1,0 +1,101 @@
+title: Trade
+description: Trade Info
+type: object
+properties:
+  ordertxid:
+    description: Order responsible for execution of trade
+    type: string
+  postxid:
+    description: Position responsible for execution of trade
+    type: string
+  pair:
+    description: Asset pair
+    type: string
+  time:
+    description: Unix timestamp of trade
+    type: number
+  type:
+    description: Type of order (buy/sell)
+    type: string
+  ordertype:
+    description: Order type
+    type: string
+  price:
+    description: Average price order was executed at (quote currency)
+    type: string
+  cost:
+    description: Total cost of order (quote currency)
+    type: string
+  fee:
+    description: Total fee (quote currency)
+    type: string
+  vol:
+    description: Volume (base currency)
+    type: string
+  margin:
+    description: Initial margin (quote currency)
+    type: string
+  leverage:
+    description: Amount of leverage used in trade
+    type: string
+  misc:
+    description: |
+      Comma delimited list of miscellaneous info:
+      * `closing` &mdash; Trade closes all or part of a position
+    type: string
+  ledgers:
+    description: |
+      List of ledger ids for entries associated with trade
+    type: array
+    items:
+      type: string
+  trade_id:
+    description: Unique identifier of trade executed
+    type: integer
+  maker:
+    description: |
+      `true` if trade was executed with user as the maker, `false` if taker
+    type: boolean 
+
+  posstatus:
+    description: |
+      Position status (open/closed)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: string
+  cprice:
+    description: |
+      Average price of closed portion of position (quote currency)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: number
+  ccost:
+    description: |
+      Total cost of closed portion of position (quote currency)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: number
+  cfee:
+    description: |
+      Total fee of closed portion of position (quote currency)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: number
+  cvol:
+    description: |
+      Total fee of closed portion of position (quote currency)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: number
+  cmargin:
+    description: |
+      Total margin freed in closed portion of position (quote currency)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: number
+  net:
+    description: |
+      Net profit/loss of closed portion of position (quote currency, quote currency scale)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: number
+  trades:
+    description: |
+      List of closing trades for position (if available)
+      <br><sub><sup>Only present if trade opened a position</sub></sup>
+    type: array
+    items:
+      type: string

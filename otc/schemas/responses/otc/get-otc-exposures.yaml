@@ -1,0 +1,34 @@
+title: getOtcExposures
+description: Response schema for retrieving OTC exposure limits and usage information for a client.
+type: object
+properties:
+  result:
+    type: object
+    properties:
+      max_otc:
+        type: string
+        description: Max OTC exposure assigned to the client.
+        example: "1500000"
+      max_rfq:
+        type: string
+        description: Max RFQ exposure assigned to the client.
+        example: "1500000"
+      used_otc:
+        type: string
+        description: Used OTC Exposure (chat + RFQ).
+        example: "100000"
+      used_rfq:
+        type: string
+        description: Used RFQ exposure (RFQ only).
+        example: "50000"
+    required:
+      - max_otc
+      - max_rfq
+      - used_otc
+      - used_rfq
+    additionalProperties: false
+  error:
+    $ref: '../../../schemas/objects/errors/error.yaml'
+required:
+  - error
+additionalProperties: false

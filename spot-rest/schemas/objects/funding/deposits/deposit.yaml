@@ -1,0 +1,50 @@
+title: deposit
+description: deposit
+type: object
+properties:
+  method:
+    description: Name of deposit method
+    type: string
+  aclass:
+    description: Asset class
+    type: string
+  asset:
+    description: Asset
+    type: string
+  refid:
+    description: Reference ID
+    type: string
+  txid:
+    description: Method transaction ID
+    type: string
+  info:
+    description: Method transaction information
+    type: string
+  amount:
+    description: Amount deposited
+    type: string
+  fee:
+    description: Fees paid
+  time:
+    description: Unix timestamp when request was made
+    type: integer
+    format: int32
+  status:
+    description: |
+      Status of deposit<br>
+      <sup><sub>For information about the status, please refer to the [IFEX financial transaction states](https://github.com/globalcitizen/ifex-protocol/blob/master/draft-ifex-00.txt#L837).</sup></sub>
+  status-prop:
+    description: |
+      Addition status properties <sup><sub>(if available)</sup></sub><br>
+        * `return` A return transaction initiated by Kraken
+        * `onhold` Deposit is on hold pending review
+    type: string
+    enum:
+      - return
+      - onhold
+  originators:
+    description: |
+      Client sending transaction id(s) for deposits that credit with a sweeping transaction
+    type: array
+    items:
+      type: string

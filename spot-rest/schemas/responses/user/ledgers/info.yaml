@@ -1,0 +1,17 @@
+type: object
+properties:
+  result:
+    title: LedgersInfo
+    description: Ledgers Info
+    type: object
+    properties:
+      ledger:
+        type: object
+        additionalProperties:
+          x-additionalPropertiesName: ledger_id
+          $ref: '../../../../schemas/objects/user/ledgers/ledger.yaml'
+      count:
+        description: Amount of available ledger info matching criteria
+        type: integer
+  error:
+      $ref: '../../../../schemas/objects/errors/error.yaml'

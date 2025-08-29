@@ -1,0 +1,10 @@
+title: 400 Bad Request
+description: Validation Failed response
+type: object
+properties:
+  results:
+    type: object
+  errors:
+    type: array
+    items:
+      $ref: '../objects/errors/validation.yaml'

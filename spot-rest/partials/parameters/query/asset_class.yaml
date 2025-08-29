@@ -1,0 +1,8 @@
+name: asset_class
+in: query
+description: This parameter is required on requests for non-crypto pairs, i.e. use `tokenized_asset` for xstocks.
+required: false
+schema:
+  type: string
+  enum:
+    - tokenized_asset

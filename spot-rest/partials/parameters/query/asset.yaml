@@ -1,0 +1,6 @@
+in: query
+name: asset
+schema:
+  type: string
+description: Comma delimited list of assets to get info on (optional, default all available assets)
+example: XBT,ETH

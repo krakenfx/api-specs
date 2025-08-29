@@ -1,0 +1,69 @@
+description: Response containing available OTC spot trading pairs and their specifications including decimal precision, size limits, and notional value constraints.
+type: object
+properties:
+  result:
+    type: object
+    properties:
+      spot_pairs:
+        type: array
+        title: OTC Spot pairs
+        items:
+          type: object
+          properties:
+            base:
+              type: string
+              description: Base asset for the pair.
+              example: "BTC"
+            quote:
+              type: string
+              description: Quote asset for the pair.
+              example: "USD"
+            pair_name:
+              type: string
+              description: Pair name.
+              example: "BTCUSD"
+            pair_decimals:
+              $ref: '../../objects/otc/decimals.yaml'
+              description: Decimal precision for this pair.
+              example: "8"
+            lot_decimals:
+              $ref: '../../objects/otc/decimals.yaml'
+              description: Decimal precision for the quantity that can be requested for this pair.
+              example: "8"
+            cost_decimals:
+              $ref: '../../objects/otc/decimals.yaml'
+              description: Decimal precision for costs related to this pair.
+              example: "8"
+            max_base_amount:
+              type: string
+              description: Max size in base asset that a quote can be requested for this pair.
+              example: "100000"
+            max_notional:
+              type: string
+              description: Max notional amount that a quote can be requested for this pair.
+              example: "1000000"
+            min_base_amount:
+              type: string
+              description: Min size in base asset that a quote can be requested for this pair.
+              example: "0.1"
+            min_notional: 
+              type: string
+              description: Min notional amount that a quote can be requested for this pair.
+              example: "100"
+          required:
+            - base
+            - quote
+            - pair_name
+            - pair_decimals
+            - lot_decimals
+            - cost_decimals
+            - max_base_amount
+    required:
+      - spot_pairs
+    additionalProperties: false
+  error:
+    $ref: '../../../schemas/objects/errors/error.yaml'
+required:
+  - result
+  - error
+additionalProperties: false

@@ -1,0 +1,14 @@
+type: object
+properties:
+  result:
+    title: OrdersCancelled
+    type: object
+    properties:
+      count:
+        description: Number of orders cancelled.
+        type: integer
+        format: int32
+  error:
+    type: array
+    items:
+      $ref: '../../../../schemas/objects/errors/error.yaml'

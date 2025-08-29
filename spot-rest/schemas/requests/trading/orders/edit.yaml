@@ -1,0 +1,83 @@
+title: Edit Standard Order Request Body
+required:
+  - nonce
+  - pair
+  - txid
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  userref:
+    description: |
+      User reference id
+
+      `userref` is an optional user-specified integer id associated with edit request. 
+       >  Note: userref from parent order will not be retained on the new order after edit.
+    type: integer
+    format: int32
+  txid:
+    description: Original Order ID or User Reference Id (userref) which is user-specified integer id used with the original order. If userref is not unique and was used with multiple order, edit request is denied with an error.
+    oneOf:
+      - type: string
+        title: string
+      - type: integer
+        title: integer
+  volume:
+    description: |
+      Order quantity in terms of the base asset.
+    type: string
+  displayvol:
+    description: |
+      For `iceberg` orders only, it defines the quantity to show in the book while the rest of order quantity remains hidden. Minimum value is 1 / 15 of `volume`.
+    type: string        
+  pair:
+    description: Asset pair `id` or `altname`
+    type: string
+    # example: XBTUSD
+  asset_class:
+    description: This parameter is required on requests for non-crypto pairs, i.e. use `tokenized_asset` for xstocks.
+    type: string
+    enum:
+      - tokenized_asset
+  price:
+    description: |
+      Price:
+      * Limit price for `limit` and `iceberg` orders
+      * Trigger price for `stop-loss`, `stop-loss-limit`, `take-profit`, `take-profit-limit`, `trailing-stop` and `trailing-stop-limit` orders
+
+      Notes:
+      * Relative Prices: Either `price` or `price2` can be preceded by `+`, `-`, or `#` to specify the order price as an offset relative to the last traded price. `+` adds the amount to, and `-` subtracts the amount from the last traded price. `#` will either add or subtract the amount to the last traded price, depending on the direction and order type used. Prices can also be suffixed with a `%` to signify the relative amount as a percentage, rather than an absolute price difference.
+      * Trailing Stops: Must use a relative price for this field, namely the `+` prefix, from which the direction will be automatic based on if the original order is a buy or sell (no need to use `-` or `#`). The `%` suffix also works for these order types to use a relative percentage price.
+
+    type: string
+  price2:
+    description: |
+      Secondary Price:
+      * Limit price for `stop-loss-limit`, `take-profit-limit` and `trailing-stop-limit` orders
+      Note:
+      * Trailing Stops: Must use a relative price for this field, namely one of the `+` or `-` prefixes. This will provide the offset from the trigger price to the limit price, i.e. +0 would set the limit price equal to the trigger price. The `%` suffix also works for this field to use a relative percentage limit price.
+
+    type: string
+  oflags:
+    description: |
+      Comma delimited list of order flags. Only these flags can be changed: - post post-only order (available when ordertype = limit). All the flags from the parent order are retained except post-only. post-only needs to be explicitly mentioned on edit request.
+  deadline:
+    type: string
+    description: |
+      RFC3339 timestamp (e.g. 2021-04-01T00:18:45Z) after which the matching engine should reject the new order request, in presence of latency or order queueing. min now() + 2 seconds, max now() + 60 seconds.  
+#Defaults to 90 seconds if not specified.
+  cancel_response:
+    description: |
+      Used to interpret if client wants to receive pending replace, before the order is completely replaced
+    type: boolean 
+  validate:
+    type: boolean
+    description: Validate inputs only. Do not submit order.
+    default: false
+example:
+  nonce: 1695828490
+  pair: "XBTUSD"
+  txid: "OHYO67-6LP66-HMQ437"
+  volume: "1.25"
+  price: "27500"
+  price2: "26500"

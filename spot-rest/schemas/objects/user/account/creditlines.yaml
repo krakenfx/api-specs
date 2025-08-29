@@ -1,0 +1,13 @@
+title: CreditLines
+description: Credit Line Details
+type: object
+properties:
+  asset_details:
+    description: "Balances by asset"
+    type: object
+    additionalProperties:
+      $ref: './creditlines-asset.yaml'
+  limits_monitor:
+    description: "Credit monitor"
+    type: object
+    $ref: './creditlines-monitor.yaml' 
