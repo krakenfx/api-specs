@@ -1,0 +1,263 @@
+AccountUid:
+  name: accountUid
+  in: path
+  description: UID of the account
+  required: true
+  schema: { $ref: "_schemas.yml#/AccountUid" }
+BeforeDateFilter:
+  name: before
+  in: query
+  description: Timestamp in milliseconds.
+  schema: { $ref: "_schemas.yml#/TimestampMilliseconds" }
+ClosedOrder:
+  name: closed
+  in: query
+  schema:
+    type: boolean
+  description: |
+    Determines status of the order that should be included in response(s).
+
+    - `true` = return orders that have been closed/cancelled/rejected within given time range.
+    - `false` = don't return orders that have been closed/cancelled/rejected within given time range.
+  required: false
+ClosedTrigger:
+  name: closed
+  in: query
+  schema:
+    type: boolean
+  description: |
+    Determines status of the trigger that should be included in response(s).
+
+    - `true` = return triggers that have been closed/cancelled/rejected within given time range.
+    - `false` = don't return triggers that have been closed/cancelled/rejected within given time range.
+  required: false
+ContinuationToken:
+  name: continuation_token
+  in: query
+  description: |
+    Opaque token from the `Next-Continuation-Token` header used to continue listing events. The
+    `sort` parameter must be the same as in the previous request to continue listing in the same
+    direction.
+  schema:
+    type: string
+    format: base64
+Count:
+  name: count
+  in: query
+  description:
+    The maximum number of results to return. The upper bound is determined by a global limit.
+  schema:
+    type: integer
+    format: int64
+    minimum: 1
+    x-rustType: usize
+IncludeClosedPositions:
+  name: closed
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include closed position events. Setting this to
+    false has no effect.
+
+    If multiple position change filters (opened/closed/increased/decreased/reversed/no_change)
+    are provided, then positions matching any of these will be included.
+
+    When combined with update reason filters (trades/funding_realization/settlement),
+    positions must match at least one position change filter AND at least one
+    update reason filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeDecreasedPositions:
+  name: decreased
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include decreased position events. Setting this to
+    false has no effect.
+
+    If multiple position change filters (opened/closed/increased/decreased/reversed/no_change)
+    are provided, then positions matching any of these will be included.
+
+    When combined with update reason filters (trades/funding_realization/settlement),
+    positions must match at least one position change filter AND at least one
+    update reason filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeFundingRealizationPositions:
+  name: funding_realization
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include position events caused by a funding
+    realisation. Setting this to false has no effect.
+
+    If multiple update reason filters (trades/funding_realization/settlement)
+    are provided, then positions matching any of these will be included.
+
+    When combined with position change filters (opened/closed/increased/decreased/reversed/no_change),
+    positions must match at least one update reason filter AND at least one
+    position change filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeIncreasedPositions:
+  name: increased
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include increased position events. Setting this to
+    false has no effect.
+
+    If multiple position change filters (opened/closed/increased/decreased/reversed/no_change)
+    are provided, then positions matching any of these will be included.
+
+    When combined with update reason filters (trades/funding_realization/settlement),
+    positions must match at least one position change filter AND at least one
+    update reason filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeNoChangePositions:
+  name: no_change
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include "no change" position events - where the
+    position has not changed. Setting this to false has no effect.
+
+    If multiple position change filters (opened/closed/increased/decreased/reversed/no_change)
+    are provided, then positions matching any of these will be included.
+
+    When combined with update reason filters (trades/funding_realization/settlement),
+    positions must match at least one position change filter AND at least one
+    update reason filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeOpenedPositions:
+  name: opened
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include opened position events. Setting this to
+    false has no effect.
+
+    If multiple position change filters (opened/closed/increased/decreased/reversed/no_change)
+    are provided, then positions matching any of these will be included.
+
+    When combined with update reason filters (trades/funding_realization/settlement),
+    positions must match at least one position change filter AND at least one
+    update reason filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeReversedPositions:
+  name: reversed
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include reversed position events. Setting this to
+    false has no effect.
+
+    If multiple position change filters (opened/closed/increased/decreased/reversed/no_change)
+    are provided, then positions matching any of these will be included.
+
+    When combined with update reason filters (trades/funding_realization/settlement),
+    positions must match at least one position change filter AND at least one
+    update reason filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeSettlementPositions:
+  name: settlement
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include position events caused by a settlement.
+    Setting this to false has no effect.
+
+    If multiple update reason filters (trades/funding_realization/settlement)
+    are provided, then positions matching any of these will be included.
+
+    When combined with position change filters (opened/closed/increased/decreased/reversed/no_change),
+    positions must match at least one update reason filter AND at least one
+    position change filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IncludeTradePositions:
+  name: trades
+  in: query
+  schema:
+    type: boolean
+  description: |
+    True if results should include position events caused by a trade.
+    Setting this to false has no effect.
+
+    If multiple update reason filters (trades/funding_realization/settlement)
+    are provided, then positions matching any of these will be included.
+
+    When combined with position change filters (opened/closed/increased/decreased/reversed/no_change),
+    positions must match at least one update reason filter AND at least one
+    position change filter.
+
+    If no filters are provided for the request, all position events will be included.
+  required: false
+IsMultiCollateral:
+  name: isMultiCollateral
+  in: query
+  description: True if results should contain only data from multi-collateral markets.
+  required: false
+  schema:
+    type: boolean
+OpenedOrder:
+  name: opened
+  in: query
+  schema:
+    type: boolean
+  description: |
+    Determines status of the orders that should be included in response(s).
+
+    - `true` = return orders that have been placed within given time range.
+    - `false` = don't return orders that have been placed within given time range.
+  required: false
+OpenedTrigger:
+  name: opened
+  in: query
+  schema:
+    type: boolean
+  description: |
+    Determines status of the triggers that should be included in response(s).
+
+    - `true` = return triggers that have been placed within given time range.
+    - `false` = don't return triggers that have been placed within given time range.
+  required: false
+SinceDateFilter:
+  name: since
+  in: query
+  description: Timestamp in milliseconds.
+  schema: { $ref: "_schemas.yml#/TimestampMilliseconds" }
+SortOrder:
+  name: sort
+  in: query
+  description: |
+    Determines the order of events in response(s).
+
+    - `asc` = chronological
+    - `desc` = reverse-chronological
+  required: false
+  schema:
+    type: string
+    enum: [asc, desc]
+    default: desc
+    x-exhaustive: true

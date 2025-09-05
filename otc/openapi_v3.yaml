@@ -1,0 +1,247 @@
+---
+openapi: 3.0.0
+
+servers:
+  - url: https://api.kraken.com/0
+    description: Production Server
+
+info:
+  title: REST API
+  version: 1.1.0
+  description: ""
+
+paths:
+  /private/CreateOtcQuoteRequest:
+    post:
+      summary: Create OTC Quote
+      description: |
+        Creates a new OTC request for quote.
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders`
+      tags:
+        - Quotes
+      operationId: createOtcQuoteRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/otc/create-otc-quote-request.yaml"
+
+      responses:
+        "200":
+          description: Create OTC quote result.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/otc/create-otc-quote-request.yaml"
+        '500':
+          $ref: './partials/responses/500.yaml'
+
+  /private/UpdateOtcQuote:
+    post:
+      summary: Update OTC Quote
+      description: |
+        Accepts or rejects an OTC quote.
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders`
+      tags:
+        - Quotes
+      operationId: updateOtcQuote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/otc/update-otc-quote.yaml"
+
+      responses:
+        "200":
+          description: Update OTC quote result.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/otc/update-otc-quote.yaml"
+        '500':
+          $ref: './partials/responses/500.yaml'
+
+  /private/GetOtcPairs:
+    post:
+      summary: Get OTC Pairs
+      description: |
+        Retrieves the list of OTC trading pairs.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Deposit`
+      tags:
+        - Quotes
+      operationId: getOtcPairs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/otc/get-otc-pairs.yaml"
+
+      responses:
+        "200":
+          description: Available OTC pairs.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/otc/get-otc-pairs.yaml"
+        '500':
+          $ref: './partials/responses/500.yaml'
+
+  /private/GetOtcActiveQuotes:
+    post:
+      summary: Get OTC Active Quotes
+      description: |
+        Retrieves a list of active OTC quotes.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades`
+      tags:
+        - Quotes
+      operationId: getOtcActiveQuotes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/otc/get-otc-active-quotes.yaml"
+
+      responses:
+        "200":
+          description: Active quotes retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/otc/get-otc-active-quotes.yaml"
+        '500':
+          $ref: './partials/responses/500.yaml'
+
+  /private/GetOtcHistoricalQuotes:
+    post:
+      summary: Get OTC Historical Quotes
+      description: |
+        Retrieves OTC quotes history.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades`
+      tags:
+        - Quotes
+      operationId: getOtcHistoricalQuotes
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/otc/get-otc-historical-quotes.yaml"
+
+      responses:
+        "200":
+          description: Historical quotes retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/otc/get-otc-historical-quotes.yaml"
+        '500':
+          $ref: './partials/responses/500.yaml'
+
+  /private/GetOtcExposures:
+    post:
+      summary: Get OTC Exposures
+      description: |
+        Retrieves the max and used OTC exposures.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades`
+      tags:
+        - Quotes
+      operationId: getOtcExposures
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/otc/get-otc-exposures.yaml"
+
+      responses:
+        "200":
+          description: OTC Exposures retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/otc/get-otc-exposures.yaml"
+        '500':
+          $ref: './partials/responses/500.yaml'
+
+  /private/CheckOtcClient:
+    post:
+      summary: Check OTC Eligibility
+      description: |
+        Retrieves the client permissions for the OTC Portal.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Deposit`
+      tags:
+        - Quotes
+      operationId: checkOtcClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/otc/check-otc-client.yaml"
+
+      responses:
+        "200":
+          description: OTC client check result.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/otc/check-otc-client.yaml"
+        '500':
+          $ref: './partials/responses/500.yaml'
+             
+
+components:
+  securitySchemes:
+    API-Key:
+      type: apiKey
+      description: The "API-Key" header should contain your API key.
+      name: API-Key
+      in: header
+
+    API-Sign:
+      type: apiKey
+      description: Authenticated requests should be signed with the "API-Sign" header, using a signature generated with your private key, nonce, encoded payload, and URI path.
+      name: API-Sign
+      in: header
+  schemas:
+    KWebErrors:
+      type: array
+      items:
+        description: General API error.
+        type: object
+        properties:
+          severity:
+            description: API error severity.
+            type: string
+            enum:
+              - E
+              - W
+          errorClass:
+            type: string
+          type:
+            type: string
+          errorMessage:
+            nullable: true
+            type: string
+        required:
+          - errorClass
+          - severity
+          - type
+
+tags:
+  - name: Quotes
+
+security:
+  - API-Key: []
+    API-Sign: []

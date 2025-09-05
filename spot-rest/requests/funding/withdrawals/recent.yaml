@@ -1,0 +1,35 @@
+# - lang: cURL
+      #   source: |
+      #     curl -X "POST" "https://api.kraken.com/0/private/DepositStatus" \
+      #         -H 'API-Key: <YOUR-API-KEY>' \
+      #         -H 'API-Sign: <YOUR-MSG-SIGNATURE>' \
+      #         -H 'Content-Type: application/x-www-form-urlencoded; charset=utf-8' \
+      #         --data-urlencode "nonce=<YOUR-NONCE>" \
+      #         --data-urlencode "asset=XBT" \
+      #         --data-urlencode "method=Bitcoin"
+- lang: Python
+  source: |
+    import time
+    import os
+    import requests
+
+    # Read Kraken API key and secret stored in environment variables
+    api_url = "https://api.kraken.com"
+    api_key = os.environ['API_KEY_KRAKEN']
+    api_sec = os.environ['API_SEC_KRAKEN']
+
+    # Attaches auth headers and returns results of a POST request
+    def kraken_request(uri_path, data, api_key, api_sec):
+        headers = {}
+        headers['API-Key'] = api_key
+        # get_kraken_signature() as defined in the 'Authentication' section
+        headers['API-Sign'] = get_kraken_signature(uri_path, data, api_sec)             
+        req = requests.post((api_url + uri_path), headers=headers, data=data)
+        return req
+    
+    # Construct the request and print the result
+    resp = kraken_request('/0/private/WithdrawStatus', {
+        "nonce": str(int(1000*time.time()))
+    }, api_key, api_sec)
+
+    print(resp.json())

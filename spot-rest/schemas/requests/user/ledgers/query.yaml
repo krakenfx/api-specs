@@ -1,0 +1,25 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Get Ledger Info Request Body
+      required:
+        - nonce
+        - id
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../../partials/properties/nonce.yaml'
+        id:
+          description: Comma delimited list of ledger IDs to query info about (20 maximum)
+          type: string
+        trades:
+          description: Whether or not to include trades related to position in output
+          type: boolean
+          default: false
+        rebase_multiplier:
+          $ref: '../../../../partials/properties/rebase_multiplier.yaml'
+      example:
+          nonce: 1695828490
+          id: "LUI2RA-CJFLB-EN5I4P, L2QE42-IGSZ3-WEVTLK"
+          trade: false

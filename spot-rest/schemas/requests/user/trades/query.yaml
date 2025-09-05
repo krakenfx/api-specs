@@ -1,0 +1,25 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Get Trades Info Request Body
+      required:
+      - nonce
+      - txid
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../../partials/properties/nonce.yaml'
+        txid:
+          description: Comma delimited list of transaction IDs to query info about (20 maximum)
+          type: string
+        trades:
+          description: Whether or not to include trades related to position in output
+          type: boolean
+          default: false
+        rebase_multiplier:
+          $ref: '../../../../partials/properties/rebase_multiplier.yaml'
+      example:
+          nonce: 1695828490
+          txid: "L2QE42-IGSZ3-WEVTLK, STMH53C-C54CG-4SO42I"
+          trades: false

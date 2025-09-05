@@ -1,0 +1,5955 @@
+openapi: 3.1.0
+info:
+  title: Trading
+  version: v3
+servers:
+- url: https://futures.kraken.com/derivatives/api/v3
+  description: Kraken Futures
+tags:
+- name: Market Data
+- name: Instrument Details
+  description: '- The `/instruments/status` endpoint provides a list of statuses for
+    all instruments.
+
+    - The `/instruments/{symbol}/status` endpoint provides the status of a single
+    instrument.'
+- name: Order Management
+- name: Multi-Collateral
+  description: Endpoints pertaining to the multi-collateral (MC) futures markets.
+- name: Account Information
+- name: Assignment Program
+- name: Fee Schedules
+- name: General
+- name: Historical Data
+- name: Historical Funding Rates
+- name: Trading Settings
+- name: Subaccounts
+- name: Transfers
+- name: RFQs
+paths:
+  /pnlpreferences:
+    get:
+      operationId: getPnlCurrencyPreference
+      tags:
+      - Multi-Collateral
+      summary: Get PNL currency preference for a market
+      description: 'The PNL currency preference is used to determine which currency
+        to pay out when realizing
+
+        PNL gains.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      preferences:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/PnlPreference'
+                    required:
+                    - preferences
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/GetPnlPreferencesExample'
+    put:
+      operationId: setPnlCurrencyPreference
+      tags:
+      - Multi-Collateral
+      summary: Set PNL currency preference for a market
+      description: "The PNL currency preference is used to determine which currency\
+        \ to pay out when realizing\nPNL gains. Calling this API can result in the\
+        \ following error codes:\n\n\n  87: Contract does not exist\n\n  88: Contract\
+        \ not a multi-collateral futures contract\n\n  89: Currency does not exist\n\
+        \n  90: Currency is not enabled for multi-collateral futures\n\n  41: Would\
+        \ cause liquidation"
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: The symbol for the PnL preference.
+        name: symbol
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: The asset in which profit will be realised for the specific symbol.
+        name: pnlPreference
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/SuccessExample'
+  /leveragepreferences:
+    get:
+      operationId: getLeverageSetting
+      tags:
+      - Multi-Collateral
+      summary: Get the leverage setting for a market
+      description: Returns list of configured leverage preferences.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      leveragePreferences:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/LeveragePreference'
+                    required:
+                    - leveragePreferences
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/GetLeveragePreferencesExample'
+    put:
+      operationId: setLeverageSetting
+      tags:
+      - Multi-Collateral
+      summary: Set the leverage setting for a market
+      description: 'Sets a contract''s margin mode, either "isolated" or "cross" margin.
+
+
+        When specifying a max leverage, the contract''s margin mode will be isolated.
+
+
+        Calling this endpoint can result in the following error codes:
+
+        - 87: Contract does not exist
+
+        - 88: Contract not a multi-collateral futures contract
+
+        - 41: Would cause liquidation'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: Symbol for the leverage preference.
+        name: symbol
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: 'Max leverage to set.
+
+
+          When present, the symbol''s margin mode will be set to "isolated".
+
+          When missing, the symbol''s margin mode will be set to "cross".
+
+          '
+        name: maxLeverage
+        in: query
+        required: false
+        schema:
+          type: number
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/SuccessExample'
+  /accounts:
+    get:
+      operationId: getAccounts
+      tags:
+      - Account Information
+      summary: Get wallets
+      description: 'This endpoint returns key information relating to all your accounts
+        which may either be
+
+        cash accounts or margin accounts. This includes digital asset balances, instrument
+        balances,
+
+        margin requirements, margin trigger estimates and auxiliary information such
+        as available
+
+        funds, PnL of open positions and portfolio value.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                title: Accounts Response
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      accounts:
+                        $ref: '#/components/schemas/Account'
+                        description: 'A structure containing structures with account-related
+                          information for
+
+                          all margin and cash accounts.'
+                    required:
+                    - accounts
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/AccountsExample'
+  /batchorder:
+    post:
+      operationId: sendBatchOrder
+      tags:
+      - Order Management
+      summary: Batch order management
+      description: 'This endpoint allows sending limit or stop order(s) and/or cancelling
+        open order(s) and/or
+
+        editing open order(s) for a currently listed Futures contract in batch.
+
+
+        When editing an order, if the `trailingStopMaxDeviation` and `trailingStopDeviationUnit`
+
+        parameters are sent unchanged, the system will recalculate a new stop price
+        upon successful
+
+        order modification.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    required:
+                    - batchStatus
+                    properties:
+                      batchStatus:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/BatchInstructionResult'
+                        description: A structure containing information on the send
+                          order request.
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/BatchOrderExample'
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                ProcessBefore:
+                  $ref: '#/components/parameters/ProcessBefore'
+                json:
+                  title: Batch Order
+                  type: object
+                  additionalProperties: false
+                  required:
+                  - batchOrder
+                  properties:
+                    batchOrder:
+                      type: array
+                      items:
+                        title: Batch Instruction
+                        discriminator:
+                          propertyName: order
+                          mapping:
+                            send: '#/components/schemas/BatchOrderSend'
+                            edit: '#/components/schemas/BatchOrderEdit'
+                            cancel: '#/components/schemas/BatchOrderCancel'
+                        oneOf:
+                        - $ref: '#/components/schemas/BatchOrderSend'
+                        - $ref: '#/components/schemas/BatchOrderEdit'
+                        - $ref: '#/components/schemas/BatchOrderCancel'
+                      description: 'A list containing structures of order sending
+                        and order cancellation
+
+                        instructions. The list is in no particular order.'
+                  examples:
+                  - batchOrder:
+                    - order: send
+                      order_tag: '1'
+                      orderType: lmt
+                      symbol: PI_XBTUSD
+                      side: buy
+                      size: 1
+                      limitPrice: 1.0
+                      cliOrdId: my_another_client_id
+                    - order: send
+                      order_tag: '2'
+                      orderType: stp
+                      symbol: PI_XBTUSD
+                      side: buy
+                      size: 1
+                      limitPrice: 2.0
+                      stopPrice: 3.0
+                    - order: cancel
+                      order_id: e35d61dd-8a30-4d5f-a574-b5593ef0c050
+                    - order: cancel
+                      cliOrdId: my_client_id
+                  description: ':::info
+
+                    This parameter is required to be encoded as a json string.
+
+                    :::'
+              required:
+              - json
+  /cancelallorders:
+    post:
+      operationId: cancelAllOrders
+      tags:
+      - Order Management
+      summary: Cancel all orders
+      description: 'This endpoint allows cancelling orders which are associated with
+        a future''s contract or a
+
+        margin account. If no arguments are specified all open orders will be cancelled.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: A futures product to cancel all open orders.
+        name: symbol
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      cancelStatus:
+                        description: A structure containing information on the cancellation
+                          request.
+                        $ref: '#/components/schemas/CancelAllOrdersStatusJson'
+                    required:
+                    - cancelStatus
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/CancelAllOrdersExample'
+  /cancelallordersafter:
+    post:
+      operationId: cancelAllOrdersAfter
+      tags:
+      - Order Management
+      summary: Dead man's switch
+      description: 'This endpoint provides a Dead Man''s Switch mechanism to protect
+        the user from network malfunctions. The user can send a request with a timeout
+        in seconds which will trigger a countdown timer that will cancel all user
+        orders when timeout expires. The user has to keep sending request to push
+        back the timeout expiration or they can deactivate the mechanism by specifying
+        a timeout of zero (0).
+
+
+        The recommended mechanism usage is making a call every 15 to 20 seconds and
+        provide a timeout of 60 seconds. This allows the user to keep the orders in
+        place on a brief network failure, while keeping them safe in case of a network
+        breakdown.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: The timeout specified in seconds.
+        name: timeout
+        in: query
+        required: false
+        schema:
+          type: number
+          format: uint32
+          example: 60
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      status:
+                        $ref: '#/components/schemas/DeadManSwitchStatusJson'
+                        description: The status of the switch.
+                    required:
+                    - status
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/CancelAllOrdersAfterSuccessExample'
+                cancel:
+                  $ref: '#/components/examples/CancelAllOrdersAfterCancelExample'
+                failure:
+                  $ref: '#/components/examples/CancelAllOrdersAfterFailureExample'
+  /cancelorder:
+    post:
+      operationId: cancelOrder
+      tags:
+      - Order Management
+      summary: Cancel order
+      description: This endpoint allows cancelling an open order for a Futures contract.
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - $ref: '#/components/parameters/ProcessBefore'
+      - name: order_id
+        in: query
+        schema:
+          type: string
+          description: The unique identifier of the order to be cancelled.
+        description: The unique identifier of the order to be cancelled.
+      - name: cliOrdId
+        in: query
+        schema:
+          type: string
+          description: The client unique identifier of the order to be cancelled.
+        description: The client unique identifier of the order to be cancelled.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      cancelStatus:
+                        $ref: '#/components/schemas/CancelOrderStatusJson'
+                        description: A structure containing information on the cancellation
+                          request.
+                    required:
+                    - cancelStatus
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/CancelOrderExample'
+  /editorder:
+    post:
+      operationId: editOrderSpring
+      tags:
+      - Order Management
+      summary: Edit order
+      description: 'This endpoint allows editing an existing order for a currently
+        listed Futures contract.
+
+
+        When editing an order, if the `trailingStopMaxDeviation` and `trailingStopDeviationUnit`
+
+        parameters are sent unchanged, the system will recalculate a new stop price
+        upon successful
+
+        order modification.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - $ref: '#/components/parameters/ProcessBefore'
+      - description: ID of the order you wish to edit. (Required if CliOrdId is not
+          included)
+        name: orderId
+        in: query
+        schema:
+          type: string
+      - description: 'The order identity that is specified from the user. It must
+          be globally unique (Required
+
+          if orderId is not included)'
+        name: cliOrdId
+        in: query
+        schema:
+          type: string
+      - description: The size associated with the order
+        name: size
+        in: query
+        schema:
+          type: number
+      - description: The limit price associated with the order. Must not exceed the
+          tick size of the contract.
+        name: limitPrice
+        in: query
+        schema:
+          type: number
+      - description: 'The stop price associated with a stop order. Required if old
+          orderType is stp.
+
+          Must not exceed tick size of the contract. Note that for stp orders, limitPrice
+          is also
+
+          required and denotes the worst price at which the stp order can get filled.'
+        name: stopPrice
+        in: query
+        schema:
+          type: number
+      - name: trailingStopMaxDeviation
+        in: query
+        schema:
+          type: number
+          description: 'Only relevant for trailing stop orders. Maximum value of 50%,
+            minimum value of 0.1% for ''PERCENT'' ''maxDeviationUnit''.
+
+
+            Is the maximum distance the trailing stop''s trigger price may trail behind
+            the requested trigger signal.
+
+            It defines the threshold at which the trigger price updates.'
+          minimum: 0.1
+          maximum: 50
+        description: 'Only relevant for trailing stop orders. Maximum value of 50%,
+          minimum value of 0.1% for ''PERCENT'' ''maxDeviationUnit''.
+
+
+          Is the maximum distance the trailing stop''s trigger price may trail behind
+          the requested trigger signal.
+
+          It defines the threshold at which the trigger price updates.'
+      - name: trailingStopDeviationUnit
+        in: query
+        schema:
+          type: string
+          enum:
+          - PERCENT
+          - QUOTE_CURRENCY
+          description: 'Only relevant for trailing stop orders.
+
+
+            This defines how the trailing trigger price is calculated from the requested
+            trigger signal.
+
+            For example, if the max deviation is set to 10, the unit is ''PERCENT'',
+            and the underlying order is a sell,
+
+            then the trigger price will never be more then 10% below the trigger signal.
+
+            Similarly, if the deviation is 100, the unit is ''QUOTE_CURRENCY'', the
+            underlying order is a sell, and the
+
+            contract is quoted in USD, then the trigger price will never be more than
+            $100 below the trigger signal.'
+        description: 'Only relevant for trailing stop orders.
+
+
+          This defines how the trailing trigger price is calculated from the requested
+          trigger signal.
+
+          For example, if the max deviation is set to 10, the unit is ''PERCENT'',
+          and the underlying order is a sell,
+
+          then the trigger price will never be more then 10% below the trigger signal.
+
+          Similarly, if the deviation is 100, the unit is ''QUOTE_CURRENCY'', the
+          underlying order is a sell, and the
+
+          contract is quoted in USD, then the trigger price will never be more than
+          $100 below the trigger signal.'
+      - name: qtyMode
+        in: query
+        schema:
+          type: string
+          enum:
+          - ABSOLUTE
+          - RELATIVE
+          description: 'Determines how the updated size is interpreted, defaulting
+            to ''RELATIVE''.
+
+
+            ''ABSOLUTE'' means that the total order size, including past fills, is
+            set to `size`.
+
+            ''RELATIVE'' means that the current open order size is set to `size`.'
+        description: 'Determines how the updated size is interpreted, defaulting to
+          ''RELATIVE''.
+
+
+          ''ABSOLUTE'' means that the total order size, including past fills, is set
+          to `size`.
+
+          ''RELATIVE'' means that the current open order size is set to `size`.'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      editStatus:
+                        description: A structure containing information on the send
+                          order request
+                        $ref: '#/components/schemas/EditOrderStatus'
+                    required:
+                    - editStatus
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/EditOrderExample'
+  /feeschedules:
+    get:
+      operationId: getFeeSchedulesV3
+      tags:
+      - Fee Schedules
+      summary: Get fee schedules
+      description: This endpoint lists all fee schedules.
+      security: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      feeSchedules:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FeeSchedule'
+                    required:
+                    - feeSchedules
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/FeeSchedulesExample'
+  /feeschedules/volumes:
+    get:
+      operationId: getUserFeeScheduleVolumesV3
+      tags:
+      - Fee Schedules
+      summary: Get fee schedule volumes
+      description: Returns your fee schedule volumes for each fee schedule.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      volumesByFeeSchedule:
+                        $ref: '#/components/schemas/FeeScheduleVolumes'
+                        description: List containing the 30-day volume.
+                    required:
+                    - volumesByFeeSchedule
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/FeeSchedulesValuesExample'
+  /fills:
+    get:
+      operationId: getFills
+      tags:
+      - Historical Data
+      summary: Get your fills
+      description: This endpoint returns information on your filled orders for all
+        futures contracts.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      parameters:
+      - description: 'If not provided, returns the last 100 fills in any futures contract.
+          If provided,
+
+          returns the 100 entries before lastFillTime.'
+        name: lastFillTime
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      fills:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/FillJson'
+                        description: 'A list containing structures with information
+                          on filled orders. The
+
+                          list is sorted descending by `fillTime`.'
+                    required:
+                    - fills
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/FillsExample'
+  /history:
+    get:
+      operationId: getHistory
+      tags:
+      - Market Data
+      summary: Get trade history
+      description: 'This endpoint returns the most recent 100 trades prior to the
+        specified `lastTime` value up
+
+        to past 7 days or recent trading engine restart (whichever is sooner).
+
+
+        If no `lastTime` specified, it will return 100 most recent trades.'
+      security: []
+      parameters:
+      - description: The symbol of the Futures.
+        name: symbol
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: Returns the last 100 trades from the specified lastTime value.
+        name: lastTime
+        in: query
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      history:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/HistoryJson'
+                        description: 'A list containing structures with historical
+                          price information. The
+
+                          list is sorted descending by time.'
+                    required:
+                    - history
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /instruments:
+    get:
+      operationId: getInstruments
+      tags:
+      - Instrument Details
+      summary: Get instruments
+      description: Returns specifications for all currently listed markets and indices.
+      security: []
+      parameters:
+      - $ref: _parameters.yml#/ContractTypesQuery
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      instruments:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Instrument'
+                        description: 'A list containing structures for each available
+                          instrument. The list
+
+                          is in no particular order.'
+                    required:
+                    - instruments
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/InstrumentsExample'
+  /instruments/status:
+    get:
+      operationId: instrumentsStatus
+      tags:
+      - Instrument Details
+      summary: Get instrument status list
+      description: Returns price dislocation and volatility details for all markets.
+      parameters:
+      - $ref: _parameters.yml#/ContractTypesQuery
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      instrumentStatus:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/InstrumentStatus'
+                    required:
+                    - instrumentStatus
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /instruments/{symbol}/status:
+    parameters:
+    - $ref: _parameters.yml#/MarketSymbolPath
+    get:
+      operationId: instrumentStatus
+      tags:
+      - Instrument Details
+      summary: Get instrument status
+      description: Returns price dislocation and volatility details for given market.
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: '#/components/schemas/InstrumentStatus'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /notifications:
+    get:
+      operationId: getNotifications
+      tags:
+      - General
+      summary: Get notifications
+      description: This endpoint provides the platform's notifications.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      notifications:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/NotificationJson'
+                        description: A list containing the notifications.
+                    required:
+                    - notifications
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/NotificationsSuccessExample'
+                failure:
+                  $ref: '#/components/examples/NotificationsFailureExample'
+  /openorders:
+    get:
+      operationId: getOpenOrders
+      tags:
+      - Order Management
+      summary: Get open orders
+      description: This endpoint returns information on all open orders for all Futures
+        contracts.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      openOrders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OpenOrderJson'
+                        description: 'A list containing structures with information
+                          on open orders. The list
+
+                          is sorted descending by receivedTime.'
+                    required:
+                    - openOrders
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/OpenOrdersExample'
+  /openpositions:
+    get:
+      operationId: getOpenPositions
+      tags:
+      - Account Information
+      summary: Get open positions
+      description: 'This endpoint returns the size and average entry price of all
+        open positions in Futures
+
+        contracts. This includes Futures contracts that have matured but have not
+        yet been settled.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      openPositions:
+                        type: array
+                        items:
+                          $ref: _schemas.yml#/OpenPositionJson
+                        description: 'A list containing structures with information
+                          on open positions.
+
+
+                          The list is sorted descending by fillTime.'
+                    required:
+                    - openPositions
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/OpenPositionsSuccessExample'
+                failure:
+                  $ref: '#/components/examples/OpenPositionsFailureExample'
+  /unwindqueue:
+    get:
+      operationId: getUnwindQueue
+      tags:
+      - Account Information
+      summary: Get position percentile of unwind queue
+      description: This endpoint returns the percentile of the open position in case
+        of unwinding.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      queue:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/UnwindQueueJson'
+                        description: 'A list containing structures with information
+                          on open positions''
+
+                          percentile rank in the unwind/termination queue.'
+                    required:
+                    - queue
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/UnwindQueueExample'
+  /orderbook:
+    get:
+      operationId: getOrderbook
+      tags:
+      - Market Data
+      summary: Get orderbook
+      description: 'This endpoint returns the entire non-cumulative order book of
+        currently listed Futures
+
+        contracts.'
+      security: []
+      parameters:
+      - description: The symbol of the Futures.
+        name: symbol
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      orderBook:
+                        $ref: '#/components/schemas/OrderBook'
+                        description: A structure containing lists with bid and ask
+                          prices and sizes.
+                    required:
+                    - orderBook
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /sendorder:
+    post:
+      operationId: sendOrder
+      tags:
+      - Order Management
+      summary: Send order
+      description: 'This endpoint allows sending a limit, stop, take profit or immediate-or-cancel
+        order for a
+
+        currently listed Futures contract.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - $ref: '#/components/parameters/ProcessBefore'
+      - description: 'The order type:
+
+
+          - `lmt` - a limit order
+
+          - `post` - a post-only limit order
+
+          - `mkt` - an immediate-or-cancel order with 1% price protection
+
+          - `stp` - a stop order
+
+          - `take_profit` - a take profit order
+
+          - `ioc` - an immediate-or-cancel order
+
+          - `trailing_stop` - a trailing stop order'
+        name: orderType
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - lmt
+          - post
+          - ioc
+          - mkt
+          - stp
+          - take_profit
+          - trailing_stop
+          - fok
+      - name: symbol
+        in: query
+        required: true
+        schema:
+          type: string
+          description: The symbol of the Futures
+        description: The symbol of the Futures
+      - name: side
+        in: query
+        required: true
+        schema:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: The direction of the order
+        description: The direction of the order
+      - name: size
+        in: query
+        required: true
+        schema:
+          type: number
+          description: 'The size associated with the order. Note that different Futures
+            have different
+
+            contract sizes.'
+        description: 'The size associated with the order. Note that different Futures
+          have different
+
+          contract sizes.'
+      - name: limitPrice
+        in: query
+        schema:
+          type: number
+          description: 'The limit price associated with the order. Note that for stop
+            orders, limitPrice denotes the worst price at
+
+            which the `stp` or `take_profit` order can get filled at. If no `limitPrice`
+            is
+
+            provided the `stp` or `take_profit` order will trigger a market order.
+            If placing a `trailing_stop` order then leave undefined.'
+        description: 'The limit price associated with the order. Note that for stop
+          orders, limitPrice denotes the worst price at
+
+          which the `stp` or `take_profit` order can get filled at. If no `limitPrice`
+          is
+
+          provided the `stp` or `take_profit` order will trigger a market order. If
+          placing a `trailing_stop` order then leave undefined.'
+      - name: stopPrice
+        in: query
+        schema:
+          type: number
+          description: 'The stop price associated with a stop or take profit order.
+
+
+            Required if orderType is `stp` or `take_profit`, but if placing a `trailing_stop`
+            then
+
+            leave undefined. Note that for stop orders, limitPrice denotes the worst
+            price at
+
+            which the `stp` or `take_profit` order can get filled at. If no `limitPrice`
+            is
+
+            provided the `stp` or `take_profit` order will trigger a market order.'
+        description: 'The stop price associated with a stop or take profit order.
+
+
+          Required if orderType is `stp` or `take_profit`, but if placing a `trailing_stop`
+          then
+
+          leave undefined. Note that for stop orders, limitPrice denotes the worst
+          price at
+
+          which the `stp` or `take_profit` order can get filled at. If no `limitPrice`
+          is
+
+          provided the `stp` or `take_profit` order will trigger a market order.'
+      - name: cliOrdId
+        in: query
+        schema:
+          type: string
+          maxLength: 100
+          description: The order identity that is specified from the user. It must
+            be globally unique.
+        description: The order identity that is specified from the user. It must be
+          globally unique.
+      - name: triggerSignal
+        in: query
+        schema:
+          type: string
+          enum:
+          - mark
+          - index
+          - last
+          description: 'If placing a `stp`, `take_profit` or `trailing_stop`, the
+            signal used for trigger.
+
+
+            - `mark` - the mark price
+
+            - `index` - the index price
+
+            - `last` - the last executed trade'
+        description: 'If placing a `stp`, `take_profit` or `trailing_stop`, the signal
+          used for trigger.
+
+
+          - `mark` - the mark price
+
+          - `index` - the index price
+
+          - `last` - the last executed trade'
+      - name: reduceOnly
+        in: query
+        schema:
+          type: boolean
+          description: 'Set as true if you wish the order to only reduce an existing
+            position.
+
+
+            Any order which increases an existing position will be rejected. Default
+            false.'
+        description: 'Set as true if you wish the order to only reduce an existing
+          position.
+
+
+          Any order which increases an existing position will be rejected. Default
+          false.'
+      - name: trailingStopMaxDeviation
+        in: query
+        schema:
+          type: number
+          description: 'Required if the order type is `trailing_stop`. Maximum value
+            of 50%, minimum value of 0.1% for ''PERCENT'' ''maxDeviationUnit''.
+
+
+            Is the maximum distance the trailing stop''s trigger price may trail behind
+            the
+
+            requested trigger signal. It defines the threshold at which the trigger
+            price updates.'
+          minimum: 0.1
+          maximum: 50
+        description: 'Required if the order type is `trailing_stop`. Maximum value
+          of 50%, minimum value of 0.1% for ''PERCENT'' ''maxDeviationUnit''.
+
+
+          Is the maximum distance the trailing stop''s trigger price may trail behind
+          the
+
+          requested trigger signal. It defines the threshold at which the trigger
+          price updates.'
+      - name: trailingStopDeviationUnit
+        in: query
+        schema:
+          type: string
+          enum:
+          - PERCENT
+          - QUOTE_CURRENCY
+          description: 'Required if the order type is `trailing_stop`.
+
+
+            This defines how the trailing trigger price is calculated from the requested
+            trigger
+
+            signal. For example, if the max deviation is set to 10, the unit is ''PERCENT'',
+            and the
+
+            underlying order is a sell, then the trigger price will never be more
+            then 10% below
+
+            the trigger signal. Similarly, if the deviation is 100, the unit is ''QUOTE_CURRENCY'',
+
+            the underlying order is a sell, and the contract is quoted in USD, then
+            the trigger
+
+            price will never be more than $100 below the trigger signal.'
+        description: 'Required if the order type is `trailing_stop`.
+
+
+          This defines how the trailing trigger price is calculated from the requested
+          trigger
+
+          signal. For example, if the max deviation is set to 10, the unit is ''PERCENT'',
+          and the
+
+          underlying order is a sell, then the trigger price will never be more then
+          10% below
+
+          the trigger signal. Similarly, if the deviation is 100, the unit is ''QUOTE_CURRENCY'',
+
+          the underlying order is a sell, and the contract is quoted in USD, then
+          the trigger
+
+          price will never be more than $100 below the trigger signal.'
+      - name: limitPriceOffsetValue
+        in: query
+        schema:
+          type: number
+          description: 'Can only be set for triggers, e.g. order types `take_profit`,
+            `stop` and `trailing_stop`.
+
+            If set, `limitPriceOffsetUnit` must be set as well.
+
+            This defines a relative limit price depending on the trigger `stopPrice`.
+            The price is determined
+
+            when the trigger is activated by the `triggerSignal`. The offset can be
+            positive or negative, there
+
+            might be restrictions on the value depending on the `limitPriceOffsetUnit`.'
+        description: 'Can only be set for triggers, e.g. order types `take_profit`,
+          `stop` and `trailing_stop`.
+
+          If set, `limitPriceOffsetUnit` must be set as well.
+
+          This defines a relative limit price depending on the trigger `stopPrice`.
+          The price is determined
+
+          when the trigger is activated by the `triggerSignal`. The offset can be
+          positive or negative, there
+
+          might be restrictions on the value depending on the `limitPriceOffsetUnit`.'
+      - name: limitPriceOffsetUnit
+        in: query
+        schema:
+          type: string
+          enum:
+          - QUOTE_CURRENCY
+          - PERCENT
+          description: 'Can only be set together with `limitPriceOffsetValue`.
+
+            This defines the unit for the relative limit price distance from the trigger''s
+            `stopPrice`.'
+        description: 'Can only be set together with `limitPriceOffsetValue`.
+
+          This defines the unit for the relative limit price distance from the trigger''s
+          `stopPrice`.'
+      - name: broker
+        in: query
+        schema:
+          type: string
+          maxLength: 100
+          description: 'Valid Broker identifier on whose behalf the order is sent.
+
+
+            Note: This is currently available exclusively in the Kraken Futures DEMO
+            environment.'
+        description: 'Valid Broker identifier on whose behalf the order is sent.
+
+
+          Note: This is currently available exclusively in the Kraken Futures DEMO
+          environment.'
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      sendStatus:
+                        $ref: '#/components/schemas/SendOrderJson'
+                        description: A structure containing information on the send
+                          order request.
+                    required:
+                    - sendStatus
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                placed:
+                  $ref: '#/components/examples/PlacedOrderExample'
+                rejected:
+                  $ref: '#/components/examples/RejectedOrderExample'
+                executed:
+                  $ref: '#/components/examples/ExecutedOrderExample'
+  /subaccount/{subaccountUid}/trading-enabled:
+    parameters:
+    - name: subaccountUid
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    get:
+      operationId: getSubaccountTradingCapability
+      tags:
+      - Subaccounts
+      summary: Check if a subaccount has trading enabled or disabled
+      description: Returns trading capability info for given subaccount.
+      security:
+      - general-api-key: []
+        authent: []
+      responses:
+        '200':
+          description: Trading enabled status.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SubaccountEnabledJson'
+                - $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The account or subaccount could not be found
+    put:
+      operationId: updateSubaccountTradingCapability
+      tags:
+      - Subaccounts
+      summary: Enable or disable trading on a subaccount
+      description: Updates trading capabilities for given subaccount.
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - name: tradingEnabled
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: Trading was successfully enabled/disabled.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SubaccountEnabledJson'
+                - $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: The account or subaccount could not be found
+  /subaccounts:
+    get:
+      operationId: listSubaccounts
+      tags:
+      - Subaccounts
+      summary: Get subaccounts
+      description: Return information about subaccounts, including balances and UIDs.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      masterAccountUid:
+                        type: string
+                        description: Master account UID
+                      subaccounts:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/SubAccount'
+                        description: The sub-accounts.
+                    required:
+                    - masterAccountUid
+                    - subaccounts
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                kfSuccess:
+                  $ref: '#/components/examples/SubaccountsWithFlexExample'
+  /tickers:
+    get:
+      operationId: getTickers
+      tags:
+      - Market Data
+      summary: Get tickers
+      description: 'This endpoint returns current market data for all currently listed
+        Futures contracts and
+
+        indices.'
+      security: []
+      parameters:
+      - $ref: _parameters.yml#/ContractTypesQuery
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      tickers:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AnyTicker'
+                        description: 'A list containing a structures for each available
+                          instrument. The list
+
+                          is in no particular order.'
+                    required:
+                    - tickers
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/TickersExample'
+  /tickers/{symbol}:
+    parameters:
+    - $ref: _parameters.yml#/MarketSymbolPath
+    get:
+      operationId: getTicker
+      tags:
+      - Market Data
+      summary: Get ticker by symbol
+      description: Get market data for contract or index by symbol
+      security: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                allOf:
+                - type: object
+                  properties:
+                    ticker:
+                      type: object
+                      $ref: '#/components/schemas/AnyTicker'
+                  required:
+                  - ticker
+                - $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/TickerExample'
+        '404':
+          description: Contract could not be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /transfer:
+    post:
+      operationId: transfer
+      tags:
+      - Transfers
+      summary: Initiate wallet transfer
+      description: 'This endpoint allows you to transfer funds between two margin
+        accounts with the same
+
+        collateral currency, or between a margin account and your cash account.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: The wallet (cash or margin account) from which funds should be
+          debited
+        name: fromAccount
+        in: query
+        required: true
+        schema:
+          type: string
+          example: fi_ethusd
+      - description: The wallet (cash or margin account) to which funds should be
+          credited
+        name: toAccount
+        in: query
+        required: true
+        schema:
+          type: string
+          example: flex
+      - description: The currency unit to transfer
+        name: unit
+        in: query
+        required: true
+        schema:
+          type: string
+          example: eth
+      - description: The amount to transfer
+        name: amount
+        in: query
+        required: true
+        schema:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+          example: 0.1
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /transfer/subaccount:
+    post:
+      operationId: subAccountTransfer
+      tags:
+      - Transfers
+      summary: Initiate sub account transfer
+      description: 'This endpoint allows you to transfer funds between the current
+        account and a sub account,
+
+        between two margin accounts with the same collateral currency, or between
+        a margin account
+
+        and your cash account.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: The user account (this or a sub account) from which funds should
+          be debited
+        name: fromUser
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: The user account (this or a sub account) to which funds should
+          be credited
+        name: toUser
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: The wallet (cash or margin account) from which funds should be
+          debited
+        name: fromAccount
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: The wallet (cash or margin account) to which funds should be
+          credited
+        name: toAccount
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: The currency unit to transfer
+        name: unit
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: The amount to transfer
+        name: amount
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/SuccessExample'
+                failure:
+                  $ref: '#/components/examples/TransferSubaccountFailureExample'
+  /withdrawal:
+    post:
+      operationId: withdrawal
+      tags:
+      - Transfers
+      summary: Initiate withdrawal to Spot wallet
+      description: 'This endpoint allows you to request to withdraw digital assets
+        to your Kraken Spot wallet.
+
+
+        Wallet names can be found in the ''accounts'' structure in the Get Wallets
+        /accounts response.'
+      security:
+      - withdrawal-api-key: []
+        authent: []
+      parameters:
+      - description: The digital asset that shall be withdrawn back to spot wallet.
+        name: currency
+        in: query
+        required: true
+        schema:
+          type: string
+          example: eth
+      - description: The amount of currency that shall be withdrawn back to spot wallet.
+        name: amount
+        in: query
+        required: true
+        schema:
+          type: number
+          format: decimal
+          exclusiveMinimum: 0
+          example: 0.1
+      - description: 'The wallet from which the funds shall be withdrawn back to spot
+          wallet. Default is
+
+          "cash" wallet.'
+        name: sourceWallet
+        in: query
+        required: false
+        schema:
+          type: string
+          example: flex
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/WithdrawalResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                success:
+                  value:
+                    uid: 9053db5f-0d5e-48dd-b606-a5c92576b706
+                    result: success
+                    serverTime: '2022-06-28T14:48:58.711Z'
+                failure:
+                  $ref: '#/components/examples/WithdrawalFailureExample'
+  /assignmentprogram/current:
+    get:
+      operationId: getAssignmentProgramCurrent
+      tags:
+      - Assignment Program
+      summary: Lists current assignment programs
+      description: This endpoint returns information on currently active assignment
+        programs
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      participants:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AssignmentParticipantDetails'
+                    required:
+                    - participants
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /assignmentprogram/add:
+    post:
+      operationId: addAssignmentProgram
+      tags:
+      - Assignment Program
+      summary: Adds an assignment program preference
+      description: This endpoint adds an assignment program preference
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      parameters:
+      - description: Type of contract for the assignment program preference. Options
+          can be found in the 'accounts' structure in the Get Wallets /accounts response
+        name: contractType
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: A specific contract for this assignment program preference. Required
+          for "flex" contracts if base/quote currencies are not included.
+        name: contract
+        in: query
+        required: false
+        schema:
+          type: string
+      - description: The maximum size for an assignment
+        name: maxSize
+        in: query
+        required: false
+        schema:
+          type: number
+      - description: The maximum position
+        name: maxPosition
+        in: query
+        required: false
+        schema:
+          type: number
+      - description: Accept to take long positions
+        name: acceptLong
+        in: query
+        required: true
+        schema:
+          type: boolean
+      - description: Accept to take short positions
+        name: acceptShort
+        in: query
+        required: true
+        schema:
+          type: boolean
+      - description: When is the program preference valid
+        name: timeFrame
+        in: query
+        required: true
+        schema:
+          type: string
+      - description: enabled assignment
+        name: enabled
+        in: query
+        required: true
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: '#/components/schemas/AssignmentParticipantDetails'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /assignmentprogram/delete:
+    post:
+      operationId: deleteAssignmentProgram
+      tags:
+      - Assignment Program
+      summary: deletes an assignment program preference
+      description: This endpoint deletes an assignment program preference
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      parameters:
+      - description: Id of program to delete
+        name: id
+        in: query
+        required: true
+        schema:
+          type: number
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: '#/components/schemas/AssignmentParticipantDetails'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /assignmentprogram/history:
+    get:
+      operationId: getAssignmentProgramHistory
+      tags:
+      - Assignment Program
+      summary: Lists all changes in assignment program preferences
+      description: This endpoint returns information on assignment program preferences
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      participants:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AssignmentParticipantHistoryJson'
+                    required:
+                    - participants
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /orders/status:
+    post:
+      operationId: getOrderStatus
+      tags:
+      - Order Management
+      summary: Get Specific Orders' Status
+      description: 'Returns information on specified orders which are open or were
+        filled/cancelled in the last
+
+        5 seconds.'
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: UIDs associated with orders or triggers.
+        name: orderIds
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            format: uuid
+      - description: Client Order IDs associated with orders or triggers.
+        name: cliOrdIds
+        in: query
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+        example:
+        - testOrder1
+        - testOrder2
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      orders:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/OrderStatusDetailsJson'
+                    required:
+                    - orders
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /historical-funding-rates:
+    get:
+      operationId: historicalFundingRates
+      tags:
+      - Historical Funding Rates
+      summary: Historical funding rates
+      description: Returns list of historical funding rates for given market.
+      parameters:
+      - $ref: _parameters.yml#/MarketSymbolQueryRequired
+      responses:
+        '200':
+          description: Historical funding rates for given market.
+          content:
+            application/json:
+              schema:
+                title: Success Response
+                allOf:
+                - type: object
+                  properties:
+                    rates:
+                      description: 'A list containing structures with historical funding
+                        rate information.
+
+                        The list is sorted ascending by timestamp.'
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/HistoricalFundingRateJson'
+                  required:
+                  - rates
+                - $ref: '#/components/schemas/SuccessResponse'
+              examples:
+                success:
+                  $ref: '#/components/examples/HistoricalFundingRatesExample'
+        '400':
+          description: Symbol is invalid or does not reference a perpetual market.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /self-trade-strategy:
+    get:
+      operationId: getSelfTradeStrategy
+      tags:
+      - Trading Settings
+      summary: Get current self trade strategy
+      description: Returns account-wide self-trade matching strategy.
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: Get current self trade strategy
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: '#/components/schemas/SelfTradeStrategyJson'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+    put:
+      operationId: setSelfTradeStrategy
+      tags:
+      - Trading Settings
+      summary: Update self trade strategy
+      description: Updates account-wide self-trade matching behavior to given strategy.
+      security:
+      - general-api-key: []
+        authent: []
+      parameters:
+      - description: Defines self trade behaviour
+        name: strategy
+        in: query
+        required: true
+        schema:
+          $ref: '#/components/schemas/SelfTradeStrategy'
+      responses:
+        '200':
+          description: Self trade strategy was successfully updated
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: '#/components/schemas/SelfTradeStrategyJson'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+  /portfolio-margining/parameters:
+    get:
+      operationId: getPortfolioMarginingParameters
+      tags:
+      - Account Information
+      summary: Get current portfolio margin calculation parameters and options trading
+        limits.
+      description: 'Retrieve current portfolio margin calculation parameters.
+
+
+        Also includes user specific limits related to options trading.
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: Portfolio margining parameters
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: _schemas.yml#/PortfolioMarginingParameters
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+  /portfolio-margining/simulate:
+    post:
+      operationId: simulatePortfolio
+      tags:
+      - Account Information
+      summary: Calculate provided portfolio's margin, pnl and option greeks.
+      description: 'For a given portfolio of balances and positions (futures and options),
+        calculate the
+
+        margin requirements, pnl and option greeks.
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      parameters:
+      - description: Request body as a JSON string
+        name: json
+        in: query
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: _schemas.yml#/PortfolioSimulationRequest
+      responses:
+        '200':
+          description: Simulated portfolio calculations
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: _schemas.yml#/PortfolioSimulationResponse
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+  /rfqs:
+    get:
+      operationId: getAllOpenRfqs
+      tags:
+      - RFQs
+      summary: List all open RFQs
+      description: 'Retrieve all currently open RFQs
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      responses:
+        '200':
+          description: RFQs
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: '#/components/schemas/OpenRfqsResponse'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+  /rfqs/{rfqUid}:
+    get:
+      operationId: getSingleOpenRfq
+      tags:
+      - RFQs
+      summary: Retrieve a single open RFQ
+      description: 'Retrieve a specific open RFQ by its unique identifier
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      parameters:
+      - description: Unique identifier for the RFQ
+        name: rfqUid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: A single RFQ object
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    required:
+                    - rfq
+                    properties:
+                      rfq:
+                        $ref: '#/components/schemas/OpenRfq'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+  /rfqs/open-offers:
+    get:
+      operationId: getOpenRfqOffers
+      tags:
+      - RFQs
+      summary: List your open offer on open RFQs
+      description: 'Retrieve all open offers for the account on currently open RFQs
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      responses:
+        '200':
+          description: Open Offers
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - $ref: '#/components/schemas/OpenRfqOffersResponse'
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+  /rfqs/{rfqUid}/place-offer:
+    post:
+      operationId: placeRfqOffer
+      tags:
+      - RFQs
+      summary: Place a new offer on an open RFQ
+      description: 'Place a new offer for the given amount in USD on the specified
+        open RFQ, bid and ask are optional but at least one must be provided
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      parameters:
+      - description: Unique identifier for the RFQ
+        name: rfqUid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bid:
+                  type: number
+                  format: number
+                  description: The bid price (optional)
+                ask:
+                  type: number
+                  format: number
+                  description: The ask price (optional)
+              example:
+                bid: 100.5
+                ask: 101.75
+      responses:
+        '200':
+          description: Placed bid
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - title: Success Response
+                  allOf:
+                  - type: object
+                    properties:
+                      offerUid:
+                        type: string
+                        format: uuid
+                    required:
+                    - offerUid
+                  - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+  /rfqs/{rfqUid}/replace-offer:
+    put:
+      operationId: replaceRfqOffer
+      tags:
+      - RFQs
+      summary: Replace an open offer on an open RFQ
+      description: 'Replace the current open offer on the specified open RFQ, bid
+        and ask are optional but at least one must be provided
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      parameters:
+      - description: Unique identifier for the RFQ
+        name: rfqUid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                bid:
+                  type: number
+                  format: number
+                  description: The bid price (optional)
+                ask:
+                  type: number
+                  format: number
+                  description: The ask price (optional)
+              example:
+                bid: 100.5
+                ask: 101.75
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+  /rfqs/{rfqUid}/cancel-offer:
+    delete:
+      operationId: cancelRfqOffer
+      tags:
+      - RFQs
+      summary: Cancel the open offer on an open RFQ
+      description: 'Cancel the current open offer on the specified open RFQ
+
+
+        Note: This is currently available exclusively in the Kraken Futures DEMO environment.'
+      security:
+      - general-api-key-read-only: []
+        authent: []
+      parameters:
+      - description: Unique identifier for the RFQ
+        name: rfqUid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: ''
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/SuccessResponse'
+                - $ref: '#/components/schemas/ErrorResponse'
+      servers:
+      - url: https://demo-futures.kraken.com/derivatives/api/v3
+components:
+  securitySchemes:
+    authent:
+      type: apiKey
+      description: Authentication string
+      in: header
+      name: Authent
+      x-inlineDescription: true
+    general-api-key:
+      type: apiKey
+      description: General API key with **full** access
+      in: header
+      name: APIKey
+      x-inlineDescription: true
+    general-api-key-read-only:
+      type: apiKey
+      description: General API key with at least **read-only** access
+      in: header
+      name: APIKey
+      x-inlineDescription: true
+    withdrawal-api-key:
+      type: apiKey
+      description: '**Withdrawal** API key with **full** access
+
+        '
+      in: header
+      name: APIKey
+      x-inlineDescription: true
+  schemas:
+    Account:
+      description: Information for all margin and cash accounts
+      type: object
+      properties:
+        cash:
+          $ref: '#/components/schemas/CashAccount'
+        flex:
+          $ref: '#/components/schemas/FlexBalanceSummary'
+          description: Structure showing multi-collateral wallet details.
+      required:
+      - cash
+      - flex
+      additionalProperties:
+        $ref: '#/components/schemas/MarginAccount'
+    AnyTicker:
+      oneOf:
+      - $ref: '#/components/schemas/MarketTicker'
+      - $ref: '#/components/schemas/IndexTicker'
+    AssignmentParticipantDetails:
+      type: object
+      properties:
+        id:
+          type: number
+        participant:
+          $ref: '#/components/schemas/AssignmentParticipantJson'
+      required:
+      - id
+      - participant
+    AssignmentParticipantHistoryJson:
+      type: object
+      properties:
+        deleted:
+          type: boolean
+        participant:
+          $ref: '#/components/schemas/AssignmentParticipantJson'
+        timestamp:
+          $ref: _schemas.yml#/Rfc3339DateTime
+      required:
+      - deleted
+      - participant
+    AssignmentParticipantJson:
+      type: object
+      properties:
+        contractType:
+          type: string
+        contract:
+          type:
+          - string
+          - 'null'
+        maxSize:
+          format: double
+          type:
+          - number
+          - 'null'
+        maxPosition:
+          format: double
+          type:
+          - number
+          - 'null'
+        acceptLong:
+          type: boolean
+        acceptShort:
+          type: boolean
+        timeFrame:
+          type: string
+          enum:
+          - all
+          - weekdays
+          - weekends
+        enabled:
+          type: boolean
+      required:
+      - contractType
+      - acceptLong
+      - acceptShort
+      - timeFrame
+      - enabled
+      example:
+        contractType: flex
+        contract: PF_BTCUSD
+        maxPosition: 10
+        maxSize: 10
+        acceptLong: true
+        acceptShort: true
+        timeFrame: weekdays
+        enabled: true
+    Auxiliary:
+      type: object
+      properties:
+        usd:
+          type: number
+        pv:
+          type: number
+          description: The portfolio value of the account, in currency.
+        pnl:
+          type: number
+          description: The PnL of current open positions of the account, in  currency.
+        af:
+          type: number
+          description: The available funds of the account, in currency.
+        funding:
+          type: number
+      required:
+      - usd
+      - pv
+      - pnl
+      - af
+      - funding
+    BatchInstructionResult:
+      type: object
+      properties:
+        cliOrdId:
+          type: string
+          description: 'The unique client order identifier. This field is returned
+            only if the order has a
+
+            client order ID.'
+        dateTimeReceived:
+          type:
+          - string
+          - 'null'
+          description: The date and time the order was received.
+        orderEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderEvent'
+        order_id:
+          type:
+          - string
+          - 'null'
+          description: The unique identifier of the order.
+        order_tag:
+          type:
+          - string
+          - 'null'
+          description: 'The arbitrary string provided client-side when the order was
+            sent for the purpose of
+
+            mapping order sending instructions to the API''s response.'
+        status:
+          type: string
+          enum:
+          - placed
+          - edited
+          - cancelled
+          - invalidOrderType
+          - invalidSide
+          - invalidSize
+          - invalidPrice
+          - insufficientAvailableFunds
+          - selfFill
+          - tooManySmallOrders
+          - marketSuspended
+          - marketInactive
+          - clientOrderIdAlreadyExist
+          - clientOrderIdTooLong
+          - outsidePriceCollar
+          - postWouldExecute
+          - iocWouldNotExecute
+          description: 'The status of the order:
+
+
+            - `placed` - the order was placed successfully
+
+            - `cancelled` - the order was cancelled successfully
+
+            - `invalidOrderType` - the order was not placed because orderType is invalid
+
+            - `invalidSide` - the order was not placed because side is invalid
+
+            - `invalidSize` - the order was not placed because size is invalid
+
+            - `invalidPrice` - the order was not placed because limitPrice and/or
+            stopPrice are invalid
+
+            - `insufficientAvailableFunds` - the order was not placed because available
+            funds are insufficient
+
+            - `selfFill` - the order was not placed because it would be filled against
+            an existing order belonging to the same account
+
+            - `tooManySmallOrders` - the order was not placed because the number of
+            small open orders would exceed the permissible limit
+
+            - `marketSuspended` - the order was not placed because the market is suspended
+
+            - `marketInactive` - the order was not placed because the market is inactive
+
+            - `clientOrderIdAlreadyExist` - the specified client ID already exist
+
+            - `clientOrderIdTooLong` - the client ID is longer than the permissible
+            limit
+
+            - `outsidePriceCollar` - the limit order crosses the spread but is an
+            order of magnitude away from the mark price - fat finger control
+
+            - `postWouldExecute` - the post-only order would be filled upon placement,
+            thus is  cancelled
+
+            - `iocWouldNotExecute` - the immediate-or-cancel order would not execute'
+      required:
+      - status
+      - orderEvents
+    BatchOrderCancel:
+      example:
+        order: cancel
+        order_id: e35d61dd-8a30-4d5f-a574-b5593ef0c050
+      allOf:
+      - type: object
+        properties:
+          order:
+            description: Always `cancel`.
+            type: string
+            enum:
+            - cancel
+        required:
+        - order
+      - $ref: '#/components/schemas/CancelInstruction'
+    BatchOrderEdit:
+      allOf:
+      - $ref: '#/components/schemas/OrderIdElement'
+      - type: object
+        properties:
+          order:
+            type: string
+            description: Always `edit`.
+            enum:
+            - edit
+          size:
+            type: number
+            description: The size associated with the order.
+          limitPrice:
+            type: number
+            description: The limit price associated with the order.
+          stopPrice:
+            type: number
+            description: 'The stop price associated with a stop order. Required if
+              old orderType is stp.
+
+
+              Note that for `stp` orders, `limitPrice` is also required and denotes
+              the worst
+
+              price at which the stp order can get filled.'
+          trailingStopMaxDeviation:
+            type: number
+            description: 'Only relevant for trailing stop orders. Maximum value of
+              50%, minimum value of 0.1%
+
+              for ''PERCENT'' ''maxDeviationUnit''.
+
+
+              Is the maximum distance the trailing stop''s trigger price may trail
+              behind the
+
+              requested trigger signal. It defines the threshold at which the trigger
+              price
+
+              updates.'
+            minimum: 0.1
+            maximum: 50
+          trailingStopDeviationUnit:
+            type: string
+            enum:
+            - PERCENT
+            - QUOTE_CURRENCY
+            description: 'Only relevant for trailing stop orders.
+
+
+              This defines how the trailing trigger price is calculated from the requested
+              trigger
+
+              signal. For example, if the max deviation is set to 10, the unit is
+              ''PERCENT'', and
+
+              the underlying order is a sell, then the trigger price will never be
+              more then 10%
+
+              below the trigger signal. Similarly, if the deviation is 100, the unit
+              is
+
+              ''QUOTE_CURRENCY'', the underlying order is a sell, and the contract
+              is quoted in USD,
+
+              then the trigger price will never be more than $100 below the trigger
+              signal.'
+          qtyMode:
+            type: string
+            enum:
+            - ABSOLUTE
+            - RELATIVE
+            description: 'Determines how the updated size is interpreted, defaulting
+              to ''RELATIVE''.
+
+
+              ''ABSOLUTE'' means that the total order size, including past fills,
+              is set to `size`.
+
+              ''RELATIVE'' means that the current open order size is set to `size`.'
+    BatchOrderSend:
+      type: object
+      required:
+      - symbol
+      - order_tag
+      - side
+      - size
+      - orderType
+      properties:
+        order:
+          type: string
+          description: Always `send`.
+          enum:
+          - send
+        order_tag:
+          type: string
+          description: 'An arbitrary string provided client-side to tag the order
+            for the purpose of
+
+            mapping order sending instructions to the API''s response.'
+        orderType:
+          type: string
+          enum:
+          - lmt
+          - ioc
+          - post
+          - stp
+          - take_profit
+          - fok
+          description: 'Order type:
+
+
+            - `lmt` - a limit order,
+
+            - `post` - a post-only limit order,
+
+            - `take_profit` - a take profit order or
+
+            - `stp` - a stop order
+
+            - `trailing_stop` - a trailing stop order'
+        symbol:
+          type: string
+          description: The symbol of the Futures.
+        side:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: The direction of the order.
+        size:
+          type: number
+          description: The size associated with the order.
+        limitPrice:
+          type: number
+          description: 'The limit price associated with the order. If placing a `trailing_stop`
+            order then leave
+
+            undefined.'
+        stopPrice:
+          type: number
+          description: 'The stop price associated with a stop order. Required if `orderType`
+            is `stp`.
+
+            Note that for `stp` orders, `limitPrice` is also required and denotes
+            the worst price at
+
+            which the `stp` order can get filled'
+        cliOrdId:
+          type: string
+          description: The order identity that is specified from the user. It must
+            be globally unique.
+          maxLength: 100
+        triggerSignal:
+          type: string
+          enum:
+          - mark
+          - index
+          - last
+        reduceOnly:
+          type: boolean
+          description: 'Set as ''true'' if you wish the order to only reduce an existing
+            position. Any order which
+
+            increases an existing position will be rejected. Default ''false''.'
+          default: false
+        trailingStopMaxDeviation:
+          type: number
+          description: 'Required if the order type is `trailing_stop`.
+
+
+            Is the maximum distance the trailing stop''s trigger price may trail behind
+            the requested trigger signal.
+
+            It defines the threshold at which the trigger price updates.'
+        trailingStopDeviationUnit:
+          type: string
+          enum:
+          - PERCENT
+          - QUOTE_CURRENCY
+          description: 'Required if the order type is `trailing_stop`.
+
+
+            This defines how the trailing trigger price is calculated from the requested
+            trigger
+
+            signal. For example, if the max deviation is set to 10, the unit is ''PERCENT'',
+            and the
+
+            underlying order is a sell, then the trigger price will never be more
+            then 10% below the
+
+            trigger signal. Similarly, if the deviation is 100, the unit is ''QUOTE_CURRENCY'',
+            the
+
+            underlying order is a sell, and the contract is quoted in USD, then the
+            trigger price
+
+            will never be more than $100 below the trigger signal.'
+      example:
+        order: send
+        order_tag: '1'
+        orderType: lmt
+        symbol: PI_XBTUSD
+        side: buy
+        size: 1
+        limitPrice: 1.0
+        cliOrdId: my_another_client_id
+    CachedOrderJson:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - TRIGGER_ORDER
+          - ORDER
+        orderId:
+          type: string
+          format: uuid
+        cliOrdId:
+          type:
+          - string
+          - 'null'
+        symbol:
+          type: string
+        side:
+          type: string
+        quantity:
+          type:
+          - number
+          - 'null'
+        filled:
+          type:
+          - number
+          - 'null'
+        limitPrice:
+          type:
+          - number
+          - 'null'
+        reduceOnly:
+          type: boolean
+        timestamp:
+          type: string
+        lastUpdateTimestamp:
+          type: string
+        priceTriggerOptions:
+          oneOf:
+          - $ref: '#/components/schemas/TriggerOptions'
+          - type: 'null'
+        triggerTime:
+          type:
+          - string
+          - 'null'
+      required:
+      - type
+      - orderId
+      - cliOrdId
+      - symbol
+      - side
+      - quantity
+      - filled
+      - limitPrice
+      - reduceOnly
+      - timestamp
+      - lastUpdateTimestamp
+      - algoId
+      - priceTriggerOptions
+      - triggerTime
+    CancelAllOrdersStatusJson:
+      type: object
+      properties:
+        cancelOnly:
+          type: string
+          description: The symbol of the futures or all.
+        cancelledOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderIdElement'
+          description: A list of structures containing all the successfully cancelled
+            orders.
+        orderEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/CancelEvent'
+        receivedTime:
+          type: string
+          description: The date and time the order cancellation was received.
+        status:
+          type: string
+          enum:
+          - noOrdersToCancel
+          - cancelled
+          description: 'The status of the order cancellation:
+
+
+            - `cancelled` - successful cancellation
+
+            - `noOrdersToCancel` - no open orders for cancellation'
+      required:
+      - cancelOnly
+      - cancelledOrders
+      - orderEvents
+      - receivedTime
+      - status
+    CancelEvent:
+      type: object
+      properties:
+        type:
+          description: Always `CANCEL`.
+          type: string
+          enum:
+          - CANCEL
+        uid:
+          type: string
+          description: The UID associated with the order.
+        order:
+          oneOf:
+          - $ref: '#/components/schemas/OrderJson'
+            description: The cancelled order.
+          - type: 'null'
+      required:
+      - type
+      - uid
+      - order
+    CancelInstruction:
+      type: object
+      description: Provide either `order_id` or `cliOrdId`.
+      properties:
+        order_id:
+          description: Order ID.
+          type: string
+          format: uuid
+        cliOrdId:
+          description: Unique client order identifier.
+          type: string
+          maxLength: 100
+    CancelOrderStatusJson:
+      type: object
+      properties:
+        cliOrdId:
+          type:
+          - string
+          - 'null'
+          description: The client order ID. Shown only if client specified one.
+        orderEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderEvent'
+        order_id:
+          type: string
+          format: uuid
+          description: The cancelled order UID
+        receivedTime:
+          type: string
+          description: The date and time the order cancellation was received.
+        status:
+          type: string
+          enum:
+          - cancelled
+          - filled
+          - notFound
+          description: 'The status of the order cancellation:
+
+
+            - `cancelled` - The order has been cancelled. This may only be part of
+            the order as part may have been filled. Check open_orders websocket feed
+            for status of the order.
+
+            - `filled` - The order was found completely filled and could not be cancelled
+
+            - `notFound` - The order was not found, either because it had already
+            been cancelled or it never existed'
+      required:
+      - status
+    CancelTriggerEvent:
+      type: object
+      properties:
+        type:
+          description: Always `CANCEL`.
+          type: string
+          enum:
+          - CANCEL
+        uid:
+          type: string
+        orderTrigger:
+          oneOf:
+          - $ref: '#/components/schemas/OrderTriggerJson'
+          - type: 'null'
+      required:
+      - type
+      - uid
+      - orderTrigger
+    CashAccount:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - cashAccount
+          description: The type of the account (always "cashAccount").
+        balances:
+          $ref: '#/components/schemas/CashAccountBalances'
+          description: A structure containing account balances.
+      required:
+      - type
+      - balances
+    CashAccountBalances:
+      type: object
+      additionalProperties:
+        $ref: _schemas.yml#/DecimalString
+    DeadManSwitchStatusJson:
+      type: object
+      properties:
+        currentTime:
+          type: string
+          description: The server date and time that server received the request.
+        triggerTime:
+          type: string
+          description: The server date and time that the switch will be activated.
+      required:
+      - currentTime
+      - triggerTime
+    EditEvent:
+      type: object
+      properties:
+        type:
+          description: Always `EDIT`.
+          type: string
+          enum:
+          - EDIT
+        old:
+          $ref: '#/components/schemas/OrderJson'
+          description: The order before the edit was applied.
+        new:
+          $ref: '#/components/schemas/OrderJson'
+          description: The order after the edit was applied.
+        reducedQuantity:
+          type:
+          - number
+          - 'null'
+          description: 'The amount of quantity that was removed from the edited order
+            or null if the order is
+
+            not a reduce only.'
+      required:
+      - type
+      - old
+      - new
+      - reducedQuantity
+    EditOrderStatus:
+      type: object
+      properties:
+        orderId:
+          type:
+          - string
+          - 'null'
+          description: The unique identifier of the order
+        cliOrdId:
+          type:
+          - string
+          - 'null'
+          description: 'The unique client order identifier.
+
+
+            This field is returned only if the order has a client order ID.'
+        orderEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderEvent'
+        receivedTime:
+          type:
+          - string
+          - 'null'
+          description: The date and time the order was received
+        status:
+          type: string
+          enum:
+          - edited
+          - invalidSize
+          - invalidPrice
+          - insufficientAvailableFunds
+          - selfFill
+          - tooManySmallOrders
+          - outsidePriceCollar
+          - postWouldExecute
+          - wouldNotReducePosition
+          - orderForEditNotFound
+          - orderForEditNotAStop
+          description: 'The status of the order, either of:
+
+
+            - `edited` - The order was edited successfully
+
+            - `invalidSize` - The order was not placed because size is invalid
+
+            - `invalidPrice` - The order was not placed because limitPrice and/or
+            stopPrice are invalid
+
+            - `insufficientAvailableFunds` - The order was not placed because available
+            funds are insufficient
+
+            - `selfFill` - The order was not placed because it would be filled against
+            an existing order belonging to the same account
+
+            - `tooManySmallOrders` - The order was not placed because the number of
+            small open orders would exceed the permissible limit
+
+            - `outsidePriceCollar` - The limit order crosses the spread but is an
+            order of magnitude away from the mark price - fat finger control
+
+            - `postWouldExecute` - The post-only order would be filled upon placement,
+            thus is cancelled
+
+            - `wouldNotReducePosition` - The edit cannot be applied because the reduce
+            only policy is violated. (Only for reduceOnly orders)
+
+            - `orderForEditNotFound` - The requested order for edit has not been found
+
+            - `orderForEditNotAStop` - The supplied stopPrice cannot be applied because
+            order is not a stop order'
+      required:
+      - status
+      - orderEvents
+    Error:
+      type: string
+      description: "Error description.\n\n  - `accountInactive`: The Futures account\
+        \ the request refers to is inactive\n  - `apiLimitExceeded`: The API limit\
+        \ for the calling IP address has been exceeded\n  - `authenticationError`:\
+        \ The request could not be authenticated\n  - `insufficientFunds`: The amount\
+        \ requested for transfer is below the amount of funds available\n  - `invalidAccount`:\
+        \ The Futures account the transfer request refers to is invalid\n  - `invalidAmount`:\
+        \ The amount the transfer request refers to is invalid\n  - `invalidArgument`:\
+        \ One or more arguments provided are invalid\n  - `invalidUnit`: The unit\
+        \ the transfer request refers to is invalid\n  - `Json Parse Error`: The request\
+        \ failed to pass valid JSON as an argument\n  - `marketUnavailable`: The market\
+        \ is currently unavailable\n  - `nonceBelowThreshold`: The provided nonce\
+        \ is below the threshold\n  - `nonceDuplicate`: The provided nonce is a duplicate\
+        \ as it has been used in a previous request\n  - `notFound`: The requested\
+        \ information could not be found\n  - `requiredArgumentMissing`: One or more\
+        \ required arguments are missing\n  - `Server Error`: There was an error processing\
+        \ the request\n  - `Unavailable`: The endpoint being called is unavailable\n\
+        \  - `unknownError`: An unknown error has occurred"
+      enum:
+      - accountInactive
+      - apiLimitExceeded
+      - authenticationError
+      - insufficientFunds
+      - invalidAccount
+      - invalidAmount
+      - invalidArgument
+      - invalidUnit
+      - Json Parse Error
+      - marketUnavailable
+      - nonceBelowThreshold
+      - nonceDuplicate
+      - notFound
+      - requiredArgumentMissing
+      - Server Error
+      - Unavailable
+      - unknownError
+    ErrorResponse:
+      allOf:
+      - title: Errors
+        type: object
+        properties:
+          errors:
+            type: array
+            items:
+              $ref: '#/components/schemas/Error'
+          error:
+            $ref: '#/components/schemas/Error'
+        required:
+        - error
+      - $ref: '#/components/schemas/ResultError'
+      - $ref: '#/components/schemas/ServerTime'
+    ExecuteEvent:
+      type: object
+      properties:
+        type:
+          description: Always `EXECUTION`.
+          type: string
+          enum:
+          - EXECUTION
+        executionId:
+          type: string
+          format: uuid
+          description: The UID associated with the execution.
+        price:
+          type: number
+          description: The price of the execution.
+        amount:
+          type: number
+          description: The executed amount.
+        orderPriorEdit:
+          oneOf:
+          - $ref: '#/components/schemas/OrderJson'
+            description: 'The order before the edit was applied (if the execution
+              is a result of an order
+
+              edit).'
+          - type: 'null'
+        orderPriorExecution:
+          $ref: '#/components/schemas/OrderJson'
+          description: The order before it executes.
+        takerReducedQuantity:
+          type:
+          - number
+          - 'null'
+          description: 'The amount of quantity that was removed from the order before
+            execution or null if the
+
+            order is not a reduce only.'
+      required:
+      - type
+      - executionId
+      - price
+      - amount
+      - orderPriorEdit
+      - orderPriorExecution
+      - takerReducedQuantity
+    FeeSchedule:
+      type: object
+      properties:
+        tiers:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeeTier'
+          description: A list containing a structures for each fee tier, see below.
+        name:
+          type: string
+          description: Name of schedule.
+          example: PGTMainFees
+        uid:
+          type: string
+          description: Unique identifier of fee schedule.
+          example: 7fc4d7c0-464f-4029-a9bb-55856d0c5247
+      required:
+      - tiers
+      - name
+      - uid
+      example:
+        uid: 7fc4d7c0-464f-4029-a9bb-55856d0c5247
+        name: PGTMainFees
+        tiers:
+        - makerFee: 0.02
+          takerFee: 0.05
+          usdVolume: 0.0
+        - makerFee: 0.015
+          takerFee: 0.04
+          usdVolume: 100000.0
+        - makerFee: 0.0125
+          takerFee: 0.03
+          usdVolume: 1000000.0
+        - makerFee: 0.01
+          takerFee: 0.025
+          usdVolume: 5000000.0
+        - makerFee: 0.0075
+          takerFee: 0.02
+          usdVolume: 10000000.0
+        - makerFee: 0.005
+          takerFee: 0.015
+          usdVolume: 20000000.0
+        - makerFee: 0.0025
+          takerFee: 0.0125
+          usdVolume: 50000000.0
+        - makerFee: 0.0
+          takerFee: 0.01
+          usdVolume: 100000000.0
+    FeeScheduleVolumes:
+      type: object
+      description: The 30-day volume for your account.
+      additionalProperties:
+        type: number
+      example:
+        d46c2190-81e3-4370-a333-424f24387829: 10.0
+        7fc4d7c0-464f-4029-a9bb-55856d0c5247: 10.0
+    FeeTier:
+      type: object
+      properties:
+        makerFee:
+          type: number
+          description: Percentage value of maker fee in the tier.
+          example: 0.015
+        takerFee:
+          type: number
+          description: Percentage value of taker fee in the tier.
+          example: 0.04
+        usdVolume:
+          type: number
+          description: Minimum 30-day USD volume for fee tier to be applicable.
+          example: 100000.0
+      required:
+      - makerFee
+      - takerFee
+      - usdVolume
+    FillJson:
+      type: object
+      properties:
+        cliOrdId:
+          type:
+          - string
+          - 'null'
+          description: 'The unique client order identifier.
+
+
+            This field is returned only if the order has a client order ID.'
+        fillTime:
+          type: string
+          description: The date and time the order was filled.
+          example: '2021-11-18T02:39:41.826Z'
+        fillType:
+          type: string
+          enum:
+          - maker
+          - taker
+          - liquidation
+          - assignor
+          - assignee
+          - takerAfterEdit
+          - unwindBankrupt
+          - unwindCounterparty
+          description: 'The classification of the fill:
+
+
+            - `maker` - user has a limit order that gets filled
+
+            - `taker` - the user makes an execution that crosses the spread
+
+            - `liquidation` - execution is result of a liquidation
+
+            - `assignee` - execution is a result of a counterparty receiving an Assignment
+            in PAS
+
+            - `assignor` - execution is a result of user assigning their position
+            due to failed liquidation'
+          example: maker
+        fill_id:
+          type: string
+          format: uuid
+          description: 'The unique identifier of the fill. Note that several `fill_id`
+            can pertain to one
+
+            `order_id` (but not vice versa)'
+        order_id:
+          type: string
+          format: uuid
+          description: The unique identifier of the order.
+        price:
+          type: number
+          description: The price of the fill.
+          example: 47000
+        side:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: The direction of the order.
+          example: buy
+        size:
+          type: number
+          description: The size of the fill.
+          example: 10
+        symbol:
+          type: string
+          description: The symbol of the futures the fill occurred in.
+          example: PI_XBTUSD
+      required:
+      - fill_id
+      - symbol
+      - side
+      - order_id
+      - size
+      - price
+      - fillTime
+      - fillType
+      example:
+        fill_id: 98e3deeb-0385-4b25-b15e-7e8453512cb2
+        fillTime: '2021-11-18T02:39:41.826Z'
+        fillType: maker
+        order_id: 06b9d509-965c-4788-b317-0e5ca11d56fb
+        price: 47000
+        side: buy
+        size: 10
+        symbol: PI_XBTUSD
+    FlexAccountBalance:
+      type: object
+      properties:
+        currencies:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlexCurrencyBalance'
+        initialMargin:
+          type: number
+          description: The total initial margin for the multi-collateral account in
+            USD.
+        initialMarginWithOrders:
+          type: number
+          description: 'The total initial margin of open positions without the margin
+            held by open orders for
+
+            the multi-collateral account in USD.'
+        maintenanceMargin:
+          type: number
+          description: The total maintenance margin for the multi-collateral account
+            in USD.
+        balanceValue:
+          type: number
+          description: The total balance value for the multi-collateral account in
+            USD.
+        portfolioValue:
+          type: number
+          description: The total value of the portfolio in USD (Balance Value + Total
+            Unrealised Profit/Loss).
+        collateralValue:
+          type: number
+          description: The USD value of balances in account usable for margin [(Balance
+            Value * (1-Haircut)].
+        pnl:
+          type: number
+          description: The unrealised pnl for the multi-collateral account.
+        unrealizedFunding:
+          type: number
+          description: The total unrealised funding for the multi-collateral account
+            in USD.
+        totalUnrealized:
+          type: number
+          description: 'Total unrealised Profit/Loss and unrealised funding of open
+            positions in USD `(Unrealised
+
+            Position(s) Profit/Loss + Unrealised Funding Rate Profit/Loss) * USD rate`.'
+        totalUnrealizedAsMargin:
+          type: number
+          description: 'Unrealised Profit/Loss and unrealised funding that is usable
+            as margin `(Unrealised
+
+            Profit/Loss + Unrealised Funding Rate) * Haircut - Conversion Fee`.'
+        availableMargin:
+          type: number
+          description: 'Account-wide margin available to create new orders (Margin
+            Equity - Total Initial
+
+            Margin).'
+        marginEquity:
+          type: number
+          description: 'The Balance Value multiplied by the dollar rate and with haircuts
+            applied to non-USD currencies, plus unrealised profit or loss as Margin.
+
+
+            `[Balance Value in USD * (1-Haircut)] + (Total Unrealised Profit/Loss
+            as Margin in USD)`'
+        portfolioMarginBreakdown:
+          $ref: _schemas.yml#/PortfolioMarginBreakdown
+          description: Breakdown of portfolio margin components.
+      required:
+      - currencies
+      - initialMargin
+      - initialMarginWithOrders
+      - maintenanceMargin
+      - balanceValue
+      - portfolioValue
+      - collateralValue
+      - pnl
+      - unrealizedFunding
+      - totalUnrealized
+      - totalUnrealizedAsMargin
+      - availableMargin
+      - marginEquity
+    FlexBalanceSummary:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - multiCollateralMarginAccount
+          description: The type of the account (always multiCollateralMarginAccount)
+        currencies:
+          $ref: '#/components/schemas/FlexCurrencies'
+          description: Structure with collateral currency details.
+        initialMargin:
+          type: number
+          description: Total initial margin held for open positions (USD).
+        initialMarginWithOrders:
+          type: number
+          description: Total initial margin held for open positions and open orders
+            (USD).
+        maintenanceMargin:
+          type: number
+          description: Total maintenance margin held for open positions (USD).
+        balanceValue:
+          type: number
+          description: USD value of all collateral in multi-collateral wallet.
+        portfolioValue:
+          type: number
+          description: Balance value plus unrealised PnL in USD.
+        collateralValue:
+          type: number
+          description: USD value of balances in account usable for margin (Balance
+            Value * Haircut).
+        pnl:
+          type: number
+          description: Unrealised PnL in USD.
+        unrealizedFunding:
+          type: number
+          description: Unrealised funding from funding rate (USD).
+        totalUnrealized:
+          type: number
+          description: Total USD value of unrealised funding and unrealised PnL.
+        totalUnrealizedAsMargin:
+          type: number
+          description: 'Unrealised pnl and unrealised funding that is usable as margin
+            `[(Unrealised Profit/Loss
+
+            + Unrealised Funding Rate) * Haircut - Conversion Fee]`.'
+        availableMargin:
+          type: number
+          description: Margin Equity - Total Initial Margin.
+        marginEquity:
+          type: number
+          description: '`[Balance Value in USD * (1-Haircut)] + (Total Unrealised
+            Profit/Loss as Margin in USD)`'
+        portfolioMarginBreakdown:
+          $ref: _schemas.yml#/PortfolioMarginBreakdown
+          description: Breakdown of portfolio margin components.
+      required:
+      - currencies
+      - initialMargin
+      - initialMarginWithOrders
+      - maintenanceMargin
+      - balanceValue
+      - portfolioValue
+      - collateralValue
+      - pnl
+      - unrealizedFunding
+      - totalUnrealized
+      - totalUnrealizedAsMargin
+      - availableMargin
+      - marginEquity
+    FlexCurrencies:
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/FlexCurrencySummary'
+    FlexCurrencyBalance:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: The name of the currency.
+        quantity:
+          type: number
+          description: The amount of currency in the multi-collateral account.
+        value:
+          type: number
+          description: The value of the currency quantity.
+        collateral:
+          type: number
+          description: The collateral value of the currency quantity (value * haircut).
+        available:
+          type: number
+          description: The available currency (quantity - margin requirement)
+      required:
+      - currency
+      - quantity
+      - value
+      - collateral
+      - available
+    FlexCurrencySummary:
+      type: object
+      properties:
+        quantity:
+          type: number
+          description: Quantity of asset.
+        value:
+          type: number
+          description: USD value of asset.
+        collateral:
+          type: number
+          description: USD value of the asset usable for margin (Asset Value * Haircut).
+        available:
+          type: number
+          description: Margin (in base currency) available for trading.
+      required:
+      - quantity
+      - value
+      - collateral
+      - available
+    FutureAccountBalance:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the futures account as the account pair.
+        availableMargin:
+          type: number
+          description: The amount of currency in the holding account in the quote
+            currency of the name pair.
+      required:
+      - name
+      - availableMargin
+    HistoricalFundingRateJson:
+      type: object
+      properties:
+        fundingRate:
+          description: The absolute funding rate for the listed time period
+          $ref: _schemas.yml#/DecimalDouble
+        relativeFundingRate:
+          description: The relative funding rate for the listed time period
+          $ref: _schemas.yml#/DecimalDouble
+        timestamp:
+          description: Start of the period to which the funding rate applies.
+          type: string
+          format: date-time
+      required:
+      - fundingRate
+      - relativeFundingRate
+      - timestamp
+    HistoryJson:
+      type: object
+      properties:
+        price:
+          type: number
+          description: 'For futures: The price of a fill
+
+
+            For indices: The calculated value'
+        side:
+          type: string
+          description: 'The classification of the taker side in the matched trade:
+            "buy" if the taker is a buyer, "sell" if the taker is a seller.'
+        size:
+          type: string
+          description: 'For futures: The size of a fill
+
+            For indices: Not returned because N/A'
+        time:
+          type: string
+          description: 'The date and time of a trade or an index computation
+
+
+            For futures: The date and time of a trade. Data is not aggregated
+
+            For indices: The date and time of an index computation. For real-time
+            indices, data is aggregated to the last computation of each full hour.
+            For reference rates, data is not aggregated'
+        trade_id:
+          type: integer
+          format: int32
+          description: 'For futures: A continuous index starting at 1 for the first
+            fill in a Futures contract maturity
+
+            For indices: Not returned because N/A'
+        type:
+          type: string
+          enum:
+          - fill
+          - liquidation
+          - assignment
+          - termination
+          - block
+          description: 'The classification of the matched trade in an orderbook:
+
+
+            - `fill` - it is a normal buyer and seller
+
+            - `liquidation` - it is a result of a user being liquidated from their
+            position
+
+            - `assignment` - the fill is the result of a users position being assigned
+            to a marketmaker
+
+            - `termination` - it is a result of a user being terminated
+
+            - `block` - it is an element of a block trade'
+        uid:
+          type: string
+        instrument_identification_type:
+          type: string
+        isin:
+          type: string
+        execution_venue:
+          type: string
+        price_notation:
+          type: string
+        price_currency:
+          type: string
+        notional_amount:
+          type: number
+        notional_currency:
+          type: string
+        publication_time:
+          type: string
+        publication_venue:
+          type: string
+        transaction_identification_code:
+          type: string
+        to_be_cleared:
+          type: boolean
+      required:
+      - time
+      - price
+    HoldingAccountBalance:
+      type: object
+      properties:
+        currency:
+          type: string
+          description: The currency of the account. All figures shown in this currency.
+        amount:
+          type: number
+          description: The amount of currency in the holding account.
+      required:
+      - currency
+      - amount
+    IndexTicker:
+      title: Index Ticker
+      type: object
+      properties:
+        symbol:
+          description: The symbol of the index.
+          type: string
+          example: rr_ethusd
+        last:
+          description: The last calculated value.
+          type: number
+        lastTime:
+          description: The date and time at which `last` was observed.
+          type: string
+          format: date-time
+      required:
+      - symbol
+      additionalProperties: false
+    Instrument:
+      type: object
+      properties:
+        category:
+          type: string
+          description: '''Category of the contract: "Layer 1", "Layer 2", "DeFi",
+            or "Privacy" (multi-collateral
+
+            contracts only).'''
+        contractSize:
+          type: number
+          description: The contract size of the Futures.
+        contractValueTradePrecision:
+          type: number
+          description: 'Trade precision for the contract (e.g. trade precision of
+            2 means trades are precise to
+
+            the hundredth decimal place 0.01).'
+        fundingRateCoefficient:
+          type: number
+        impactMidSize:
+          type: number
+          description: Amount of contract used to calculated the mid price for the
+            mark price.
+        isin:
+          type: string
+          description: International Securities Identification Number (ISIN)
+        lastTradingTime:
+          type: string
+          format: date-time
+        marginSchedules:
+          description: A map containing margin schedules by platform.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/MarginSchedule'
+        retailMarginLevels:
+          description: Margin levels for retail clients.
+          type: array
+          items:
+            $ref: '#/components/schemas/MarginLevel'
+        marginLevels:
+          description: Margin levels for professional clients.
+          type: array
+          items:
+            $ref: '#/components/schemas/MarginLevel'
+        maxPositionSize:
+          type: number
+          description: Maximum number of contracts that one can hold in a position
+        maxRelativeFundingRate:
+          type: number
+          description: 'Perpetuals only: the absolute value of the maximum permissible
+            funding rate'
+        openingDate:
+          format: date-time
+          type: string
+          description: When the contract was first available for trading
+        postOnly:
+          type: boolean
+          description: True if the instrument is in post-only mode, false otherwise.
+        feeScheduleUid:
+          type: string
+          description: Unique identifier of fee schedule associated with the instrument
+        symbol:
+          description: Market symbol.
+          type: string
+          example: PF_BTCUSD
+        pair:
+          description: Asset pair.
+          type: string
+          example: BTC:USD
+        base:
+          description: Base asset.
+          type: string
+          example: BTC
+        quote:
+          description: Quote asset.
+          type: string
+          example: USD
+        tags:
+          type: array
+          items:
+            type: string
+          description: Tag for the contract (currently does not return a value).
+        tickSize:
+          type: number
+          description: Tick size of the contract being traded.
+        tradeable:
+          type: boolean
+          description: True if the instrument can be traded, False otherwise.
+        type:
+          type: string
+          enum:
+          - flexible_futures
+          - futures_inverse
+          - futures_vanilla
+          description: 'The type of the instrument:
+
+
+            - `flexible_futures`
+
+            - `futures_inverse`
+
+            - `futures_vanilla`'
+        underlying:
+          type: string
+          description: The underlying of the Futures.
+        underlyingFuture:
+          type: string
+          description: 'For options: The underlying future of the option. Otherwise
+            null.'
+        tradfi:
+          description: True if this is a non-crypto market.
+          type: boolean
+        mtf:
+          type: boolean
+          description: True if currently has MTF status.
+      required:
+      - tradeable
+      - symbol
+      - tradfi
+    InstrumentStatus:
+      type: object
+      properties:
+        tradeable:
+          $ref: _schemas.yml#/MarketSymbol
+        experiencingDislocation:
+          type: boolean
+        priceDislocationDirection:
+          type:
+          - string
+          - 'null'
+          enum:
+          - ABOVE_UPPER_BOUND
+          - BELOW_LOWER_BOUND
+        experiencingExtremeVolatility:
+          type: boolean
+        extremeVolatilityInitialMarginMultiplier:
+          type: integer
+      required:
+      - tradeable
+      - experiencingDislocation
+      - priceDislocationDirection
+      - experiencingExtremeVolatility
+      - extremeVolatilityInitialMarginMultiplier
+    LeveragePreference:
+      type: object
+      properties:
+        symbol:
+          type: string
+        maxLeverage:
+          type: number
+      required:
+      - symbol
+      - maxLeverage
+    MarginAccount:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+          - marginAccount
+          description: The type of the account (always "marginAccount").
+        currency:
+          type: string
+          description: 'The currency of the account. All figures shown in `auxiliary`
+            and `marginRequirements`
+
+            are in this currency.'
+        balances:
+          $ref: '#/components/schemas/MarginAccountBalances'
+          description: A structure containing account balances.
+        auxiliary:
+          description: A structure containing auxiliary account information.
+          $ref: '#/components/schemas/Auxiliary'
+        marginRequirements:
+          $ref: '#/components/schemas/MarginRequirements'
+          description: A structure containing the account's margin requirements.
+        triggerEstimates:
+          $ref: '#/components/schemas/MarginRequirements'
+          description: A structure containing the account's margin trigger estimates.
+      required:
+      - type
+      - currency
+      - balances
+      - auxiliary
+      - marginRequirements
+      - triggerEstimates
+    MarginAccountBalances:
+      type: object
+      additionalProperties:
+        $ref: _schemas.yml#/DecimalString
+    MarginLevel:
+      type: object
+      properties:
+        contracts:
+          type:
+          - integer
+          - 'null'
+          format: int64
+          description: 'For futures: The lower limit of the number of contracts to
+            which this margin level applies
+
+
+            For indices: Not returned because N/A'
+        numNonContractUnits:
+          type:
+          - number
+          - 'null'
+          format: double
+          description: 'For futures: The lower limit of the number of non-contract
+            units (i.e. quote currency
+
+            units for linear futures) to which this margin level applies
+
+
+            For indices: Not returned because N/A.
+
+            '
+        initialMargin:
+          type: number
+          description: 'For futures: The initial margin requirement for this level
+
+
+            For indices: Not returned because N/A'
+        maintenanceMargin:
+          type: number
+          description: 'For futures: The maintenance margin requirement for this level
+
+
+            For indices: Not returned because N/A'
+      required:
+      - initialMargin
+      - maintenanceMargin
+    MarginRequirements:
+      type: object
+      properties:
+        im:
+          type: number
+          description: The initial margin requirement of the account.
+        mm:
+          type: number
+          description: The maintenance margin requirement of the account.
+        lt:
+          type: number
+          description: The liquidation threshold of the account.
+        tt:
+          type: number
+          description: The termination threshold of the account
+      required:
+      - im
+      - mm
+      - lt
+      - tt
+    MarginSchedule:
+      type: object
+      properties:
+        retail:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarginLevel'
+        professional:
+          type: array
+          items:
+            $ref: '#/components/schemas/MarginLevel'
+      required:
+      - retail
+      - professional
+    MarketTicker:
+      title: Market Ticker
+      type: object
+      required:
+      - symbol
+      - tag
+      - pair
+      - markPrice
+      - vol24h
+      - volumeQuote
+      - openInterest
+      - suspended
+      - indexPrice
+      - postOnly
+      - change24h
+      properties:
+        symbol:
+          $ref: _schemas.yml#/MarketSymbol
+        last:
+          description: The price of the last fill.
+          $ref: _schemas.yml#/DecimalDouble
+        lastTime:
+          description: The date and time at which `last` was observed.
+          type: string
+        lastSize:
+          description: The size of the last fill.
+          type: number
+        tag:
+          type: string
+          enum:
+          - perpetual
+          - month
+          - quarter
+          - semiannual
+          description: 'Expiry-related grouping.
+
+
+            Currently can be ''perpetual'', ''month'', ''quarter'', or ''semiannual''.
+            Other tags may be
+
+            added without notice.'
+        pair:
+          description: The currency pair of the instrument.
+          type: string
+          example: BTC:USD
+        markPrice:
+          description: The price to which Kraken Futures currently marks the Futures
+            for margining purposes.
+          type: number
+        bid:
+          description: The price of the current best bid.
+          type: number
+        bidSize:
+          description: The size of the current best bid.
+          type: number
+        ask:
+          description: The price of the current best ask.
+          type: number
+        askSize:
+          description: The size of the current best ask.
+          type: number
+        vol24h:
+          description: The sum of the sizes of all fills observed in the last 24 hours.
+          type: number
+        volumeQuote:
+          description: The sum of the `size * price` of all fills observed in the
+            last 24 hours.
+          type: number
+        openInterest:
+          description: The current open interest of the market.
+          type: number
+        open24h:
+          description: The price of the fill observed 24 hours ago.
+          type: number
+        high24h:
+          description: The highest fill price observed in the last 24 hours.
+          type: number
+        low24h:
+          description: The lowest fill price observed in the last 24 hours.
+          type: number
+        extrinsicValue:
+          type: number
+          description: "The mark price less the how much the option would be worth\
+            \ if exercised now, i.e.:\n  - For a call: `markPrice - ( max ( Underlying\
+            \ - StrikePrice , 0) )`\n  - For a put: `markPrice - ( max ( StrikePrice\
+            \ - Underlying , 0) )`\n\nOnly returned for options markets."
+        fundingRate:
+          description: 'The current absolute funding rate.
+
+
+            Only returned for perpetual markets.'
+          type: number
+        fundingRatePrediction:
+          description: 'The estimated next absolute funding rate.
+
+
+            Only returned for perpetual markets.'
+          type: number
+        suspended:
+          description: True if the market is suspended.
+          type: boolean
+        indexPrice:
+          type: number
+        postOnly:
+          type: boolean
+        change24h:
+          description: The 24h change in price (%).
+          type: number
+        greeks:
+          description: 'Current greeks.
+
+
+            Only returned for options markets.
+
+
+            Note: This is currently available exclusively in the Kraken Futures DEMO
+            environment.'
+          $ref: _schemas.yml#/OptionGreeks
+        isUnderlyingMarketClosed:
+          type: boolean
+          description: 'True if the underlying market/index is closed.
+
+
+            Only returned for tradfi markets.
+
+            '
+    NotificationJson:
+      type: object
+      properties:
+        effectiveTime:
+          type: string
+          description: The time that notification is taking effect.
+        note:
+          type: string
+          description: 'The notification note.
+
+
+            A short description about the specific notification.'
+        priority:
+          type: string
+          enum:
+          - low
+          - medium
+          - high
+          description: "The notification priorities:\n\n- `low`\n- `medium`\n- `high`\n\
+            \n If priority == \"high\" then it implies downtime will occur at `effective_time`\
+            \ when type == \"maintenance\"."
+        type:
+          type: string
+          enum:
+          - new_feature
+          - bug_fix
+          - settlement
+          - general
+          - maintenance
+          - market
+          description: 'The notification types:
+
+
+            - `market`
+
+            - `general`
+
+            - `new_feature`
+
+            - `bug_fix`
+
+            - `maintenance`
+
+            - `settlement`
+
+
+            If type == "maintenance" then it implies downtime will occur at `effective_time`
+            if priority == "high".'
+        expectedDowntimeMinutes:
+          type: integer
+          description: The expected downtime in minutes or absent if no downtime is
+            expected.
+      required:
+      - type
+      - priority
+      - effectiveTime
+      - note
+    OpenOrderJson:
+      type: object
+      properties:
+        order_id:
+          type: string
+          format: uuid
+          description: The unique identifier of the order.
+        cliOrdId:
+          type: string
+          description: 'The unique client order identifier. This field is returned
+            only if the order has a
+
+            client order ID.'
+        status:
+          type: string
+          enum:
+          - untouched
+          - partiallyFilled
+          description: 'The status of the order:
+
+
+            - `untouched` - the entire size of the order is unfilled
+
+            - `partiallyFilled` - the size of the order is partially but not entirely
+            filled'
+        side:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: The direction of the order.
+        orderType:
+          type: string
+          enum:
+          - lmt
+          - stop
+          - take_profit
+          description: 'The order type:
+
+
+            - `lmt` - limit order
+
+            - `stp` - stop order
+
+            - `take_profit` - take profit order'
+        symbol:
+          type: string
+          description: The symbol of the futures to which the order refers.
+        limitPrice:
+          type: number
+          description: The limit price associated with the order.
+        stopPrice:
+          type: number
+          description: 'If orderType is `stp`: The stop price associated with the
+            order
+
+
+            If orderType is `lmt`: Not returned because N/A'
+        filledSize:
+          type: number
+          description: The filled size associated with the order.
+        unfilledSize:
+          type: number
+          description: The unfilled size associated with the order.
+        reduceOnly:
+          type: boolean
+          description: Is the order a reduce only order or not.
+        triggerSignal:
+          description: The trigger signal for the stop or take profit order.
+          type: string
+          enum:
+          - mark
+          - last
+          - spot
+        lastUpdateTime:
+          description: The date and time the order was last updated.
+          type: string
+          format: date-time
+        receivedTime:
+          description: The date and time the order was received.
+          type: string
+          format: date-time
+      required:
+      - receivedTime
+      - lastUpdateTime
+      - status
+      - order_id
+      - orderType
+      - symbol
+      - side
+      - filledSize
+      - reduceOnly
+    OpenRfq:
+      type: object
+      properties:
+        rfqUid:
+          type: string
+          format: uuid
+          description: The unique identifier for this RFQ
+        expiry:
+          type: string
+          format: date-time
+          description: The time at which this RFQ expires
+        markPrice:
+          type: number
+          format: double
+          description: The reference price of the RFQ
+        legs:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenRfqPosition'
+          description: The positions associated with the RFQ
+      required:
+      - rfqUid
+      - expiry
+      - markPrice
+      - legs
+    OpenRfqOffer:
+      type: object
+      properties:
+        uid:
+          type: string
+          format: uuid
+          description: Unique identifier for the offer
+        rfqUid:
+          type: string
+          format: uuid
+          description: Unique identifier for the RFQ
+        placementDate:
+          type: string
+          format: date-time
+          description: The date and time when the offer was placed
+        lastUpdateDate:
+          type: string
+          format: date-time
+          description: The last update date and time of the offer
+        bid:
+          type: string
+          format: decimal
+          description: The bid price, if available
+        ask:
+          type: string
+          format: decimal
+          description: The ask price, if available
+      required:
+      - uid
+      - rfqUid
+      - placementDate
+      - lastUpdateDate
+    OpenRfqOffersResponse:
+      type: object
+      properties:
+        openOffers:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenRfqOffer'
+      required:
+      - openOffers
+    OpenRfqPosition:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: The symbol of the derivatives contract
+        size:
+          type: number
+          format: double
+          description: The size of the position
+        markPrice:
+          type: number
+          format: double
+          description: The current mark price of the market
+      required:
+      - symbol
+      - size
+      - markPrice
+    OpenRfqsResponse:
+      type: object
+      properties:
+        rfqs:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpenRfq'
+      required:
+      - rfqs
+    OrderBook:
+      type: object
+      properties:
+        asks:
+          description: The first value of the inner list is the ask price, the second
+            is the ask size. The outer list is sorted ascending by ask price.
+          type: array
+          items:
+            description: An array of two floats. The first value is the price. The
+              second value is the size.
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: number
+            example:
+            - 40178.0
+            - 5.0
+        bids:
+          description: The first value of the inner list is the bid price, the second
+            is the bid size. The outer list is sorted descending by bid price.
+          type: array
+          items:
+            description: An array of two floats. The first value is the price. The
+              second value is the size.
+            type: array
+            minItems: 2
+            maxItems: 2
+            items:
+              type: number
+            example:
+            - 40178.0
+            - 5.0
+      required:
+      - asks
+      - bids
+      example:
+        bids:
+        - - 40178
+          - 5
+        - - 40174
+          - 4.2
+        - - 40170
+          - 7.2
+        asks:
+        - - 40186
+          - 5.0183
+        - - 40190
+          - 0.4183
+    OrderError:
+      type: string
+      enum:
+      - MARKET_SUSPENDED
+      - MARKET_NOT_FOUND
+      - INVALID_PRICE
+      - INVALID_QUANTITY
+      - SMALL_ORDER_LIMIT_EXCEEDED
+      - INSUFFICIENT_MARGIN
+      - WOULD_CAUSE_LIQUIDATION
+      - CLIENT_ORDER_ID_IN_USE
+      - CLIENT_ORDER_ID_TOO_LONG
+      - MAX_POSITION_EXCEEDED
+      - PRICE_COLLAR
+      - PRICE_DISLOCATION
+      - EDIT_HAS_NO_EFFECT
+      - ORDER_FOR_CANCELLATION_NOT_FOUND
+      - ORDER_FOR_EDIT_NOT_FOUND
+      - ORDER_CANNOT_HAVE_TRIGGER_PRICE
+      - POST_WOULD_EXECUTE
+      - IOC_WOULD_NOT_EXECUTE
+      - WOULD_EXECUTE_SELF
+      - WOULD_NOT_REDUCE_POSITION
+      - REJECTED_AFTER_EXECUTION
+      - MARKET_IS_POST_ONLY
+      - ORDER_LIMIT_EXCEEDED
+      - FIXED_LEVERAGE_TOO_HIGH
+      - CANNOT_EDIT_TRIGGER_PRICE_OF_TRAILING_STOP
+      - CANNOT_EDIT_LIMIT_PRICE_OF_TRAILING_STOP
+      - TRAILING_STOP_ORDER_LIMIT_EXCEEDED
+      - TRAILING_STOP_PERCENT_DEVIATION_EXCEEDS_MAX_DECIMAL_PLACES
+      - TRAILING_STOP_QUOTE_DEVIATION_NOT_MULTIPLE_OF_TICK_SIZE
+      - TRAILING_STOP_MAX_DEVIATION_TOO_LARGE
+      - TRAILING_STOP_MAX_DEVIATION_TOO_SMALL
+      - INSUFFICIENT_HEADROOM_AROUND_CURRENT_PRICE_TO_EDIT_TRAILING_STOP
+      - NO_REFERENCE_PRICE_AVAILABLE_FOR_CALCULATING_TRAILING_STOP_TRIGGER_PRICE
+      - INSUFFICIENT_CLOSING_MARGIN
+      - LIMIT_PRICE_SET_AS_ABSOLUTE_AND_RELATIVE
+      - LIMIT_PRICE_OFFSET_VALUE_INVALID
+      - LIMIT_PRICE_OFFSET_UNIT_INVALID
+      - LIMIT_PRICE_OFFSET_MUST_HAVE_VALUE_AND_UNIT
+      - LIMIT_PRICE_OFFSET_QUOTE_CURRENCY_VALUE_MUST_BE_MULTIPLE_OF_TICK_SIZE
+      - LIMIT_PRICE_OFFSET_PERCENT_VALUE_TOO_MANY_DECIMAL_PLACES
+      - LIMIT_PRICE_OFFSET_TOO_HIGH
+      - LIMIT_PRICE_OFFSET_TOO_LOW
+    OrderEvent:
+      oneOf:
+      - $ref: '#/components/schemas/PlaceEvent'
+      - $ref: '#/components/schemas/CancelEvent'
+      - $ref: '#/components/schemas/EditEvent'
+      - $ref: '#/components/schemas/RejectEvent'
+      - $ref: '#/components/schemas/ExecuteEvent'
+      - $ref: '#/components/schemas/PlaceTriggerEvent'
+      - $ref: '#/components/schemas/CancelTriggerEvent'
+      - $ref: '#/components/schemas/RejectTriggerEvent'
+    OrderIdElement:
+      type: object
+      description: Provide either `order_id` or `cliOrdId`.
+      properties:
+        cliOrdId:
+          type:
+          - string
+          - 'null'
+          description: Unique client order identifier.
+          maxLength: 100
+        order_id:
+          type: string
+          description: Order ID.
+          format: uuid
+      required:
+      - order_id
+    OrderJson:
+      type: object
+      properties:
+        orderId:
+          type: string
+          description: The UID associated with the order.
+        cliOrdId:
+          type:
+          - string
+          - 'null'
+          description: The client order id or null if order does not have one.
+        type:
+          type: string
+          enum:
+          - lmt
+          - ioc
+          - post
+          - liquidation
+          - assignment
+          - stp
+          - unwind
+          - block
+          - fok
+          description: The order type
+        symbol:
+          type: string
+          description: The symbol of the Futures.
+        side:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: The side associated with the order
+        quantity:
+          type: number
+          description: The quantity (size) associated with the order.
+        filled:
+          type: number
+          description: The total amount of the order that has been filled.
+        limitPrice:
+          type: number
+          description: The limit price associated with a limit order.
+        reduceOnly:
+          type: boolean
+          description: Is the order a reduce only order or not.
+        timestamp:
+          type: string
+          description: The date and time the order was placed.
+        lastUpdateTimestamp:
+          type: string
+          description: The date and time the order was edited.
+      required:
+      - orderId
+      - cliOrdId
+      - type
+      - symbol
+      - side
+      - quantity
+      - filled
+      - limitPrice
+      - reduceOnly
+      - timestamp
+      - lastUpdateTimestamp
+    OrderStatusDetailsJson:
+      type: object
+      properties:
+        order:
+          $ref: '#/components/schemas/CachedOrderJson'
+        status:
+          $ref: '#/components/schemas/OrderStatusJson'
+        updateReason:
+          oneOf:
+          - $ref: '#/components/schemas/OrderUpdateReason'
+          - type: 'null'
+        error:
+          oneOf:
+          - $ref: '#/components/schemas/OrderError'
+          - type: 'null'
+      required:
+      - order
+      - status
+      - updateReason
+      - error
+    OrderStatusJson:
+      type: string
+      enum:
+      - ENTERED_BOOK
+      - FULLY_EXECUTED
+      - REJECTED
+      - CANCELLED
+      - TRIGGER_PLACED
+      - TRIGGER_ACTIVATION_FAILURE
+    OrderTriggerJson:
+      type: object
+      properties:
+        uid:
+          type: string
+          description: The UID associated with the order.
+        clientId:
+          type:
+          - string
+          - 'null'
+          description: The client order id or null if order does not have one.
+        type:
+          type: string
+          enum:
+          - lmt
+          - ioc
+          - post
+          - liquidation
+          - assignment
+          - stp
+          - unwind
+          - fok
+          description: The order type
+        symbol:
+          type: string
+          description: The symbol of the Futures.
+        side:
+          type: string
+          enum:
+          - buy
+          - sell
+          description: The side associated with the order
+        quantity:
+          type:
+          - number
+          - 'null'
+          description: The quantity (size) associated with the order.
+        limitPrice:
+          type:
+          - number
+          - 'null'
+          description: The limit price associated with a limit order.
+        triggerPrice:
+          type:
+          - number
+          - 'null'
+        triggerSide:
+          type:
+          - string
+          - 'null'
+          enum:
+          - trigger_above
+          - trigger_below
+        triggerSignal:
+          type:
+          - string
+          - 'null'
+          enum:
+          - mark_price
+          - last_price
+          - spot_price
+        reduceOnly:
+          type: boolean
+          description: Is the order a reduce only order or not.
+        timestamp:
+          type: string
+          description: The date and time the order was placed.
+        lastUpdateTimestamp:
+          type: string
+          description: The date and time the order was edited.
+        startTime:
+          type:
+          - string
+          - 'null'
+      required:
+      - uid
+      - clientId
+      - type
+      - symbol
+      - side
+      - quantity
+      - limitPrice
+      - triggerPrice
+      - triggerSide
+      - triggerSignal
+      - reduceOnly
+      - timestamp
+      - lastUpdateTimestamp
+    OrderUpdateReason:
+      type: string
+      enum:
+      - LOADING_MARKET
+      - NEW_USER_ORDER
+      - LIQUIDATION_ORDER
+      - STOP_ORDER_TRIGGERED
+      - LIMIT_FROM_STOP
+      - PARTIAL_FILL
+      - FULL_FILL
+      - CANCELLED_BY_USER
+      - CONTRACT_EXPIRED
+      - NOT_ENOUGH_MARGIN
+      - MARKET_INACTIVE
+      - DEAD_MAN_SWITCH
+      - CANCELLED_BY_ADMIN
+      - POST_WOULD_EXECUTE_REASON
+      - IOC_WOULD_NOT_EXECUTE_REASON
+      - WOULD_EXECUTE_SELF_REASON
+      - WOULD_NOT_REDUCE_POSITION
+      - EDITED_BY_USER
+      - ORDER_FOR_EDIT_NOT_FOUND_REASON
+      - EXPIRED
+      - TRAILING_STOP_PRICE_UPDATED
+      - TRAILING_STOP_CANCELLED_AND_REPLACED_BY_ADMIN
+    PlaceEvent:
+      type: object
+      properties:
+        type:
+          description: Always `PLACE`.
+          type: string
+          enum:
+          - PLACE
+        order:
+          description: The placed order.
+          $ref: '#/components/schemas/OrderJson'
+        reducedQuantity:
+          type:
+          - number
+          - 'null'
+          description: 'The amount of quantity that was removed before placement or
+            null if the order is not a
+
+            reduce only.'
+      required:
+      - type
+      - order
+      - reducedQuantity
+    PlaceTriggerEvent:
+      type: object
+      properties:
+        type:
+          description: Always `PLACE`.
+          type: string
+          enum:
+          - PLACE
+        orderTrigger:
+          $ref: '#/components/schemas/OrderTriggerJson'
+      required:
+      - type
+      - orderTrigger
+    PnlPreference:
+      type: object
+      properties:
+        symbol:
+          type: string
+        pnlCurrency:
+          type: string
+          example: USD
+      required:
+      - symbol
+      - pnlCurrency
+    RejectEvent:
+      type: object
+      properties:
+        type:
+          description: Always `REJECT`.
+          type: string
+          enum:
+          - REJECT
+        uid:
+          type: string
+          description: The UID associated with the order.
+        order:
+          oneOf:
+          - $ref: '#/components/schemas/OrderJson'
+            description: The rejected order.
+          - type: 'null'
+        reason:
+          type: string
+          enum:
+          - POST_WOULD_EXECUTE
+          - IOC_WOULD_NOT_EXECUTE
+          description: 'The rejection reason:
+
+
+            - `POST_WOULD_EXECUTE` - The post-only order would be filled upon placement,
+            thus is cancelled.
+
+            - `IOC_WOULD_NOT_EXECUTE` - The immediate-or-cancel order would not execute.'
+          x-codeReference: OrderError.toApiString()
+      required:
+      - type
+      - uid
+      - order
+      - reason
+    RejectTriggerEvent:
+      type: object
+      properties:
+        type:
+          description: Always `REJECT`.
+          type: string
+          enum:
+          - REJECT
+        uid:
+          type: string
+        orderTrigger:
+          oneOf:
+          - $ref: '#/components/schemas/OrderTriggerJson'
+          - type: 'null'
+        reason:
+          $ref: '#/components/schemas/OrderError'
+      required:
+      - type
+      - uid
+      - orderTrigger
+      - reason
+    ResultError:
+      type: object
+      properties:
+        result:
+          type: string
+          enum:
+          - error
+          example: error
+      required:
+      - result
+    ResultSuccess:
+      type: object
+      properties:
+        result:
+          type: string
+          enum:
+          - success
+          example: success
+      required:
+      - result
+    SelfTradeStrategy:
+      type: string
+      description: 'Self trade matching behaviour:
+
+
+        - `REJECT_TAKER` - default behaviour, rejects the taker order that would match
+        against a maker order from any sub-account
+
+        - `CANCEL_MAKER_SELF` - only cancels the maker order if it is from the same
+        account that sent the taker order
+
+        - `CANCEL_MAKER_CHILD` - only allows master to cancel its own maker orders
+        and orders from its sub-account
+
+        - `CANCEL_MAKER_ANY` - allows both master accounts and their subaccounts to
+        cancel maker orders
+
+        '
+      enum:
+      - REJECT_TAKER
+      - CANCEL_MAKER_SELF
+      - CANCEL_MAKER_CHILD
+      - CANCEL_MAKER_ANY
+    SelfTradeStrategyJson:
+      type: object
+      description: Self trade strategy response
+      required:
+      - strategy
+      properties:
+        strategy:
+          $ref: '#/components/schemas/SelfTradeStrategy'
+    SendOrderJson:
+      type: object
+      properties:
+        cliOrdId:
+          type: string
+          description: 'The unique client order identifier.
+
+
+            This field is returned only if the order has a client order ID.'
+        orderEvents:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderEvent'
+        order_id:
+          type: string
+          format: uuid
+          description: The unique identifier of the order
+        receivedTime:
+          description: The date and time the order was received.
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum:
+          - placed
+          - partiallyFilled
+          - filled
+          - cancelled
+          - edited
+          - marketSuspended
+          - marketInactive
+          - invalidPrice
+          - invalidSize
+          - tooManySmallOrders
+          - insufficientAvailableFunds
+          - wouldCauseLiquidation
+          - clientOrderIdAlreadyExist
+          - clientOrderIdTooBig
+          - maxPositionViolation
+          - outsidePriceCollar
+          - wouldIncreasePriceDislocation
+          - notFound
+          - orderForEditNotAStop
+          - orderForEditNotFound
+          - postWouldExecute
+          - iocWouldNotExecute
+          - selfFill
+          - wouldNotReducePosition
+          - marketIsPostOnly
+          - tooManyOrders
+          - fixedLeverageTooHigh
+          - clientOrderIdInvalid
+          - cannotEditTriggerPriceOfTrailingStop
+          - cannotEditLimitPriceOfTrailingStop
+          - wouldProcessAfterSpecifiedTime
+          description: 'The status of the order, either of:
+
+
+            - `placed` - the order was placed successfully
+
+            - `cancelled` - the order was cancelled successfully
+
+            - `invalidOrderType` - the order was not placed because orderType is invalid
+
+            - `invalidSide` - the order was not placed because side is invalid
+
+            - `invalidSize` - the order was not placed because size is invalid
+
+            - `invalidPrice` - the order was not placed because limitPrice and/or
+            stopPrice are invalid
+
+            - `insufficientAvailableFunds` - the order was not placed because available
+            funds are insufficient
+
+            - `selfFill` - the order was not placed because it would be filled against
+            an existing order belonging to the same account
+
+            - `tooManySmallOrders` - the order was not placed because the number of
+            small open orders would exceed the permissible limit
+
+            - `maxPositionViolation` - Order would cause you to exceed your maximum
+            position in this contract.
+
+            - `marketSuspended` - the order was not placed because the market is suspended
+
+            - `marketInactive` - the order was not placed because the market is inactive
+
+            - `clientOrderIdAlreadyExist` - the specified client id already exist
+
+            - `clientOrderIdTooLong` - the client id is longer than the permissible
+            limit
+
+            - `outsidePriceCollar` - the order would have executed outside of the
+            price collar for its order type
+
+            - `postWouldExecute` - the post-only order would be filled upon placement,
+            thus is cancelled
+
+            - `iocWouldNotExecute` - the immediate-or-cancel order would not execute.
+
+            - `wouldCauseLiquidation` - returned when a new order would fill at a
+            worse price than the mark price, causing the portfolio value to fall below
+            maintenance margin and triggering a liquidation.
+
+            - `wouldNotReducePosition` - the reduce only order would not reduce position.
+
+            - `wouldProcessAfterSpecifiedTime` - order would be processed after the
+            time specified in `processBefore` parameter.'
+      required:
+      - status
+    ServerTime:
+      type: object
+      properties:
+        serverTime:
+          description: Server time in Coordinated Universal Time (UTC)
+          type: string
+          format: date-time
+          example: '2020-08-27T17:03:33.196Z'
+      required:
+      - serverTime
+    SubAccount:
+      type: object
+      properties:
+        accountUid:
+          type: string
+          description: The account UID
+        email:
+          type: string
+          description: The email associated with the account
+        fullName:
+          type:
+          - string
+          - 'null'
+          description: The name of the account
+        holdingAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/HoldingAccountBalance'
+          description: 'Structure containing structures with holding accounts information
+            for a specific holding
+
+            account asset.'
+        futuresAccounts:
+          type: array
+          items:
+            $ref: '#/components/schemas/FutureAccountBalance'
+          description: 'Structure containing structures with single-collateral accounts
+            information for a
+
+            specific futures account asset.'
+        flexAccount:
+          type: object
+          $ref: '#/components/schemas/FlexAccountBalance'
+          description: Multi-collateral account structure.
+      required:
+      - accountUid
+      - email
+      - fullName
+      - holdingAccounts
+      - futuresAccounts
+      - flexAccount
+    SubaccountEnabledJson:
+      type: object
+      properties:
+        tradingEnabled:
+          type: boolean
+      required:
+      - tradingEnabled
+    SuccessResponse:
+      allOf:
+      - $ref: '#/components/schemas/ResultSuccess'
+      - $ref: '#/components/schemas/ServerTime'
+    TriggerOptions:
+      type: object
+      properties:
+        triggerPrice:
+          type: number
+        triggerSide:
+          type: string
+          enum:
+          - TRIGGER_ABOVE
+          - TRIGGER_BELOW
+        triggerSignal:
+          type: string
+          enum:
+          - MARK_PRICE
+          - LAST_PRICE
+          - SPOT_PRICE
+      required:
+      - triggerPrice
+      - triggerSide
+      - triggerSignal
+    UnwindQueueJson:
+      type: object
+      properties:
+        symbol:
+          type: string
+          description: The symbol of the futures to which the order refers.
+        percentile:
+          type: integer
+          format: int32
+          description: The percentile rank of which the trader's position is in the
+            unwind queue (20, 40, 80, or 100).
+      required:
+      - symbol
+      - percentile
+    WithdrawalResponse:
+      description: Withdrawal initiated
+      allOf:
+      - type: object
+        properties:
+          uid:
+            description: Withdrawal/transfer reference
+            type: string
+        required:
+        - uid
+      - $ref: '#/components/schemas/SuccessResponse'
+  parameters:
+    ProcessBefore:
+      description: The time before which the request should be processed, otherwise
+        it is rejected.
+      name: processBefore
+      in: query
+      required: false
+      schema:
+        type: string
+        format: date-time
+      example: 2023-11-08 19:56:35.441899+00:00
+  examples:
+    AccountsExample:
+      value:
+        accounts:
+          cash:
+            balances:
+              xbt: '141.31756797'
+              xrp: '52465.1254'
+            type: cashAccount
+          fi_xbtusd:
+            auxiliary:
+              af: 100.73891563
+              funding: 100.73891563
+              pnl: 12.42134766
+              pv: 153.73891563
+              usd: 0
+            balances:
+              FI_XBTUSD_171215: '50000'
+              FI_XBTUSD_180615: '-15000'
+              xbt: '141.31756797'
+              xrp: '0'
+            currency: xbt
+            marginRequirements:
+              im: 52.8
+              lt: 39.6
+              mm: 23.76
+              tt: 15.84
+            triggerEstimates:
+              im: 3110
+              lt: 2890
+              mm: 3000
+              tt: 2830
+            type: marginAccount
+          flex:
+            type: multiCollateralMarginAccount
+            currencies:
+              XBT:
+                quantity: 0.1185308247
+                value: 4998.721054420551
+                collateral: 4886.49976674881
+                available: 0.1185308247
+              USD:
+                quantity: 5000.0
+                value: 5000.0
+                collateral: 5000.0
+                available: 5000.0
+              EUR:
+                quantity: 4540.5837374453
+                value: 4999.137289089901
+                collateral: 4886.906656949836
+                available: 4540.5837374453
+            balanceValue: 34995.52
+            portfolioValue: 34995.52
+            collateralValue: 34122.66
+            initialMargin: 0.0
+            initialMarginWithOrders: 0.0
+            maintenanceMargin: 0.0
+            pnl: 0.0
+            unrealizedFunding: 0.0
+            totalUnrealized: 0.0
+            totalUnrealizedAsMargin: 0.0
+            marginEquity: 34122.66
+            availableMargin: 34122.66
+        result: success
+        serverTime: '2016-02-25T09:45:53.818Z'
+    BatchOrderExample:
+      value:
+        result: success
+        batchStatus:
+        - status: placed
+          order_tag: '1'
+          order_id: 022774bc-2c4a-4f26-9317-436c8d85746d
+          dateTimeReceived: '2019-09-05T16:41:35.173Z'
+          orderEvents:
+          - type: PLACE
+            order:
+              orderId: 022774bc-2c4a-4f26-9317-436c8d85746d
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 1000
+              filled: 0
+              limitPrice: 9400.0
+              reduceOnly: false
+              timestamp: '2019-09-05T16:41:35.173Z'
+              lastUpdateTimestamp: '2019-09-05T16:41:35.173Z'
+        - status: edited
+          order_id: 9c2cbcc8-14f6-42fe-a020-6e395babafd1
+          orderEvents:
+          - type: EDIT
+            old:
+              orderId: 9c2cbcc8-14f6-42fe-a020-6e395babafd1
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 102.0
+              filled: 0.0
+              limitPrice: 8500.0
+              reduceOnly: false
+              timestamp: '2019-09-04T11:45:48.884Z'
+              lastUpdateTimestamp: '2019-09-04T11:45:48.884Z'
+            new:
+              orderId: 9c2cbcc8-14f6-42fe-a020-6e395babafd1
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 1000
+              filled: 0.0
+              limitPrice: 9400.0
+              reduceOnly: false
+              timestamp: '2019-09-04T11:45:48.884Z'
+              lastUpdateTimestamp: '2019-09-05T16:41:40.996Z'
+        - status: cancelled
+          order_id: 566942c8-a3b5-4184-a451-622b09493129
+          orderEvents:
+          - type: CANCEL
+            uid: 566942c8-a3b5-4184-a451-622b09493129
+            order:
+              orderId: 566942c8-a3b5-4184-a451-622b09493129
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 100.0
+              filled: 0.0
+              limitPrice: 8500.0
+              reduceOnly: false
+              timestamp: '2019-09-02T12:54:08.005Z'
+              lastUpdateTimestamp: '2019-09-02T12:54:08.005Z'
+        serverTime: '2019-09-05T16:41:40.996Z'
+    CancelAllOrdersAfterCancelExample:
+      value:
+        result: success
+        status:
+          currentTime: '2018-06-19T16:51:23.839Z'
+          triggerTime: '0'
+        serverTime: '2018-06-19T16:51:23.839Z'
+    CancelAllOrdersAfterFailureExample:
+      value:
+        result: error
+        serverTime: '2016-02-25T09:45:53.818Z'
+        error: apiLimitExceeded
+    CancelAllOrdersAfterSuccessExample:
+      value:
+        result: success
+        status:
+          currentTime: '2018-06-19T16:51:23.839Z'
+          triggerTime: '2018-06-19T16:52:23.839Z'
+        serverTime: '2018-06-19T16:51:23.839Z'
+    CancelAllOrdersExample:
+      value:
+        result: success
+        cancelStatus:
+          receivedTime: '2019-08-01T15:57:37.518Z'
+          cancelOnly: all
+          status: cancelled
+          cancelledOrders:
+          - order_id: 6180adfa-e4b1-4a52-adac-ea5417620dbd
+          - order_id: 89e3edbe-d739-4c52-b866-6f5a8407ff6e
+          - order_id: 0cd37a77-1644-4960-a7fb-9a1f6e0e46f7
+          orderEvents:
+          - type: CANCEL
+            uid: 89e3edbe-d739-4c52-b866-6f5a8407ff6e
+            order:
+              orderId: 89e3edbe-d739-4c52-b866-6f5a8407ff6e
+              type: post
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 890
+              filled: 0
+              limitPrice: 10040
+              reduceOnly: false
+              timestamp: '2019-08-01T15:57:08.508Z'
+              lastUpdateTimestamp: '2019-08-01T15:57:08.508Z'
+          - type: CANCEL
+            uid: 0cd37a77-1644-4960-a7fb-9a1f6e0e46f7
+            order:
+              orderId: 0cd37a77-1644-4960-a7fb-9a1f6e0e46f7
+              type: lmt
+              symbol: PI_XBTUSD
+              side: sell
+              quantity: 900
+              filled: 0
+              limitPrice: 10145
+              reduceOnly: true
+              timestamp: '2019-08-01T15:57:14.003Z'
+              lastUpdateTimestamp: '2019-08-01T15:57:14.003Z'
+        serverTime: '2019-08-01T15:57:37.520Z'
+    CancelOrderExample:
+      value:
+        result: success
+        cancelStatus:
+          status: cancelled
+          order_id: cb4e34f6-4eb3-4d4b-9724-4c3035b99d47
+          receivedTime: '2020-07-22T13:26:20.806Z'
+          orderEvents:
+          - type: CANCEL
+            uid: cb4e34f6-4eb3-4d4b-9724-4c3035b99d47
+            order:
+              orderId: cb4e34f6-4eb3-4d4b-9724-4c3035b99d47
+              cliOrdId: '1234568'
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 5500
+              filled: 0
+              limitPrice: 8000
+              reduceOnly: false
+              timestamp: '2020-07-22T13:25:56.366Z'
+              lastUpdateTimestamp: '2020-07-22T13:25:56.366Z'
+        serverTime: '2020-07-22T13:26:20.806Z'
+    EditOrderExample:
+      value:
+        result: success
+        editStatus:
+          status: edited
+          orderId: 022774bc-2c4a-4f26-9317-436c8d85746d
+          receivedTime: '2019-09-05T16:47:47.521Z'
+          orderEvents:
+          - type: EDIT
+            old:
+              orderId: 022774bc-2c4a-4f26-9317-436c8d85746d
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 1000
+              filled: 0
+              limitPrice: 9400.0
+              reduceOnly: false
+              timestamp: '2019-09-05T16:41:35.173Z'
+              lastUpdateTimestamp: '2019-09-05T16:41:35.173Z'
+            new:
+              orderId: 022774bc-2c4a-4f26-9317-436c8d85746d
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 1501
+              filled: 0
+              limitPrice: 7200
+              reduceOnly: false
+              timestamp: '2019-09-05T16:41:35.173Z'
+              lastUpdateTimestamp: '2019-09-05T16:47:47.519Z'
+        serverTime: '2019-09-05T16:47:47.521Z'
+    ExecutedOrderExample:
+      value:
+        result: success
+        sendStatus:
+          order_id: 61ca5732-3478-42fe-8362-abbfd9465294
+          status: placed
+          receivedTime: '2019-12-11T17:17:33.888Z'
+          orderEvents:
+          - type: EXECUTION
+            executionId: e1ec9f63-2338-4c44-b40a-43486c6732d7
+            price: 7244.5
+            amount: 10
+            orderPriorExecution:
+              orderId: 61ca5732-3478-42fe-8362-abbfd9465294
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 10
+              filled: 0
+              limitPrice: 7500
+              reduceOnly: false
+              timestamp: '2019-12-11T17:17:33.888Z'
+              lastUpdateTimestamp: '2019-12-11T17:17:33.888Z'
+        serverTime: '2019-12-11T17:17:33.888Z'
+    FeeSchedulesExample:
+      value:
+        result: success
+        serverTime: '2022-03-31T20:38:53.677Z'
+        feeSchedules:
+        - uid: 7fc4d7c0-464f-4029-a9bb-55856d0c5247
+          name: PGTMainFees
+          tiers:
+          - makerFee: 0.02
+            takerFee: 0.05
+            usdVolume: 0.0
+          - makerFee: 0.015
+            takerFee: 0.04
+            usdVolume: 100000.0
+          - makerFee: 0.0125
+            takerFee: 0.03
+            usdVolume: 1000000.0
+          - makerFee: 0.01
+            takerFee: 0.025
+            usdVolume: 5000000.0
+          - makerFee: 0.0075
+            takerFee: 0.02
+            usdVolume: 10000000.0
+          - makerFee: 0.005
+            takerFee: 0.015
+            usdVolume: 20000000.0
+          - makerFee: 0.0025
+            takerFee: 0.0125
+            usdVolume: 50000000.0
+          - makerFee: 0.0
+            takerFee: 0.01
+            usdVolume: 100000000.0
+        - uid: d46c2190-81e3-4370-a333-424f24387829
+          name: mainfees
+          tiers:
+          - makerFee: 0.02
+            takerFee: 0.05
+            usdVolume: 0.0
+          - makerFee: 0.015
+            takerFee: 0.04
+            usdVolume: 100000.0
+          - makerFee: 0.0125
+            takerFee: 0.03
+            usdVolume: 1000000.0
+          - makerFee: 0.01
+            takerFee: 0.025
+            usdVolume: 5000000.0
+          - makerFee: 0.0075
+            takerFee: 0.02
+            usdVolume: 10000000.0
+          - makerFee: 0.005
+            takerFee: 0.015
+            usdVolume: 20000000.0
+          - makerFee: 0.0025
+            takerFee: 0.0125
+            usdVolume: 50000000.0
+          - makerFee: 0.0
+            takerFee: 0.01
+            usdVolume: 100000000.0
+    FeeSchedulesValuesExample:
+      value:
+        result: success
+        serverTime: '2016-02-25T09:45:53.818Z'
+        volumesByFeeSchedule:
+          eef90775-995b-4596-9257-0917f6134766: 53823.0
+    FillsExample:
+      value:
+        result: success
+        fills:
+        - fill_id: 3d57ed09-fbd6-44f1-8e8b-b10e551c5e73
+          symbol: PI_XBTUSD
+          side: buy
+          order_id: 693af756-055e-47ef-99d5-bcf4c456ebc5
+          size: 5490
+          price: 9400
+          fillTime: '2020-07-22T13:37:27.077Z'
+          fillType: maker
+        - fill_id: 56b86ada-73b0-454d-a95a-e29e3e85b349
+          symbol: PI_XBTUSD
+          side: buy
+          order_id: 3f513c4c-683d-44ab-a73b-d296abbea201
+          size: 5000
+          price: 9456
+          fillTime: '2020-07-21T12:41:52.790Z'
+          fillType: taker
+        serverTime: '2020-07-22T13:44:24.311Z'
+    GetLeveragePreferencesExample:
+      value:
+        result: success
+        serverTime: '2022-06-28T15:01:12.762Z'
+        leveragePreferences:
+        - symbol: PF_XBTUSD
+          maxLeverage: 10.0
+    GetPnlPreferencesExample:
+      value:
+        result: success
+        serverTime: '2022-06-28T15:04:06.710Z'
+        preferences:
+        - symbol: PF_XBTUSD
+          pnlCurrency: BTC
+    HistoricalFundingRatesExample:
+      value:
+        result: success
+        serverTime: '2022-06-28T09:29:04.243Z'
+        rates:
+        - timestamp: '2022-06-28T00:00:00.000Z'
+          fundingRate: -8.15861558e-10
+          relativeFundingRate: -1.6898883333333e-05
+        - timestamp: '2022-06-28T04:00:00.000Z'
+          fundingRate: -2.6115278e-11
+          relativeFundingRate: -5.40935416667e-07
+        - timestamp: '2022-06-28T08:00:00.000Z'
+          fundingRate: -4.08356853e-10
+          relativeFundingRate: -8.521190625e-06
+    InstrumentsExample:
+      value:
+        instruments:
+        - symbol: PI_XBTUSD
+          pair: XBT:USD
+          base: XBT
+          quote: USD
+          type: futures_inverse
+          underlying: rr_xbtusd
+          tickSize: 0.5
+          contractSize: 1
+          tradeable: true
+          impactMidSize: 1
+          maxPositionSize: 1000000
+          openingDate: '2022-01-01T00:00:00.000Z'
+          marginLevels:
+          - contracts: 0
+            initialMargin: 0.02
+            maintenanceMargin: 0.01
+          - contracts: 500000
+            initialMargin: 0.04
+            maintenanceMargin: 0.02
+          - contracts: 1000000
+            initialMargin: 0.06
+            maintenanceMargin: 0.03
+          - contracts: 3000000
+            initialMargin: 0.1
+            maintenanceMargin: 0.05
+          fundingRateCoefficient: 8
+          maxRelativeFundingRate: 0.001
+          isin: GB00J62YGL67
+          contractValueTradePrecision: 0
+          postOnly: false
+          feeScheduleUid: eef90775-995b-4596-9257-0917f6134766
+          retailMarginLevels:
+          - contracts: 0
+            initialMargin: 0.5
+            maintenanceMargin: 0.25
+          category: ''
+          tags: []
+          tradfi: false
+          mtf: true
+        - symbol: FI_XBTUSD_220930
+          pair: XBT:USD
+          base: XBT
+          quote: USD
+          type: futures_inverse
+          underlying: rr_xbtusd
+          lastTradingTime: '2022-09-30T15:00:00.000Z'
+          tickSize: 0.5
+          contractSize: 1
+          tradeable: true
+          impactMidSize: 1
+          maxPositionSize: 1000000
+          openingDate: '2022-01-01T00:00:00.000Z'
+          marginLevels:
+          - contracts: 0
+            initialMargin: 0.02
+            maintenanceMargin: 0.01
+          - contracts: 500000
+            initialMargin: 0.04
+            maintenanceMargin: 0.02
+          - contracts: 1000000
+            initialMargin: 0.06
+            maintenanceMargin: 0.03
+          - contracts: 3000000
+            initialMargin: 0.1
+            maintenanceMargin: 0.05
+          isin: GB00JVMLP260
+          contractValueTradePrecision: 0
+          postOnly: false
+          feeScheduleUid: eef90775-995b-4596-9257-0917f6134766
+          retailMarginLevels:
+          - contracts: 0
+            initialMargin: 0.5
+            maintenanceMargin: 0.25
+          category: ''
+          tags: []
+          tradfi: false
+          mtf: false
+        - symbol: PF_XBTUSD
+          pair: XBT:USD
+          base: XBT
+          quote: USD
+          type: flexible_futures
+          tickSize: 1
+          contractSize: 1
+          tradeable: true
+          impactMidSize: 1
+          maxPositionSize: 1000000
+          openingDate: '2022-01-01T00:00:00.000Z'
+          marginLevels:
+          - numNonContractUnits: 0
+            initialMargin: 0.02
+            maintenanceMargin: 0.01
+          - numNonContractUnits: 500000
+            initialMargin: 0.04
+            maintenanceMargin: 0.02
+          - numNonContractUnits: 2000000
+            initialMargin: 0.1
+            maintenanceMargin: 0.05
+          - numNonContractUnits: 5000000
+            initialMargin: 0.2
+            maintenanceMargin: 0.1
+          - numNonContractUnits: 10000000
+            initialMargin: 0.3
+            maintenanceMargin: 0.15
+          - numNonContractUnits: 30000000
+            initialMargin: 0.5
+            maintenanceMargin: 0.25
+          fundingRateCoefficient: 8
+          maxRelativeFundingRate: 0.001
+          contractValueTradePrecision: 4
+          feeScheduleUid: 5b755fea-c5b0-4307-a66e-b392cd5bd931
+          postOnly: false
+          retailMarginLevels:
+          - numNonContractUnits: 0
+            initialMargin: 0.02
+            maintenanceMargin: 0.01
+          - numNonContractUnits: 500000
+            initialMargin: 0.04
+            maintenanceMargin: 0.02
+          - numNonContractUnits: 2000000
+            initialMargin: 0.1
+            maintenanceMargin: 0.05
+          - numNonContractUnits: 5000000
+            initialMargin: 0.2
+            maintenanceMargin: 0.1
+          - numNonContractUnits: 10000000
+            initialMargin: 0.3
+            maintenanceMargin: 0.15
+          - numNonContractUnits: 30000000
+            initialMargin: 0.5
+            maintenanceMargin: 0.25
+          category: Layer 1
+          tags: []
+          tradfi: false
+          mtf: false
+        result: success
+        serverTime: '2022-06-28T09:29:04.243Z'
+    NotificationsFailureExample:
+      value:
+        result: error
+        serverTime: '2016-02-25T09:45:53.818Z'
+        error: apiLimitExceeded
+    NotificationsSuccessExample:
+      value:
+        result: success
+        notifications:
+        - type: general
+          priority: low
+          note: We've launched a new Telegram group.
+          effectiveTime: '2022-03-31T20:38:52.677Z'
+        - type: settlement
+          priority: medium
+          note: Week contracts with maturity 29/Jun/2018 expire and settle.
+          effectiveTime: '2018-06-29T15:00:00Z'
+        serverTime: '2018-06-29T15:22:05.187Z'
+    OpenOrdersExample:
+      value:
+        result: success
+        openOrders:
+        - order_id: 59302619-41d2-4f0b-941f-7e7914760ad3
+          symbol: PI_XBTUSD
+          side: sell
+          orderType: lmt
+          limitPrice: 10640
+          unfilledSize: 304
+          receivedTime: '2019-09-05T17:01:17.410Z'
+          status: untouched
+          filledSize: 0
+          reduceOnly: true
+          lastUpdateTime: '2019-09-05T17:01:17.410Z'
+        - order_id: 022774bc-2c4a-4f26-9317-436c8d85746d
+          symbol: PI_XBTUSD
+          side: buy
+          orderType: lmt
+          limitPrice: 7200
+          unfilledSize: 1501
+          receivedTime: '2019-09-05T16:41:35.173Z'
+          status: untouched
+          filledSize: 0
+          reduceOnly: false
+          lastUpdateTime: '2019-09-05T16:47:47.519Z'
+        - order_id: d08021f7-58cb-4f2c-9c86-da4c60de46bb
+          symbol: PI_XBTUSD
+          side: sell
+          orderType: lmt
+          limitPrice: 10640
+          unfilledSize: 10000
+          receivedTime: '2019-09-05T16:38:43.651Z'
+          status: untouched
+          filledSize: 0
+          reduceOnly: true
+          lastUpdateTime: '2019-09-05T16:38:43.651Z'
+        - order_id: 179f9af8-e45e-469d-b3e9-2fd4675cb7d0
+          symbol: PI_XBTUSD
+          side: buy
+          orderType: lmt
+          limitPrice: 9400
+          unfilledSize: 10000
+          receivedTime: '2019-09-05T16:33:50.734Z'
+          status: untouched
+          filledSize: 0
+          reduceOnly: false
+          lastUpdateTime: '2019-09-05T16:33:50.734Z'
+        - order_id: 9c2cbcc8-14f6-42fe-a020-6e395babafd1
+          symbol: PI_XBTUSD
+          side: buy
+          orderType: lmt
+          limitPrice: 9400
+          unfilledSize: 1000
+          receivedTime: '2019-09-04T11:45:48.884Z'
+          status: untouched
+          filledSize: 0
+          reduceOnly: false
+          lastUpdateTime: '2019-09-05T16:41:40.996Z'
+        - order_id: 3deea5c8-0274-4d33-988c-9e5a3895ccf8
+          symbol: PI_XBTUSD
+          side: buy
+          orderType: lmt
+          limitPrice: 8500
+          unfilledSize: 102
+          receivedTime: '2019-09-03T12:52:17.945Z'
+          status: untouched
+          filledSize: 0
+          reduceOnly: false
+          lastUpdateTime: '2019-09-03T12:52:17.945Z'
+        - order_id: fcbb1459-6ed2-4b3c-a58c-67c4df7412cf
+          symbol: PI_XBTUSD
+          side: buy
+          orderType: lmt
+          limitPrice: 7200
+          unfilledSize: 1501
+          receivedTime: '2019-09-02T12:54:34.347Z'
+          status: untouched
+          filledSize: 0
+          reduceOnly: false
+          lastUpdateTime: '2019-09-02T12:54:34.347Z'
+        serverTime: '2019-09-05T17:08:18.138Z'
+    OpenPositionsFailureExample:
+      value:
+        result: error
+        serverTime: '2016-02-25T09:45:53.818Z'
+        error: apiLimitExceeded
+    OpenPositionsSuccessExample:
+      value:
+        result: success
+        openPositions:
+        - side: short
+          symbol: PI_XBTUSD
+          price: 9392.749993345933
+          fillTime: '2020-07-22T14:39:12.376Z'
+          size: 10000
+          unrealizedFunding: 1.045432180096817e-05
+        - side: long
+          symbol: FI_XBTUSD_201225
+          price: 9399.749966754434
+          fillTime: '2020-07-22T14:39:12.376Z'
+          size: 20000
+        - side: long
+          symbol: PF_DEFIUSD
+          price: 570.0
+          fillTime: '2022-04-20T19:15:25.438Z'
+          size: 1
+          unrealizedFunding: -0.0073428045972263895
+          pnlCurrency: BTC
+          maxFixedLeverage: 5.0
+        serverTime: '2020-07-22T14:39:12.376Z'
+    PlacedOrderExample:
+      value:
+        result: success
+        sendStatus:
+          order_id: 179f9af8-e45e-469d-b3e9-2fd4675cb7d0
+          status: placed
+          receivedTime: '2019-09-05T16:33:50.734Z'
+          orderEvents:
+          - type: PLACE
+            order:
+              orderId: 179f9af8-e45e-469d-b3e9-2fd4675cb7d0
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 10000
+              filled: 0
+              limitPrice: 9400
+              reduceOnly: false
+              timestamp: '2019-09-05T16:33:50.734Z'
+              lastUpdateTimestamp: '2019-09-05T16:33:50.734Z'
+        serverTime: '2019-09-05T16:33:50.734Z'
+    RejectedOrderExample:
+      value:
+        result: success
+        sendStatus:
+          order_id: 614a5298-0071-450f-83c6-0617ce8c6bc4
+          status: iocWouldNotExecute
+          receivedTime: '2019-09-05T16:32:54.076Z'
+          orderEvents:
+          - type: REJECT
+            uid: 614a5298-0071-450f-83c6-0617ce8c6bc4
+            reason: IOC_WOULD_NOT_EXECUTE
+            order:
+              orderId: 614a5298-0071-450f-83c6-0617ce8c6bc4
+              type: lmt
+              symbol: PI_XBTUSD
+              side: buy
+              quantity: 10000
+              filled: 0
+              limitPrice: 9400
+              reduceOnly: true
+              timestamp: '2019-09-05T16:32:54.076Z'
+              lastUpdateTimestamp: '2019-09-05T16:32:54.076Z'
+        serverTime: '2019-09-05T16:32:54.077Z'
+    SubaccountsWithFlexExample:
+      value:
+        result: success
+        serverTime: '2022-03-31T20:38:53.677Z'
+        masterAccountUid: ba598ca1-65c1-4f48-927d-0e2b647d627a
+        subaccounts:
+        - holdingAccounts:
+          - currency: gbp
+            amount: 0
+          - currency: bch
+            amount: 4.0e-05
+          - currency: xrp
+            amount: 13662.85078
+          - currency: usd
+            amount: 0
+          - currency: eth
+            amount: 3.0000485057
+          - currency: usdt
+            amount: 0
+          - currency: ltc
+            amount: 2.0e-05
+          - currency: usdc
+            amount: 0
+          - currency: xbt
+            amount: 3.46e-09
+          futuresAccounts:
+          - name: f-xrp:usd
+            availableMargin: 16187.33210488726
+          - name: f-eth:usd
+            availableMargin: 67.59768318324302
+          - name: f-xbt:usd
+            availableMargin: -0.0009056832839642471
+          - name: f-ltc:usd
+            availableMargin: 67.51126059691163
+          - name: f-xrp:xbt
+            availableMargin: 2.34e-09
+          - name: f-bch:usd
+            availableMargin: 47.151615710695495
+          flexAccount:
+            currencies:
+            - currency: eth
+              quantity: 0.5
+              value: 1646.575
+              collateral: 1543.91104875
+              available: 0.49999966035931903
+            - currency: usdt
+              quantity: 0
+              value: 0
+              collateral: 0
+              available: 0
+            - currency: gbp
+              quantity: 0
+              value: 0
+              collateral: 0
+              available: 0
+            - currency: xbt
+              quantity: 0
+              value: 0
+              collateral: 0
+              available: 0
+            - currency: usdc
+              quantity: 0
+              value: 0
+              collateral: 0
+              available: 0
+            - currency: usd
+              quantity: 0
+              value: 0
+              collateral: 0
+              available: 0
+            initialMargin: 0
+            initialMarginWithOrders: 0
+            maintenanceMargin: 0
+            balanceValue: 1646.58
+            portfolioValue: 1646.58
+            collateralValue: 1543.91
+            pnl: 0
+            unrealizedFunding: 0
+            totalUnrealized: 0
+            totalUnrealizedAsMargin: 0
+            availableMargin: 1543.91
+            marginEquity: 1543.91
+          fullName: fullname redacted
+          email: email redacted
+          accountUid: 7f5c528e-2285-45f0-95f5-83d53d4bfcd2
+    SuccessExample:
+      value:
+        result: success
+        serverTime: '2022-06-28T14:48:58.711Z'
+    TickerExample:
+      value:
+        result: success
+        ticker:
+          tag: perpetual
+          pair: XBT:USD
+          symbol: pi_xbtusd
+          markPrice: 30209.9
+          bid: 8634
+          bidSize: 1000
+          ask: 49289
+          askSize: 139984
+          vol24h: 15304
+          volumeQuote: 40351.34
+          change24h: 1.9974017538161748
+          openInterest: 149655
+          open24h: 49289
+          indexPrice: 21087.8
+          last: 49289
+          lastTime: '2022-06-17T10:46:35.705Z'
+          lastSize: 100
+          suspended: false
+          fundingRate: 1.18588737106e-07
+          fundingRatePrediction: 1.1852486794e-07
+          postOnly: false
+        serverTime: '2022-06-17T11:00:31.335Z'
+    TickersExample:
+      value:
+        result: success
+        tickers:
+        - tag: perpetual
+          pair: XBT:USD
+          symbol: PI_XBTUSD
+          markPrice: 30209.9
+          bid: 8634
+          bidSize: 1000
+          ask: 49289
+          askSize: 139984
+          vol24h: 15304
+          volumeQuote: 7305.2
+          openInterest: 149655
+          open24h: 49289
+          indexPrice: 21087.8
+          last: 49289
+          lastTime: '2022-06-17T10:46:35.705Z'
+          lastSize: 100
+          suspended: false
+          fundingRate: 1.18588737106e-07
+          fundingRatePrediction: 1.1852486794e-07
+          postOnly: false
+          change24h: 1.9974017538161748
+        - tag: month
+          pair: XBT:USD
+          symbol: FI_XBTUSD_211231
+          markPrice: 20478.5
+          bid: 28002
+          bidSize: 900
+          vol24h: 100
+          volumeQuote: 843.9
+          openInterest: 10087
+          open24h: 28002
+          indexPrice: 21087.8
+          last: 28002
+          lastTime: '2022-06-17T10:45:57.177Z'
+          lastSize: 100
+          suspended: false
+          postOnly: false
+          change24h: 1.9974017538161748
+        - symbol: in_xbtusd
+          last: 21088
+          lastTime: '2022-06-17T11:00:30.000Z'
+        - symbol: rr_xbtusd
+          last: 20938
+          lastTime: '2022-06-16T15:00:00.000Z'
+        serverTime: '2022-06-17T11:00:31.335Z'
+    TransferSubaccountFailureExample:
+      value:
+        result: error
+        serverTime: '2016-02-25T09:45:53.818Z'
+        error: invalidUnit
+    UnwindQueueExample:
+      value:
+        result: success
+        serverTime: '2022-06-13T18:01:18.695Z'
+        queue:
+        - symbol: PF_GMTUSD
+          percentile: 100
+        - symbol: FI_ETHUSD_220624
+          percentile: 20
+        - symbol: PF_UNIUSD
+          percentile: 80
+    WithdrawalFailureExample:
+      value:
+        result: error
+        serverTime: '2019-05-15T09:24:16.968Z'
+        error: Unavailable

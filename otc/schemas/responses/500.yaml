@@ -1,0 +1,6 @@
+title: 500 Internal Server Error
+description: Internal error response
+type: object
+properties:
+  error:
+    $ref: '../objects/errors/error.yaml'

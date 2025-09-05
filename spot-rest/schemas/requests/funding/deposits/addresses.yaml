@@ -1,0 +1,36 @@
+required:
+  - nonce
+  - asset
+  - method
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  asset:
+    description: Asset being deposited
+    type: string
+  # aclass:
+  #   description: Asset class
+  #   type: string
+  #   default: currency
+  method:
+    description: Name of the deposit method
+    type: string
+  new:
+    description: Whether or not to generate a new address
+    type: boolean
+    default: false
+  amount:
+    description: Amount you wish to deposit (only required for `method=Bitcoin Lightning`)
+    oneOf:
+      - type: string
+        title: string
+      - type: integer
+        title: integer
+      - type: number
+        title: number
+example:
+                  nonce: 1695828271
+                  asset: "XBT"
+                  method: "Bitcoin"
+                  new: true

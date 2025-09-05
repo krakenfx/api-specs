@@ -1,0 +1,11 @@
+description: |
+  Comma delimited list of order flags
+
+    * &bull; `post` post-only order (available when ordertype = limit)
+    * &bull; `fcib` prefer fee in base currency (default if selling)
+    * &bull; `fciq` prefer fee in quote currency (default if buying, mutually exclusive with `fcib`)
+    * &bull; `nompp` disable [market price protection](https://support.kraken.com/hc/en-us/articles/201648183-Market-Price-Protection) for market orders
+    * &bull; `viqc`  order volume expressed in quote currency. This option is supported only for buy market orders. Also not available on margin orders.
+
+type: string
+example: "post"

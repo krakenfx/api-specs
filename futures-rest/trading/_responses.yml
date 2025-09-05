@@ -1,0 +1,54 @@
+Default:
+  description: OK
+  content:
+    application/json:
+      schema:
+        $ref: "_schemas.yml#/ResponseJson"
+Error:
+  description: Error
+  content:
+    application/json:
+      schema:
+        $ref: "_schemas.yml#/ErrorResponse"
+MissingPermission:
+  description: This admin account does not have the required permission.
+RateLimited:
+  x-summary: Rate limited
+  description: |
+    Rate limit exceeded.
+
+    Wait for your account's rate limiter bucket to refill sufficiently before trying again.
+
+    - Error `code`: 10
+  content:
+    application/json:
+      schema:
+        allOf:
+          - type: object
+            properties:
+              status:
+                type: string
+                enum: [TOO_MANY_REQUESTS]
+            required:
+              - status
+          - $ref: "_schemas.yml#/ErrorResponse"
+RfaSubmitted:
+  description: Request for approval submitted
+Unauthenticated:
+  x-summary: Unauthenticated
+  description: |
+    Authentication details are missing or invalid.
+
+    - Error `code`: 18
+  content:
+    application/json:
+      schema:
+        allOf:
+          - type: object
+            properties:
+              status:
+                type: string
+                enum: [UNAUTHORIZED]
+            required:
+              - status
+          - $ref: "_schemas.yml#/ErrorResponse"

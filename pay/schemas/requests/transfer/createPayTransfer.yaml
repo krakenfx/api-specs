@@ -1,0 +1,29 @@
+type: object
+required:
+  - nonce
+  - amount
+  - asset
+  - external_id
+  - to
+properties:
+  nonce:
+    description: "Nonce used in construction of `API-Sign` header"
+    type: string
+  amount:
+    description: "The amount to be transferred, denominated in `asset`."
+    oneOf:
+      - type: string
+      - type: integer
+      - type: number
+  asset:
+    description: "The name of the asset to be transferred. It is assumed that this is always a \"currency\" asset."
+    type: string
+  # external_id:
+  $ref: "../../../partials/properties/external_id.yaml"
+  note:
+    description: An optional note which will be viewable by both the sender and recipient.
+    nullable: true
+    type: string
+  to:
+    description: The kraktag to send the transfer to
+    type: string

@@ -1,0 +1,37 @@
+type: object
+required:
+  - error
+properties:
+  error:
+    items:
+      description: General API error.
+      properties:
+        errorClass:
+          type: string
+        errorMessage:
+          nullable: true
+          type: string
+        severity:
+          description: API error severity.
+          enum:
+            - E
+            - W
+          type: string
+        type:
+          type: string
+      required:
+        - errorClass
+        - severity
+        - type
+      type: object
+    type: array
+  result:
+    description: Contains the information about the pending payment that can be shown to the sender.
+    nullable: true
+    properties:
+      claim_link:
+        description: "The claim link, used to verify and claim the transfer."
+        type: string
+    required:
+      - claim_link
+    type: object

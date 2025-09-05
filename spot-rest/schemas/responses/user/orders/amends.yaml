@@ -1,0 +1,53 @@
+  type: object
+  properties:
+    result:
+      type: object
+      description: The amend transaction history.
+      title: Amend transactions.
+      properties:
+        count:
+          type: integer
+          description: The total count of new and amend transactions (i.e. includes the original order).
+        amends:
+          type: array
+          items:
+            type: object
+            properties:
+              amend_id:
+                description: Kraken amend identifier
+                type: string
+              amend_type:
+                description: |
+                  The type of amend transaction:
+                    * &bull; `original`: original order values on order entry.
+                    * &bull; `user`: user requested amendment.
+                    * &bull; `restated`: engine order maintenance amendment.
+                type: string
+                enum:
+                - original
+                - user
+                - restated
+              order_qty:
+                description: Order quantity in terms of the base asset.
+                type: string
+              display_qty:
+                description: The quantity show in the book for iceberg orders.
+                type: string
+              remaining_qty:
+                description: Remaining un-traded quantity on the order.
+                type: string
+              limit_price:
+                description: The limit price restriction on the order.
+                type: string
+              trigger_price:
+                description: The trigger price on trigger order types.
+                type: string
+              reason:
+                description: Description of the reason for this amend.
+                type: string          
+              post_only:
+                description: Indicates if the transaction was restricted from taking liquidity.
+                type: boolean          
+              timestamp:
+                description: The UNIX timestamp for the amend transaction.
+                type: integer          

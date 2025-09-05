@@ -1,0 +1,13 @@
+type: object
+required:
+  - days
+  - percentage
+properties:
+  days:
+    description:  Days the funds are locked.
+    type: number
+  percentage:
+    description: Percentage of the funds that are locked (0 - 100)
+    type: number
+    minimum: 0
+    maximum: 100

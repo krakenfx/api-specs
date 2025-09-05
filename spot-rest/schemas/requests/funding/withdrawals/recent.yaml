@@ -1,0 +1,42 @@
+title: Get Status of Recent Withdrawals Request Body
+required:
+  - nonce
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  asset:
+    description: Filter for specific asset being withdrawn
+    type: string
+  aclass:
+    description: Filter for specific asset class being withdrawn
+    type: string
+    enum:
+      - currency
+      - tokenized_asset
+    default: currency
+  method:
+    description: Filter for specific name of withdrawal method
+    type: string
+  start:
+    description: Start timestamp, withdrawals created strictly before will not be included in the response
+    type: string
+  end:
+    description: End timestamp, withdrawals created strictly after will be not be included in the response
+    type: string
+  cursor:
+    description: true/false to enable/disable paginated response (boolean) or cursor for next page of results (string), default false
+    anyOf:
+      - type: boolean
+        description: Enable/disable paginated response
+      - type: string
+        description: Cursor for next page of results
+  limit:
+    description: Number of results to include per page
+    type: integer
+    default: 500
+
+example:
+                  nonce: 1695828271
+                  asset: "XBT"
+                  method: "bitcoin"

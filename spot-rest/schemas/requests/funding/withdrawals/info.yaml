@@ -1,0 +1,27 @@
+required:
+  - nonce
+  - asset
+  - key
+  - amount
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  asset:
+    description: Asset being withdrawn
+    type: string
+  # aclass:
+  #   description: Asset class
+  #   type: string
+  #   default: currency
+  key:
+    description: Withdrawal key name, as set up on your account
+    type: string
+  amount:
+    description: Amount to be withdrawn
+    type: string
+example:
+                  nonce: 1695828271
+                  asset: "XBT"
+                  key: "btc_testnet"
+                  amount: "0.725"

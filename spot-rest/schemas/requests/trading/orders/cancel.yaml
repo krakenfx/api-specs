@@ -1,0 +1,21 @@
+title: Cancel Open Order Request Body
+required:
+  - nonce
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  txid:
+    description: Kraken order identifier (txid) or user reference (userref)
+    oneOf:
+      - type: string
+        title: string
+      - type: integer
+        title: integer
+  cl_ord_id:
+    description: An alphanumeric client order identifier which uniquely identifies an open order for each client.
+    type: string
+example:
+  nonce: 1695828490
+  pair: "XBTUSD"
+  txid: "OHYO67-6LP66-HMQ437"

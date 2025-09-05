@@ -1,0 +1,19 @@
+type: array
+items:
+  # title: Error
+  description: Kraken API error
+  type: string
+  example: "EGeneral:Invalid arguments"
+  # properties:
+  #   value:
+  #     type: object
+  #   field:
+  #     type: string
+  #   type:
+  #     type: string
+  #   msg:
+  #     type: string
+  #   severity:
+  #     type: string
+  #   errorClass:
+  #     type: string

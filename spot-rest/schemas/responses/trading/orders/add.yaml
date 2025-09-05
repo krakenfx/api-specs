@@ -1,0 +1,29 @@
+type: object
+properties:
+  result:
+    title: OrderAdded
+    type: object
+    properties:
+      descr:
+        description: Order description info
+        type: object
+        properties:
+          order:
+            description: Order description
+            type: string
+          close:
+            description: Conditional close order description, if applicable
+            type: string
+      txid:
+        description: |
+          Transaction IDs for order
+          <br><sup><sub>(if order was added successfully)</sup></sub>
+        type: array
+        items:
+          type: string
+  error:
+    type: array
+    items:
+      $ref: '../../../../schemas/objects/errors/error.yaml'
+example: { "error": [], "result": { "descr": { "order": "buy 1.45 XBTUSD @ limit 27500.0", }, "txid": ["OU22CG-KLAF2-FWUDD7"],},}
+

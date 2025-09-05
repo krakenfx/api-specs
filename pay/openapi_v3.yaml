@@ -1,0 +1,224 @@
+---
+openapi: 3.0.0
+
+servers:
+  - url: https://api.kraken.com/0
+    description: Production Server
+
+info:
+  title: REST API
+  version: 1.1.0
+  description: ""
+
+paths:
+  # Request
+  /private/Pay/request/create:
+    post:
+      tags:
+        - Request
+      summary: Create a payment request
+      description: |
+        Create a payment request
+
+        **API Key Permissions Required:** `Funds permissions - Deposit`
+      operationId: createPayRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/request/createPayRequest.yaml"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/request/createPayRequest.yaml"
+
+  /private/Pay/request/cancel:
+    post:
+      tags:
+        - Request
+      summary: Cancel a payment request
+      description: |
+        Cancel a payment request
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      operationId: cancelPayRequest
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/request/cancelPayRequest.yaml"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/request/cancelPayRequest.yaml"
+
+  # Transfer
+  /private/Pay/transfer/create:
+    post:
+      tags:
+        - Transfer
+      summary: Create a pay transfer
+      description: |
+        This method is asynchronous, your callback will be sent the `external_id` and the `status` when it reaches a final state.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Withdraw`
+      operationId: createPayTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/transfer/createPayTransfer.yaml"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/transfer/createPayTransfer.yaml"
+
+  /private/Pay/transfer/cancel:
+    post:
+      tags:
+        - Transfer
+        - Paylink
+      summary: Cancel a pay transfer or an unclaimed paylink
+      description: |
+        Cancel a pay transfer or an **unclaimed** paylink
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      operationId: cancelPayTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/transfer/cancelPayTransfer.yaml"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/transfer/cancelPayTransfer.yaml"
+
+  # Paylink
+  /private/Pay/paylink/create:
+    post:
+      tags:
+        - Paylink
+      summary: Create a paylink code
+      description: |
+        This method is asynchronous, it will not return the generated code. After calling, the `external_id` must then be used to query the code using `getPaylinkCode`.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Withdraw`
+      operationId: createPaylinkCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/paylink/createPaylinkCode.yaml"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/paylink/createPaylinkCode.yaml"
+
+  /private/Pay/paylink/get:
+    post:
+      tags:
+        - Paylink
+      summary: Get the generated paylink code
+      description: |
+        If the code has not been generated yet, this method will return an error indicating this.
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      operationId: getPaylinkCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/paylink/getPaylinkCode.yaml"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/paylink/getPaylinkCode.yaml"
+
+  /private/Pay/paylink/config:
+    post:
+      tags:
+        - Paylink
+      summary: Get paylink configuration
+      description: |
+        Get paylink configuration
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      operationId: getPaylinkConfig
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/paylink/getPaylinkConfig.yaml"
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/paylink/getPaylinkConfig.yaml"
+
+components:
+  securitySchemes:
+    API-Key:
+      type: apiKey
+      description: The "API-Key" header should contain your API key.
+      name: API-Key
+      in: header
+
+    API-Sign:
+      type: apiKey
+      description: Authenticated requests should be signed with the "API-Sign" header, using a signature generated with your private key, nonce, encoded payload, and URI path.
+      name: API-Sign
+      in: header
+  schemas:
+    KWebErrors:
+      type: array
+      items:
+        description: General API error.
+        type: object
+        properties:
+          severity:
+            description: API error severity.
+            type: string
+            enum:
+              - E
+              - W
+          errorClass:
+            type: string
+          type:
+            type: string
+          errorMessage:
+            nullable: true
+            type: string
+        required:
+          - errorClass
+          - severity
+          - type
+
+tags:
+  - name: Request
+  - name: Transfer
+  - name: Paylink
+
+security:
+  - API-Key: []
+    API-Sign: []

@@ -1,0 +1,16 @@
+title: depositAddress
+description: Deposit Address
+type: object
+properties:
+  address:
+    description: Deposit Address
+    type: string
+  expiretm:
+    description: Expiration time in unix timestamp, or 0 if not expiring
+    type: string
+  new:
+    description: Whether or not address has ever been used
+    type: boolean
+  tag:
+    description: Contains tags for [XRP](https://support.kraken.com/hc/en-us/articles/360000184443-Destination-Tag-for-Ripple-XRP-deposits) deposit addresses and memos for [STX](https://support.kraken.com/hc/en-us/articles/10902306995860-Memo-for-Stacks-STX-deposits), [XLM](https://support.kraken.com/hc/en-us/articles/360000184543-Memo-for-Stellar-Lumens-XLM-deposits), and [EOS](https://support.kraken.com/hc/en-us/articles/360001099203-Memo-for-EOS-deposits) deposit addresses
+    type: string

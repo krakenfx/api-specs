@@ -1,0 +1,20 @@
+error: []
+result:
+  currency: ZUSD
+  volume: '3015012348193.4134'
+  fees:
+    XETCXETH:
+      fee: '0.1000'
+      minfee: '0.1000'
+      maxfee: '0.2600'
+      nextfee:
+      nextvolume:
+      tiervolume: '10000000.0000'
+  fees_maker:
+    XETCXETH:
+      fee: '0.0000'
+      minfee: '0.0000'
+      maxfee: '0.1600'
+      nextfee:
+      nextvolume:
+      tiervolume: '10000000.0000'

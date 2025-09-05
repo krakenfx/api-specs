@@ -1,0 +1,13 @@
+type: object
+properties:
+  result:
+    type: object
+    additionalProperties:
+      x-additionalPropertiesName: pair
+      $ref: '../../../schemas/objects/public/spread.yaml'
+    properties:
+      last:
+        type: integer
+        description: ID to be used as since when polling for new spread data
+  error:
+    $ref: '../../../schemas/objects/errors/error.yaml'

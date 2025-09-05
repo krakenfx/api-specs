@@ -1,0 +1,52 @@
+error: []
+result:
+  trades:
+    TBGB6I-IMYKU-WWA2SK:
+      ordertxid: OJTVFU-UWBXK-7AC6ML
+      postxid: TKH1SE-X7IF5-CKI7JT
+      pair: XXBTZUSD
+      time: 1428084298.0986
+      type: sell
+      ordertype: limit
+      price: '9.25000'
+      cost: '0.92500'
+      fee: '0.00296'
+      vol: '0.10000000'
+      margin: '0.61667'
+      leverage: '0'
+      misc: ''
+      trade_id: 2560488
+      posstatus: closed
+      cprice: '9.2'
+      ccost: '0.9'
+      cfee: '0'
+      cvol: '0.10000000'
+      cmargin: '0.9'
+      net: "-0.0070"
+      trades:
+        - TSOROF-PFCET-MPJ7ZY
+    TNJAD2-A56J2-34HIEZ:
+      ordertxid: OJTVFU-UWBXK-7AC6ML
+      postxid: TLS1SE-X8IF4-DKI7GT
+      pair: XXBTZUSD
+      time: 1428084246.804
+      type: sell
+      ordertype: limit
+      price: '9.25000'
+      cost: '0.92500'
+      fee: '0.00296'
+      vol: '0.10000000'
+      margin: '0.61667'
+      leverage: '0'
+      misc: ''
+      trade_id: 2260198
+      posstatus: closed
+      cprice: '9.2'
+      ccost: '0.9'
+      cfee: '0'
+      cvol: '0.10000000'
+      cmargin: '0.9'
+      net: "-0.0070"
+      trades:
+        - TNGJFU-5CD67-ZV3AEO
+  count: 2

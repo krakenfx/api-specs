@@ -1,0 +1,9 @@
+# No request body required for getOtcPairs.
+title: Get OTC Pairs Request Body
+type: object
+properties: 
+    nonce:
+      $ref: "../../../partials/properties/nonce.yaml"
+additionalProperties: false
+required:
+  - nonce

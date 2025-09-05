@@ -1,0 +1,35 @@
+type: object
+required:
+  - error
+properties:
+  error:
+    items:
+      description: General API error.
+      properties:
+        errorClass:
+          type: string
+        errorMessage:
+          nullable: true
+          type: string
+        severity:
+          description: API error severity.
+          enum:
+            - E
+            - W
+          type: string
+        type:
+          type: string
+      required:
+        - errorClass
+        - severity
+        - type
+      type: object
+    type: array
+  result:
+    nullable: true
+    properties:
+      view_link:
+        description: "The view link, to be shared to the paying user outside of Kraken as part of a request paylink.\n\nOnly included if the request is not targeted to a specific user. If it is targeted, the request is sent to them directly, so there is no need for a view link."
+        nullable: true
+        type: string
+    type: object

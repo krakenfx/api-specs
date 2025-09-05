@@ -1,0 +1,17 @@
+title: SpreadData
+description: |
+  Array of spread entries
+  `[int <time>, string <bid>, string <ask>]`
+type: array
+items:
+  type: array
+  items:
+    oneOf:
+    - type: string
+      title: string
+    - type: integer
+      title: integer
+    example:
+    - 1548120550
+    - '3538.70000'
+    - '3541.50000'

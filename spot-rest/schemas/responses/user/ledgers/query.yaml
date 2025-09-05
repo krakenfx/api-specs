@@ -1,0 +1,9 @@
+type: object
+properties:
+  result:
+    type: object
+    additionalProperties:
+      x-additionalPropertiesName: ledger_id
+      $ref: '../../../../schemas/objects/user/ledgers/ledger.yaml'
+  error:
+      $ref: '../../../../schemas/objects/errors/error.yaml'

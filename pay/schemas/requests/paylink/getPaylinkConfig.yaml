@@ -1,0 +1,7 @@
+type: object
+required:
+  - nonce
+properties:
+  nonce:
+    description: "Nonce used in construction of `API-Sign` header"
+    type: string

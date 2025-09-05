@@ -1,0 +1,78 @@
+title: OpenOrder
+description: Open Order
+type: object
+properties:
+  refid:
+    description: Referral order transaction ID that created this order
+    type: string
+    nullable: true
+  userref:
+    description: Optional numeric, client identifier associated with one or more orders.
+    type: integer
+    nullable: true
+  cl_ord_id:
+    description: Optional alphanumeric, client identifier associated with the order.
+    type: string
+    nullable: true
+  status:
+    description: |
+      Status of order
+        * `pending` = order pending book entry
+        * `open` = open order
+        * `closed` = closed order
+        * `canceled` = order canceled
+        * `expired` = order expired
+    type: string
+    enum:
+    - pending
+        description: Asset pair
+        type: string
+      type:
+        description: Type of order (`buy` or `sell`)
+        type: string
+        enum:
+          - buy
+      ordertype:
+        $ref: '../../../../partials/properties/ordertype.yaml'
+      price:
+        description: |
+          Price:
+          * Limit price for `limit` and `iceberg` orders
+          * Trigger price for `stop-loss`, `stop-loss-limit`, `take-profit`, `take-profit-limit`, `trailing-stop` and `trailing-stop-limit` orders
+        type: string
+      price2:
+        description: |
+          Secondary Price:
+          * Limit price for `stop-loss-limit`, `take-profit-limit` and `trailing-stop-limit` orders
+        type: string
+      leverage:
+        description: Amount of leverage
+    type: string
+  trigger:
+    description: |
+      Price signal used to trigger `stop-loss`, `stop-loss-limit`, `take-profit`, `take-profit-limit`, `trailing-stop` and `trailing-stop-limit` orders.
+
+      Note, this `trigger` type will also apply to any associated conditional close orders.
+    type: string
+    enum:
+    - last
+    - index  
+    default: "last"
+  margin:
+    description: Indicates if the order is funded on margin.
+    type: boolean
+  sender_sub_id:
+    description: For institutional accounts, identifies underlying sub-account/trader for Self Trade Prevention (STP).
+    type: string
+    nullable: true
+  misc:
+    description: |
+      Comma delimited list of miscellaneous info
+        * `touched` triggered by touch price
+        * `liquidated` liquidation
+        * `partial` partial fill
+        * `amended` order parameters modified
+
+    type: string
+  oflags:
+    $ref: '../../../../partials/properties/oflags.yaml'

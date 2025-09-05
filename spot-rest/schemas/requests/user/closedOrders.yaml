@@ -1,0 +1,56 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Get Closed Orders Request Body
+      required:
+      - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../partials/properties/nonce.yaml'
+        trades:
+          description: Whether or not to include trades related to position in output
+          type: boolean
+          default: false
+        userref:
+          description: Restrict results to given user reference
+          type: integer
+          format: int32
+        cl_ord_id:
+          description: Restrict results to given client order id
+          type: string
+        start:
+          description: Starting unix timestamp or order tx ID of results (exclusive)
+          type: integer
+        end:
+          description: Ending unix timestamp or order tx ID of results (inclusive)
+          type: integer
+        ofs:
+          description: Result offset for pagination
+          type: integer
+        closetime:
+          description: Which time to use to search
+          type: string
+          enum:
+            - open
+            - close
+            - both
+          default: both
+        consolidate_taker:
+          description: Whether or not to consolidate trades by individual taker trades
+          type: boolean
+          default: true
+        without_count:
+          description: Whether or not to include page count in result (`true` is much faster for users with many closed orders)
+          type: boolean
+          default: false
+        rebase_multiplier:
+          $ref: '../../../partials/properties/rebase_multiplier.yaml'
+      example:
+          nonce: 1234567
+          trades: True
+          cl_ord_id: 9cc788d8-9c00-4b25-94d3-26d93603948d
+          start: 1695728276
+          end: 1695828276
+          closetime: "open"

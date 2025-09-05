@@ -1,0 +1,21 @@
+# $schema: "http://json-schema.org/draft-07/schema#"
+type: object
+description: Response schema for checking OTC client permissions
+properties:
+  result:
+    type: object
+    description: Contains the successful response data
+    properties:
+      permissions:
+        type: array
+        items:
+          type: string
+        description: OTC permissions assigned to the client.
+    required:
+      - permissions
+    additionalProperties: false
+  error:
+    $ref: '../../../schemas/objects/errors/error.yaml'
+required:
+  - error
+additionalProperties: false

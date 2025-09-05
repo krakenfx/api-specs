@@ -1,0 +1,9 @@
+- default:
+      {
+          "nonce": 123456789018,
+          "ordertype": "limit",
+          "type": "buy",
+          "volume": 1.25,
+          "pair": "XBTUSD",
+          "price": 27500
+      }

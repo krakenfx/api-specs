@@ -1,0 +1,25 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Query Orders Info Request Body
+      required:
+      - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../partials/properties/nonce.yaml'
+        trades:
+          description: Whether or not to include trades related to position in output
+          type: boolean
+          default: false
+        userref:
+          description: Restrict results to given user reference id
+          type: string
+        txid:
+          description: Comma delimited list of transaction IDs to query info about (20 maximum)
+          type: string
+      example:
+          nonce: 1234567
+          trades: True
+          userref: 12343533

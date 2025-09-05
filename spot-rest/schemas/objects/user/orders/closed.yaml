@@ -1,0 +1,159 @@
+title: txid
+description: Closed Order
+type: object
+properties:
+  refid:
+    description: Referral order transaction ID that created this order
+    type: string
+    nullable: true
+  userref:
+    description: Optional numeric, client identifier associated with one or more orders.
+    type: integer
+    nullable: true
+  cl_ord_id:
+    description: Optional alphanumeric, client identifier associated with the order.
+    type: string
+    nullable: true
+  status:
+    description: |
+      Status of order
+        * pending = order pending book entry
+        * open = open order
+        * closed = closed order
+        * canceled = order canceled
+        * expired = order expired
+    type: string
+    enum:
+    - pending
+    - open
+    - closed
+    - canceled
+    - expired
+  opentm:
+    description: Unix timestamp of when order was placed
+    type: number
+  starttm:
+    description: Unix timestamp of order start time (or 0 if not set)
+    type: number
+  expiretm:
+    description: Unix timestamp of order end time (or 0 if not set)
+    type: number
+  descr:
+    title: OrderDescription
+    description: Order description info
+    type: object
+    properties:
+      pair:
+        description: Asset pair
+        type: string
+      type:
+        description: Type of order (buy/sell)
+        type: string
+        enum:
+          - buy
+          - sell
+      ordertype:
+        description: |
+          Order type
+        type: string
+        enum:
+          - market
+          - limit
+          - iceberg
+          - stop-loss
+          - take-profit
+          - trailing-stop
+          - stop-loss-limit
+          - take-profit-limit
+          - trailing-stop-limit
+          - settle-position
+      price:
+        description: primary price
+        type: string
+      price2:
+        description: Secondary price
+        type: string
+      leverage:
+        description: Amount of leverage
+        type: string
+      order:
+        description: Order description
+        type: string
+      close:
+        description: Conditional close order description (if conditional close set)
+        type: string
+  vol:
+    description: Volume of order (base currency)
+    type: string
+  vol_exec:
+    description: Volume executed (base currency)
+    type: string
+  cost:
+    description: Total cost (quote currency unless)
+    type: string
+  fee:
+    description: Total fee (quote currency)
+    type: string
+  price:
+    description: Average price (quote currency)
+    type: string
+  stopprice:
+    description: Stop price (quote currency)
+    type: string
+  limitprice:
+    description: Triggered limit price (quote currency, when limit based order type triggered)
+    type: string
+  trigger:
+    description: |
+      Price signal used to trigger "stop-loss" "take-profit" "stop-loss-limit" "take-profit-limit" orders.
+        * `last` is the implied trigger if this field is not set.
+
+    type: string
+
+    enum:
+    - last
+    - index  
+
+    default: "last"
+  margin:
+    description: Indicates if the order is funded on margin.
+    type: boolean
+  misc:
+    description: |
+      Comma delimited list of miscellaneous info:
+        * `stopped` triggered by stop price
+        * `touched` triggered by touch price
+        * `liquidated` liquidation
+        * `partial` partial fill
+        * `amended` order parameters modified
+
+      
+    type: string
+  oflags:
+    description: |
+      Comma delimited list of order flags:
+        * `post` post-only order (available when ordertype = limit)
+        * `fcib` prefer fee in base currency (default if selling)
+        * `fciq` prefer fee in quote currency (default if buying, mutually exclusive with `fcib`)
+        * `nompp` disable [market price protection](https://support.kraken.com/hc/en-us/articles/201648183-Market-Price-Protection) for market orders
+        * `viqc`  order volumes expressed in quote currency.
+
+    type: string
+  trades:
+    description: List of trade IDs related to order (if trades info requested and data available)
+    type: array
+    items:
+      type: string
+  sender_sub_id:
+    description: For institutional accounts, identifies underlying sub-account/trader for Self Trade Prevention (STP).
+    type: string
+    nullable: true
+  closetm:
+        description: Unix timestamp of when order was closed
+        type: number
+  reason:
+        description: Additional info on status (if any)
+        type: string
+
+
+        

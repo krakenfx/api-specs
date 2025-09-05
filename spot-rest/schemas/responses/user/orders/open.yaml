@@ -1,0 +1,14 @@
+type: object
+properties:
+  result:
+    title: OpenOrders
+    description: Open Orders
+    type: object
+    properties:
+      open:
+        type: object
+        additionalProperties:
+          x-additionalPropertiesName: txid
+          $ref: '../../../../schemas/objects/user/orders/open.yaml'
+  error:
+      $ref: '../../../../schemas/objects/errors/error.yaml'
