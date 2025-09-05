@@ -1,0 +1,3675 @@
+---
+openapi: 3.0.0
+
+servers:
+  - url: https://api.kraken.com/0
+    description: Production Server
+
+info:
+  title: REST API
+  version: 1.1.0
+  description: ""
+
+paths:
+  /public/Time:
+    get:
+      tags:
+        - Market Data
+      summary: Get Server Time
+      description: |
+              Get the server's time.
+
+      operationId: getServerTime
+      security: []
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/public/time.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "unixtime": 1688669448,
+                        "rfc1123": "Thu, 06 Jul 23 18:50:48 +0000",
+                      },
+                  }
+                #$ref: './examples/responses/public/time.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /public/SystemStatus:
+    get:
+      tags:
+        - Market Data
+      summary: Get System Status
+      description: |
+                  Get the current system status or trading mode.
+
+      operationId: getSystemStatus
+      security: []
+      # requestBody:
+      #   description: blah
+      #   content:
+      responses:
+        "200":
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    properties:
+                      status:
+                        type: string
+                        enum: [online, maintenance, cancel_only, post_only]
+                        description: |
+                          Current system status:
+                          * `online`  Kraken is operating normally. All order types may be submitted and trades can occur.
+                          * `maintenance`  The exchange is offline. No new orders or cancellations may be submitted.
+                          * `cancel_only`  Resting (open) orders can be cancelled but no new orders may be submitted. No trades will occur.
+                          * `post_only`  Only post-only limit orders can be submitted. Existing orders may still be cancelled. No trades will occur.
+                      timestamp:
+                        type: string
+                        description: Current timestamp (RFC3339)
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      { "status": "online", "timestamp": "2023-07-06T18:52:00Z" },
+                  }
+
+
+  /public/Assets:
+    get:
+      tags:
+        - Market Data
+      summary: Get Asset Info
+      description: |
+              Get information about the assets that are available for deposit, withdrawal, trading and earn.
+
+      operationId: getAssetInfo
+      security: []
+      parameters:
+        - $ref: "./partials/parameters/query/asset.yaml"
+        - $ref: "./partials/parameters/query/aclass.yaml"
+      responses:
+        "200":
+          description: Asset info retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/public/assets/info.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "XXBT":
+                          {
+                            "aclass": "currency",
+                            "altname": "XBT",
+                            "decimals": 10,
+                            "display_decimals": 5,
+                            "collateral_value": 1,
+                            "status": "enabled",
+                          },
+                        "ZEUR":
+                          {
+                            "aclass": "currency",
+                            "altname": "EUR",
+                            "decimals": 4,
+                            "display_decimals": 2,
+                            "collateral_value": 1,
+                            "status": "enabled",
+                          },
+                        "ZUSD":
+                          {
+                            "aclass": "currency",
+                            "altname": "USD",
+                            "decimals": 4,
+                            "display_decimals": 2,
+                            "collateral_value": 1,
+                            "status": "enabled",
+                          },
+                      },
+                  }
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /public/AssetPairs:
+    get:
+      tags:
+        - Market Data
+      summary: Get Tradable Asset Pairs
+      description: |
+                Get tradable asset pairs
+
+      operationId: getTradableAssetPairs
+      security: []
+      parameters:
+        - in: query
+          name: pair
+          description: Asset pairs to get data for
+          schema:
+            type: string
+          example: BTC/USD,ETH/BTC
+        - in: query
+          name: aclass_base
+          schema:
+            type: string
+            enum:
+              - currency
+              - tokenized_asset
+            default: currency
+          description: |
+            Filters the asset class to retrieve (optional)
+
+              * `currency` = spot currency pairs.
+              * `tokenized_asset` = tokenized asset pairs, i.e. xstocks.
+        - in: query
+          name: info
+          schema:
+            type: string
+            enum:
+              - info
+              - leverage
+              - fees
+              - margin
+            default: info
+          description: |
+            Info to retrieve (optional)
+
+              * `info` = all info
+              * `leverage` = leverage info
+              * `fees` = fees schedule
+              * `margin` = margin info
+        - in: query
+          name: country_code
+          description: Filter for response to only include pairs available in the provided country/region.
+          schema:
+            type: ISO 3166-1 alpha-2
+          example: GB
+      responses:
+        "200":
+          description: Tradable asset pairs retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: Pair names and their info
+                    type: object
+                    additionalProperties:
+                      $ref: "./schemas/objects/public/assets/pairs.yaml"
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example:
+                  $ref: "./examples/responses/public/assets/pairs.yaml"
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /public/Ticker:
+    get:
+      summary: Get Ticker Information
+      description: |
+                    Get ticker information for all or requested markets. To clarify usage, note that 
+                    * Today's prices start at midnight UTC
+                    * Leaving the pair parameter blank will return tickers for all tradeable assets on Kraken
+      
+      tags:
+        - Market Data
+      operationId: getTickerInformation
+      security: []
+      parameters:
+        - $ref: "./partials/parameters/query/wildcard_pair.yaml"
+        # - name: asset_class
+        #   in: query
+        #   description: The asset_class is required on requests for tokenized assets, i.e. xstocks.
+        #   required: false
+        #   schema:
+        #     type: string
+        #     enum:
+        #       - tokenized_asset
+      responses:
+        "200":
+          description: Ticker info retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/public/ticker.yaml"
+
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /public/OHLC:
+    get:
+      summary: Get OHLC Data
+      description: |
+                Retrieve OHLC market data.
+                The last entry in the OHLC array is for the current, not-yet-committed timeframe, and will always be present, regardless of the value of `since`.
+                Returns up to 720 of the most recent entries (older data cannot be retrieved, regardless of the value of `since`).
+      
+      tags:
+        - Market Data
+      operationId: getOHLCData
+      security: []
+      parameters:
+        - $ref: "./partials/parameters/query/pair.yaml"
+        - name: interval
+          description: Time frame interval in minutes
+          in: query
+          schema:
+            type: integer
+            default: 1
+            enum: [1, 5, 15, 30, 60, 240, 1440, 10080, 21600]
+          example: 60
+        - name: since
+          in: query
+          description: Return OHLC entries since the given timestamp (intended for incremental updates)
+          schema:
+            type: integer
+          example: 1688671200
+        - $ref: "./partials/parameters/query/asset_class.yaml"
+      responses:
+        "200":
+          description: OHLC data retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/public/ohlc.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "XXBTZUSD":
+                          [
+                            [
+                              1688671200,
+                              "30306.1",
+                              "30306.2",
+                              "30305.7",
+                              "30305.7",
+                              "30306.1",
+                              "3.39243896",
+                              23,
+                            ],
+                            [
+                              1688671260,
+                              "30304.5",
+                              "30304.5",
+                              "30300.0",
+                              "30300.0",
+                              "30300.0",
+                              "4.42996871",
+                              18,
+                            ],
+                            [
+                              1688671320,
+                              "30300.3",
+                              "30300.4",
+                              "30291.4",
+                              "30291.4",
+                              "30294.7",
+                              "2.13024789",
+                              25,
+                            ],
+                            [
+                              1688671380,
+                              "30291.8",
+                              "30295.1",
+                              "30291.8",
+                              "30295.0",
+                              "30293.8",
+                              "1.01836275",
+                              9,
+                            ],
+                          ],
+                        "last": 1688672160,
+                      },
+                  }
+                # $ref: './examples/responses/public/ohlc.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /public/Depth:
+    get:
+      summary: Get Order Book
+      description: |
+                  Returns level 2 (L2) order book, which describes the individual price levels in the book with aggregated order quantities at each level.
+
+      tags:
+        - Market Data
+      operationId: getOrderBook
+      security: []
+      parameters:
+        - $ref: "./partials/parameters/query/pair.yaml"
+        - name: count
+          description: Maximum number of asks/bids
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+          example: 2
+        - $ref: "./partials/parameters/query/asset_class.yaml"
+      responses:
+        "200":
+          description: Order book entries retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/public/depth.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "XXBTZUSD":
+                          {
+                            "asks":
+                              [
+                                ["30384.10000", "2.059", 1688671659],
+                                ["30387.90000", "1.500", 1688671380],
+                                ["30393.70000", "9.871", 1688671261],
+                              ],
+                            "bids":
+                              [
+                                ["30297.00000", "1.115", 1688671636],
+                                ["30296.70000", "2.002", 1688671674],
+                                ["30289.80000", "5.001", 1688671673],
+                              ],
+                          },
+                      },
+                  }
+                # $ref: './examples/responses/public/depth.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /public/Trades:
+    get:
+      summary: Get Recent Trades
+      description: |
+                  Returns the last 1000 trades by default
+
+      tags:
+        - Market Data
+      operationId: getRecentTrades
+      security: []
+      parameters:
+        - $ref: "./partials/parameters/query/pair.yaml"
+        - name: since
+          in: query
+          description: Return trade data since given timestamp
+          schema:
+            type: string
+          example: "1616663618"
+        - name: count
+          in: query
+          description: Return specific number of trades, up to 1000
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1000
+            default: 1000
+          example: 2
+        - $ref: "./partials/parameters/query/asset_class.yaml"
+      responses:
+        "200":
+          description: Trade data retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/public/trades.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "XXBTZUSD":
+                          [
+                            [
+                              "30243.40000",
+                              "0.34507674",
+                              1688669597.8277369,
+                              "b",
+                              "m",
+                              "",
+                              61044952,
+                            ],
+                            [
+                              "30243.30000",
+                              "0.00376960",
+                              1688669598.2804112,
+                              "s",
+                              "l",
+                              "",
+                              61044953,
+                            ],
+                            [
+                              "30243.30000",
+                              "0.01235716",
+                              1688669602.698379,
+                              "s",
+                              "m",
+                              "",
+                              61044956,
+                            ],
+                          ],
+                        "last": "1688671969993150842",
+                      },
+                  }
+                # $ref: './examples/responses/public/trades.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /public/Spread:
+    get:
+      summary: Get Recent Spreads
+      description: |
+                  Returns the last ~200 top-of-book spreads for a given pair
+
+      tags:
+        - Market Data
+      operationId: getRecentSpreads
+      security: []
+      parameters:
+        - $ref: "./partials/parameters/query/pair.yaml"
+        - name: since
+          in: query
+          description: Returns spread data since given timestamp. Optional, intended for incremental updates within available dataset (does not contain all historical spreads).
+          schema:
+            type: integer
+          example: 1678219570
+        - $ref: "./partials/parameters/query/asset_class.yaml"
+      responses:
+        "200":
+          description: Spread data retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/public/spread.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "XXBTZUSD":
+                          [
+                            [1688671834, "30292.10000", "30297.50000"],
+                            [1688671834, "30292.10000", "30296.70000"],
+                            [1688671834, "30292.70000", "30296.70000"],
+                          ],
+                        "last": 1688672106,
+                      },
+                  }
+                #$ref: './examples/responses/public/spread.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/Balance:
+    post:
+      summary: Get Account Balance
+      description: |
+        Retrieve all cash balances, net of pending withdrawals.
+    
+        **Note on Staking/Earn assets:** We have begun to migrate assets from our legacy Staking system over to a new Earn system. As such, the following assets may appear in your balances and ledger. Please see our [Support article](https://support.kraken.com/hc/en-us/articles/360039879471-What-is-Asset-S-and-Asset-M-) for more details. Note that these assets are "read-only", to interact with your balances in them please use the base asset (e.g. `USDT` to transact with your `USDT` and `USDT.F` balances).
+
+        **Symbol Extensions**:
+        * `.B`: balances in new yield-bearing products, similar to `.S` (staked) and `.M` (opt-in rewards) balances
+        * `.F`: balances earning automatically in Kraken Rewards
+        * `.T`: tokenized assets.
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      tags:
+        - Account Data
+      operationId: getAccountBalance
+      
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                rebase_multiplier:
+                  $ref: "./partials/properties/rebase_multiplier.yaml"
+              required:
+                - nonce
+
+      responses:
+        "200":
+          description: Account balances retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/account/balance.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "ZUSD": "171288.6158",
+                        "ZEUR": "504861.8946",
+                        "XXBT": "1011.1908877900",
+                        "XETH": "818.5500000000",
+                        "USDT": "500000.00000000",
+                        "DAI": "9999.9999999999",
+                        "DOT": "2.5000000000",
+                        "ETH2.S": "198.3970800000",
+                        "ETH2": "2.5885574330",
+                        "USD.M": "1213029.2780",
+                      },
+                  }
+                # $ref: './examples/responses/user/account/balance.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/BalanceEx:
+    post:
+      summary: Get Extended Balance
+      description: |
+        Retrieve all extended account balances, including credits and held amounts. Balance available for trading is calculated as: `available balance = balance + credit - credit_used - hold_trade`
+
+        **Note on Staking/Earn assets:** We have begun to migrate assets from our legacy Staking system over to a new Earn system. As such, the following assets may appear in your balances and ledger. Please see our [Support article](https://support.kraken.com/hc/en-us/articles/360039879471-What-is-Asset-S-and-Asset-M-) for more details. Note that these assets are "read-only", to interact with your balances in them please use the base asset (e.g. `USDT` to transact with your `USDT` and `USDT.F` balances).
+
+        **Symbol Extensions**:
+        * `.B`: balances in new yield-bearing products, similar to `.S` (staked) and `.M` (opt-in rewards) balances
+        * `.F`: balances earning automatically in Kraken Rewards
+        * `.T`: tokenized assets.
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      tags:
+        - Account Data
+      operationId: getExtendedBalance
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                rebase_multiplier:
+                  $ref: "./partials/properties/rebase_multiplier.yaml"
+              required:
+                - nonce
+
+      responses:
+        "200":
+          description: Extended account balances retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/account/balanceex.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "ZUSD": { "balance": 25435.21, "hold_trade": 8249.76 },
+                        "XXBT":
+                          { "balance": 1.24350000, "hold_trade": 0.84230000 },
+                      },
+                  }
+                # $ref: './examples/responses/user/account/balance.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/CreditLines:
+    post:
+      summary: Get Credit Lines
+      description: |
+        Retrieve all credit line details for VIPs with this functionality.
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      tags:
+        - Account Data
+      operationId: getCreditLines
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                rebase_multiplier:
+                  $ref: "./partials/properties/rebase_multiplier.yaml"
+              required:
+                - nonce
+
+      responses:
+        "200":
+          description: Credit line details retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/account/creditlines.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result": {
+                      "asset_details": {
+                        "USD": {
+                          "balance": "1000.5000",
+                          "credit_limit": "50000.0000",
+                          "credit_used": "12500.0000",
+                          "available_credit": "37500.0000"
+                        },
+                        "EUR": {
+                          "balance": "500.2500",
+                          "credit_limit": "25000.0000",
+                          "credit_used": "5000.0000",
+                          "available_credit": "20000.0000"
+                        }
+                      },
+                      "limits_monitor": {
+                        "total_credit_usd": "100000.0000",
+                        "total_credit_used_usd": "25000.0000",
+                        "total_collateral_value_usd": "150000.0000",
+                        "equity_usd": "125000.0000",
+                        "ongoing_balance": "1.5000",
+                        "debt_to_equity": "0.2000"
+                      }
+                    }
+                  }
+
+
+  /private/TradeBalance:
+    post:
+      summary: Get Trade Balance
+      description: |
+        Retrieve a summary of collateral balances, margin position valuations, equity and margin level.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades`
+      tags:
+        - Account Data
+      operationId: getTradeBalance
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/trades/balance.yaml"
+
+      responses:
+        "200":
+          description: Trade balances retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/trades/balance.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "eb": "1101.3425",
+                        "tb": "392.2264",
+                        "m": "7.0354",
+                        "n": "-10.0232",
+                        "c": "21.1063",
+                        "v": "31.1297",
+                        "e": "382.2032",
+                        "mf": "375.1678",
+                        "ml": "5432.57",
+                      },
+                  }
+                # $ref: './examples/responses/user/trades/balance.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/OpenOrders:
+    post:
+      summary: Get Open Orders
+      description: |
+        Retrieve information about currently open orders.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades`
+      tags:
+        - Account Data
+      operationId: getOpenOrders
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/openOrders.yaml"
+
+      responses:
+        "200":
+          description: Open orders info retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/orders/open.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "open":
+                          {
+                            "OQCLML-BW3P3-BUCMWZ":
+                              {
+                                "refid": None,
+                                "userref": 0,
+                                "status": "open",
+                                "opentm": 1688666559.8974,
+                                "starttm": 0,
+                                "expiretm": 0,
+                                "descr":
+                                  {
+                                    "pair": "XBTUSD",
+                                    "type": "buy",
+                                    "ordertype": "limit",
+                                    "price": "30010.0",
+                                    "price2": "0",
+                                    "leverage": "none",
+                                    "order": "buy 1.25000000 XBTUSD @ limit 30010.0",
+                                    "close": "",
+                                  },
+                                "vol": "1.25000000",
+                                "vol_exec": "0.37500000",
+                                "cost": "11253.7",
+                                "fee": "0.00000",
+                                "price": "30010.0",
+                                "stopprice": "0.00000",
+                                "limitprice": "0.00000",
+                                "misc": "",
+                                "oflags": "fciq",
+                                "trades": ["TCCCTY-WE2O6-P3NB37"],
+                              },
+                            "OB5VMB-B4U2U-DK2WRW":
+                              {
+                                "refid": None,
+                                "userref": 45326,
+                                "status": "open",
+                                "opentm": 1688665899.5699,
+                                "starttm": 0,
+                                "expiretm": 0,
+                                "descr":
+                                  {
+                                    "pair": "XBTUSD",
+                                    "type": "buy",
+                                    "ordertype": "limit",
+                                    "price": "14500.0",
+                                    "price2": "0",
+                                    "leverage": "5:1",
+                                    "order": "buy 0.27500000 XBTUSD @ limit 14500.0 with 5:1 leverage",
+                                    "close": "",
+                                  },
+                                "vol": "0.27500000",
+                                "vol_exec": "0.00000000",
+                                "cost": "0.00000",
+                                "fee": "0.00000",
+                                "price": "0.00000",
+                                "stopprice": "0.00000",
+                                "limitprice": "0.00000",
+                                "misc": "",
+                                "oflags": "fciq",
+                              },
+                          },
+                      },
+                  }
+                # $ref: './examples/responses/user/orders/open.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/ClosedOrders:
+    post:
+      summary: Get Closed Orders
+      description: |
+        Retrieve information about orders that have been closed (filled or cancelled). 50 results are returned at a time, the most recent by default.
+
+        **Note:** If an order's tx ID is given for `start` or `end` time, the order's opening time (`opentm`) is used
+
+        **API Key Permissions Required:** `Orders and trades - Query closed orders & trades`
+      tags:
+        - Account Data
+      operationId: getClosedOrders
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/closedOrders.yaml"
+
+      responses:
+        "200":
+          description: Closed orders info retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/orders/closed.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "closed":
+                          {
+                            "O37652-RJWRT-IMO74O":
+                              {
+                                "refid": None,
+                                "userref": 1,
+                                "status": "canceled",
+                                "reason": "User requested",
+                                "opentm": 1688148493.7708,
+                                "closetm": 1688148610.0482,
+                                "starttm": 0,
+                                "expiretm": 0,
+                                "descr":
+                                  {
+                                    "pair": "XBTGBP",
+                                    "type": "buy",
+                                    "ordertype": "stop-loss-limit",
+                                    "price": "23667.0",
+                                    "price2": "0",
+                                    "leverage": "none",
+                                    "order": "buy 0.00100000 XBTGBP @ limit 23667.0",
+                                    "close": "",
+                                  },
+                                "vol": "0.00100000",
+                                "vol_exec": "0.00000000",
+                                "cost": "0.00000",
+                                "fee": "0.00000",
+                                "price": "0.00000",
+                                "stopprice": "0.00000",
+                                "limitprice": "0.00000",
+                                "misc": "",
+                                "oflags": "fciq",
+                                "trigger": "index",
+                              },
+                            "O6YDQ5-LOMWU-37YKEE":
+                              {
+                                "refid": None,
+                                "userref": 36493663,
+                                "status": "canceled",
+                                "reason": "User requested",
+                                "opentm": 1688148493.7708,
+                                "closetm": 1688148610.0477,
+                                "starttm": 0,
+                                "expiretm": 0,
+                                "descr":
+                                  {
+                                    "pair": "XBTEUR",
+                                    "type": "buy",
+                                    "ordertype": "take-profit-limit",
+                                    "price": "27743.0",
+                                    "price2": "0",
+                                    "leverage": "none",
+                                    "order": "buy 0.00100000 XBTEUR @ limit 27743.0",
+                                    "close": "",
+                                  },
+                                "vol": "0.00100000",
+                                "vol_exec": "0.00000000",
+                                "cost": "0.00000",
+                                "fee": "0.00000",
+                                "price": "0.00000",
+                                "stopprice": "0.00000",
+                                "limitprice": "0.00000",
+                                "misc": "",
+                                "oflags": "fciq",
+                                "trigger": "index",
+                              },
+                          },
+                        "count": 2,
+                      },
+                  }
+                # $ref: './examples/responses/user/orders/closed.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/QueryOrders:
+    post:
+      summary: Query Orders Info
+      description: |
+        Retrieve information about specific orders.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades` or `Orders and trades - Query closed orders & trades`, depending on status of order
+      tags:
+        - Account Data
+      operationId: getOrdersInfo
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/user/orders/query.yaml"
+            examples:
+              Example Query 2 orders:
+                value:
+                  nonce: 1695828490
+                  trades: false
+                  userref: 1693455284
+                  txid: "STMH53C-C54CG-4SO42I, ST4USDQ-ZQBMB-FGET2G"
+      responses:
+        "200":
+          description: Orders info retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/orders/query.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "OBCMZD-JIEE7-77TH3F":
+                          {
+                            "refid": None,
+                            "userref": 0,
+                            "status": "closed",
+                            "reason": null,
+                            "opentm": 1688665496.7808,
+                            "closetm": 1688665499.1922,
+                            "starttm": 0,
+                            "expiretm": 0,
+                            "descr":
+                              {
+                                "pair": "XBTUSD",
+                                "type": "buy",
+                                "ordertype": "stop-loss-limit",
+                                "price": "27500.0",
+                                "price2": "0",
+                                "leverage": "none",
+                                "order": "buy 1.25000000 XBTUSD @ limit 27500.0",
+                                "close": "",
+                              },
+                            "vol": "1.25000000",
+                            "vol_exec": "1.25000000",
+                            "cost": "27526.2",
+                            "fee": "26.2",
+                            "price": "27500.0",
+                            "stopprice": "0.00000",
+                            "limitprice": "0.00000",
+                            "misc": "",
+                            "oflags": "fciq",
+                            "trigger": "index",
+                            "trades": ["TZX2WP-XSEOP-FP7WYR"],
+                          },
+                        "OMMDB2-FSB6Z-7W3HPO":
+                          {
+                            "refid": None,
+                            "userref": 0,
+                            "status": "closed",
+                            "reason": null,
+                            "opentm": 1688592012.2317,
+                            "closetm": 1688592012.2335,
+                            "starttm": 0,
+                            "expiretm": 0,
+                            "descr":
+                              {
+                                "pair": "XBTUSD",
+                                "type": "sell",
+                                "ordertype": "market",
+                                "price": "0",
+                                "price2": "0",
+                                "leverage": "none",
+                                "order": "sell 0.25000000 XBTUSD @ market",
+                                "close": "",
+                              },
+                            "vol": "0.25000000",
+                            "vol_exec": "0.25000000",
+                            "cost": "7500.0",
+                            "fee": "7.5",
+                            "price": "30000.0",
+                            "stopprice": "0.00000",
+                            "limitprice": "0.00000",
+                            "misc": "",
+                            "oflags": "fcib",
+                            "trades": ["TJUW2K-FLX2N-AR2FLU"],
+                          },
+                      },
+                  }
+                # $ref: './examples/responses/user/orders/query.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/OrderAmends:
+    post:
+      summary: Get Order Amends
+      description: |
+        Retrieves an audit trail of amend transactions on the specified order. The list is ordered by ascending amend timestamp.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades` or `Orders and trades - Query closed orders & trades`, depending on status of order.
+      tags:
+        - Account Data
+      operationId: getOrderAmends
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/user/orders/amends.yaml"
+      responses:
+        "200":
+          description: The first entry contains the original order parameters and has amend_type of `original`.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/orders/amends.yaml"
+                example:
+                  {
+                      "response": {
+                          "error": [],
+                          "result": {
+                              "amends": [
+                                  {
+                                      "amend_id": "TSUN4B-EX2XN-WQ6GKG",
+                                      "amend_type": "original",
+                                      "order_qty": "0.01000000",
+                                      "remaining_qty": "0.01000000",
+                                      "limit_price": "61032.8",
+                                      "timestamp": 1724158070287557853
+                                  },
+                                  {
+                                      "amend_id": "TF6VAW-VUWMX-6SXTCH",
+                                      "amend_type": "user",
+                                      "order_qty": "0.01000000",
+                                      "remaining_qty": "0.01000000",
+                                      "limit_price": "61032.7",
+                                      "timestamp": 1724158076936755587
+                                  },
+                                  {
+                                      "amend_id": "TUMY4K-E4MPE-CSL2N3",
+                                      "amend_type": "user",
+                                      "order_qty": "0.01000000",
+                                      "remaining_qty": "0.01000000",
+                                      "limit_price": "61032.6",
+                                      "timestamp": 1724158214879659945
+                                  }
+                              ],
+                              "count": 3
+                          }
+                      }
+                  }
+
+
+  /private/TradesHistory:
+    post:
+      summary: Get Trades History
+      description: |
+        Retrieve information about trades/fills. 50 results are returned at a time, the most recent by default.
+        * Unless otherwise stated, costs, fees, prices, and volumes are specified with the precision for the asset pair (`pair_decimals` and `lot_decimals`), not the individual assets' precision (`decimals`).
+
+        **API Key Permissions Required:** `Orders and trades - Query closed orders & trades`
+      tags:
+        - Account Data
+      operationId: getTradeHistory
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/trades/history.yaml"
+      responses:
+        "200":
+          description: Trade history retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/trades/history.yaml"
+                example:
+                  {"error":[],"result":{"trades":{"THVRQM-33VKH-UCI7BS":{"ordertxid":"OQCLML-BW3P3-BUCMWZ","postxid":"TKH2SE-M7IF5-CFI7LT","pair":"XXBTZUSD","time":1688667796.8802,"type":"buy","ordertype":"limit","price":"30010.00000","cost":"600.20000","fee":"0.00000","vol":"0.02000000","margin":"0.00000","misc":"","trade_id":40274859,"maker":True},"TCWJEG-FL4SZ-3FKGH6":{"ordertxid":"OQCLML-BW3P3-BUCMWZ","postxid":"TKH2SE-M7IF5-CFI7LT","pair":"XXBTZUSD","time":1688667769.6396,"type":"buy","ordertype":"limit","price":"30010.00000","cost":"300.10000","fee":"0.00000","vol":"0.01000000","margin":"0.00000","misc":"","trade_id":39482674,"maker":True}}}}
+                # $ref: './examples/responses/user/trades/history.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/QueryTrades:
+    post:
+      summary: Query Trades Info
+      description: |
+        Retrieve information about specific trades/fills.
+
+        **API Key Permissions Required:** `Orders and trades - Query closed orders & trades`
+      tags:
+        - Account Data
+      operationId: getTradesInfo
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/trades/query.yaml"
+      responses:
+        "200":
+          description: Trades info retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    description: Trade info
+                    type: object
+                    additionalProperties:
+                      $ref: "./schemas/objects/user/trades/trade.yaml"
+                  error:
+                    type: array
+                    items:
+                      $ref: "./schemas/objects/errors/error.yaml"
+                example:
+                  {"error":[],"result":{"THVRQM-33VKH-UCI7BS":{"ordertxid":"OQCLML-BW3P3-BUCMWZ","postxid":"TKH2SE-M7IF5-CFI7LT","pair":"XXBTZUSD","time":1688667796.8802,"type":"buy","ordertype":"limit","price":"30010.00000","cost":"600.20000","fee":"0.00000","vol":"0.02000000","margin":"0.00000","misc":"","trade_id":93748276,"maker":True},"TTEUX3-HDAAA-RC2RUO":{"ordertxid":"OH76VO-UKWAD-PSBDX6","postxid":"TKH2SE-M7IF5-CFI7LT","pair":"XXBTZEUR","time":1688082549.3138,"type":"buy","ordertype":"limit","price":"27732.00000","cost":"0.20020","fee":"0.00000","vol":"0.00020000","margin":"0.00000","misc":"","trade_id":74625834,"maker":True}}}
+                  # $ref: './examples/responses/user/trades/query.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/OpenPositions:
+    post:
+      summary: Get Open Positions
+      description: |
+        Get information about open margin positions.
+
+        **API Key Permissions Required:** `Orders and trades - Query open orders & trades`
+      tags:
+        - Account Data
+      operationId: getOpenPositions
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                txid:
+                  type: string
+                  description: Comma delimited list of txids to limit output to
+                docalcs:
+                  type: boolean
+                  description: Whether to include P&L calculations
+                  default: false
+                consolidation:
+                  type: string
+                  description: Consolidate positions by market/pair
+                  enum:
+                    - market
+                rebase_multiplier:
+                  $ref: "./partials/properties/rebase_multiplier.yaml"
+            examples:
+              get Open Position:
+                value:
+                  nonce: 1695828490
+                  docalcs: false
+                  consolidation: "market"
+                  txid: "STMH53C-C54CG-4SO42I, ST4USDQ-ZQBMB-FGET2G"
+      responses:
+        "200":
+          description: Open positions info retrieved.
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: object
+                    additionalProperties:
+                      x-additionalPropertiesName: txid
+                      title: txid
+                      type: object
+                      properties:
+                        ordertxid:
+                          type: string
+                          description: Order ID responsible for the position
+                        posstatus:
+                          type: string
+                          description: Position status
+                          enum:
+                            - open
+                        pair:
+                          type: string
+                          description: Asset pair
+                        time:
+                          type: number
+                          description: Unix timestamp of trade
+                        type:
+                          type: string
+                          description: Direction (buy/sell) of position
+                        ordertype:
+                          type: string
+                          description: Order type used to open position
+                        cost:
+                          type: string
+                          description: Opening cost of position (in quote currency)
+                        fee:
+                          type: string
+                          description: Opening fee of position (in quote currency)
+                        vol:
+                          type: string
+                          description: Position opening size (in base currency)
+                        vol_closed:
+                          type: string
+                          description: Quantity closed (in base currency)
+                        margin:
+                          type: string
+                          description: Initial margin consumed (in quote currency)
+                        value:
+                          type: string
+                          description: Current value of remaining position (if `docalcs` requested)
+                        net:
+                          type: string
+                          description: Unrealised P&L of remaining position (if `docalcs` requested)
+                        terms:
+                          type: string
+                          description: Funding cost and term of position
+                        rollovertm:
+                          type: string
+                          description: Timestamp of next margin rollover fee
+                        misc:
+                          type: string
+                          description: Comma delimited list of add'l info
+                        oflags:
+                          type: string
+                          description: Comma delimited list of opening order flags
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+              #   $ref: './schemas/responses/funding/withdrawals/recent.yaml'
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "TF5GVO-T7ZZ2-6NBKBI":
+                          {
+                            "ordertxid": "OLWNFG-LLH4R-D6SFFP",
+                            "posstatus": "open",
+                            "pair": "XXBTZUSD",
+                            "time": 1605280097.8294,
+                            "type": "buy",
+                            "ordertype": "limit",
+                            "cost": "104610.52842",
+                            "fee": "289.06565",
+                            "vol": "8.82412861",
+                            "vol_closed": "0.20200000",
+                            "margin": "20922.10568",
+                            "value": "258797.5",
+                            "net": "+154186.9728",
+                            "terms": "0.0100% per 4 hours",
+                            "rollovertm": "1616672637",
+                            "misc": "",
+                            "oflags": "",
+                          },
+                        "T24DOR-TAFLM-ID3NYP":
+                          {
+                            "ordertxid": "OIVYGZ-M5EHU-ZRUQXX",
+                            "posstatus": "open",
+                            "pair": "XXBTZUSD",
+                            "time": 1607943827.3172,
+                            "type": "buy",
+                            "ordertype": "limit",
+                            "cost": "145756.76856",
+                            "fee": "335.24057",
+                            "vol": "8.00000000",
+                            "vol_closed": "0.00000000",
+                            "margin": "29151.35371",
+                            "value": "240124.0",
+                            "net": "+94367.2314",
+                            "terms": "0.0100% per 4 hours",
+                            "rollovertm": "1616672637",
+                            "misc": "",
+                            "oflags": "",
+                          },
+                        "TYMRFG-URRG5-2ZTQSD":
+                          {
+                            "ordertxid": "OF5WFH-V57DP-QANDAC",
+                            "posstatus": "open",
+                            "pair": "XXBTZUSD",
+                            "time": 1610448039.8374,
+                            "type": "buy",
+                            "ordertype": "limit",
+                            "cost": "0.00240",
+                            "fee": "0.00000",
+                            "vol": "0.00000010",
+                            "vol_closed": "0.00000000",
+                            "margin": "0.00048",
+                            "value": "0",
+                            "net": "+0.0006",
+                            "terms": "0.0100% per 4 hours",
+                            "rollovertm": "1616672637",
+                            "misc": "",
+                            "oflags": "",
+                          },
+                        "TAFGBN-TZNFC-7CCYIM":
+                          {
+                            "ordertxid": "OF5WFH-V57DP-QANDAC",
+                            "posstatus": "open",
+                            "pair": "XXBTZUSD",
+                            "time": 1610448039.8448,
+                            "type": "buy",
+                            "ordertype": "limit",
+                            "cost": "2.40000",
+                            "fee": "0.00264",
+                            "vol": "0.00010000",
+                            "vol_closed": "0.00000000",
+                            "margin": "0.48000",
+                            "value": "3.0",
+                            "net": "+0.6015",
+                            "terms": "0.0100% per 4 hours",
+                            "rollovertm": "1616672637",
+                            "misc": "",
+                            "oflags": "",
+                          },
+                        "T4O5L3-4VGS4-IRU2UL":
+                          {
+                            "ordertxid": "OF5WFH-V57DP-QANDAC",
+                            "posstatus": "open",
+                            "pair": "XXBTZUSD",
+                            "time": 1610448040.7722,
+                            "type": "buy",
+                            "ordertype": "limit",
+                            "cost": "21.59760",
+                            "fee": "0.02376",
+                            "vol": "0.00089990",
+                            "vol_closed": "0.00000000",
+                            "margin": "4.31952",
+                            "value": "27.0",
+                            "net": "+5.4133",
+                            "terms": "0.0100% per 4 hours",
+                            "rollovertm": "1616672637",
+                            "misc": "",
+                            "oflags": "",
+                          },
+                      },
+                  }
+
+
+  /private/Ledgers:
+    post:
+      summary: Get Ledgers Info
+      description: |
+        Retrieve information about ledger entries. 50 results are returned at a time, the most recent by default.
+
+        > **Note on Staking/Earn assets:** We have begun to migrate assets from our legacy Staking system over to a new Earn system. As such, the following assets may appear in your balances and ledger. Please see our [Support article](https://support.kraken.com/hc/en-us/articles/360039879471-What-is-Asset-S-and-Asset-M-) for more details. Note that these assets are "read-only", to interact with your balances in them please use the base asset (e.g. `USDT` to transact with your `USDT` and `USDT.F` balances).
+        > * `.B`, which represents balances in new yield-bearing products, similar to `.S` (staked) and `.M` (opt-in rewards) balances
+        > * `.F`, which represents balances earning automatically in Kraken Rewards
+
+        **API Key Permissions Required:** `Data - Query ledger entries`
+      tags:
+        - Account Data
+      operationId: getLedgers
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/ledgers/info.yaml"
+      responses:
+        "200":
+          description: Ledgers info retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/ledgers/info.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "ledger":
+                          {
+                            "L4UESK-KG3EQ-UFO4T5":
+                              {
+                                "refid": "TJKLXF-PGMUI-4NTLXU",
+                                "time": 1688464484.1787,
+                                "type": "trade",
+                                "subtype": "",
+                                "aclass": "currency",
+                                "asset": "ZGBP",
+                                "amount": "-24.5000",
+                                "fee": "0.0490",
+                                "balance": "459567.9171",
+                              },
+                            "LMKZCZ-Z3GVL-CXKK4H":
+                              {
+                                "refid": "TBZIP2-F6QOU-TMB6FY",
+                                "time": 1688444262.8888,
+                                "type": "trade",
+                                "subtype": "",
+                                "aclass": "currency",
+                                "asset": "ZUSD",
+                                "amount": "0.9852",
+                                "fee": "0.0010",
+                                "balance": "52732.1132",
+                              },
+                          },
+                        "count": 2,
+                      },
+                  }
+                # $ref: './examples/responses/user/ledgers/info.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/QueryLedgers:
+    post:
+      summary: Query Ledgers
+      description: |
+        Retrieve information about specific ledger entries. 
+
+        > **Note on Staking/Earn assets:** We have begun to migrate assets from our legacy Staking system over to a new Earn system. As such, the following assets may appear in your balances and ledger. Please see our [Support article](https://support.kraken.com/hc/en-us/articles/360039879471-What-is-Asset-S-and-Asset-M-) for more details. Note that these assets are "read-only", to interact with your balances in them please use the base asset (e.g. `USDT` to transact with your `USDT` and `USDT.F` balances).
+        > * `.B`, which represents balances in new yield-bearing products, similar to `.S` (staked) and `.M` (opt-in rewards) balances
+        > * `.F`, which represents balances earning automatically in Kraken Rewards
+
+        **API Key Permissions Required:** `Data - Query ledger entries`
+      tags:
+        - Account Data
+      operationId: getLedgersInfo
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/ledgers/query.yaml"
+
+      responses:
+        "200":
+          description: Ledgers info retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/ledgers/query.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "L4UESK-KG3EQ-UFO4T5":
+                          {
+                            "refid": "TJKLXF-PGMUI-4NTLXU",
+                            "time": 1688464484.1787,
+                            "type": "trade",
+                            "subtype": "",
+                            "aclass": "currency",
+                            "asset": "ZGBP",
+                            "amount": "-24.5000",
+                            "fee": "0.0490",
+                            "balance": "459567.9171",
+                          },
+                      },
+                  }
+                # $ref: './examples/responses/user/ledgers/query.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/TradeVolume:
+    post:
+      summary: Get Trade Volume
+      description: |
+        Returns 30 day USD trading volume and resulting fee schedule for any asset pair(s) provided. Fees will not be included if `pair` is not specified as Kraken fees differ by asset pair.
+        Note: If an asset pair is on a maker/taker fee schedule, the taker side is given in `fees` and maker side in `fees_maker`. For pairs not on maker/taker, they will only be given in `fees`.
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      tags:
+        - Account Data
+      operationId: getTradeVolume
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/user/trades/volume.yaml"
+      responses:
+        "200":
+          description: Trade Volume retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/user/trades/volume.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "currency": "ZUSD",
+                        "volume": "200709587.4223",
+                        "fees":
+                          {
+                            "XXBTZUSD":
+                              {
+                                "fee": "0.1000",
+                                "minfee": "0.1000",
+                                "maxfee": "0.2600",
+                                "nextfee": null,
+                                "nextvolume": null,
+                                "tiervolume": "10000000.0000",
+                              },
+                          },
+                        "fees_maker":
+                          {
+                            "XXBTZUSD":
+                              {
+                                "fee": "0.0000",
+                                "minfee": "0.0000",
+                                "maxfee": "0.1600",
+                                "nextfee": null,
+                                "nextvolume": null,
+                                "tiervolume": "10000000.0000",
+                              },
+                          },
+                      },
+                  }
+                # $ref: './examples/responses/user/trades/volume.yaml'
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/AddExport:
+    post:
+      summary: Request Export Report
+      description: |
+        Request export of trades or ledgers.
+
+        **API Key Permissions Required:** `Data - Export data`
+      tags:
+        - Account Data
+      operationId: addExport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - report
+                - description
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                report:
+                  type: string
+                  description: Type of data to export
+                  enum:
+                    - trades
+                    - ledgers
+                format:
+                  type: string
+                  description: File format to export
+                  enum:
+                    - CSV
+                    - TSV
+                  default: CSV
+                description:
+                  type: string
+                  description: Description for the export
+                fields:
+                  type: string
+                  default: all
+                  description: |
+                    Comma-delimited list of fields to include
+
+                    * `trades`: `ordertxid`, `time`, `ordertype`, `price`, `cost`, `fee`, `vol`, `margin`, `misc`, `ledgers`
+                    * `ledgers`: `refid`, `time`, `type`, `subtype`, `aclass`, `asset`, `amount`, `fee`, `balance`, `wallet`
+                # asset:
+                #   type: string
+                #   description: |
+                #     Comma-delimited list of assets to filter data by
+                #   default: all
+                starttm:
+                  type: integer
+                  description: UNIX timestamp for report start time (default 1st of the current month)
+                endtm:
+                  type: integer
+                  description: UNIX timestamp for report end time (default now)
+
+              example:
+                  nonce: 1695828490
+                  report: "trades"
+                  description: "yearly report"
+                  format: "CSV"
+                  starttm: 1695728276
+                  endtm: 1695828276
+      responses:
+        "200":
+          description: Export request made
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: Report ID
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example: { "error": [], "result": { "id": "TCJA" } }
+
+
+  /private/ExportStatus:
+    post:
+      summary: Get Export Report Status
+      description: |
+        Get status of requested data exports.
+
+        **API Key Permissions Required:** `Data - Export data`
+      tags:
+        - Account Data
+      operationId: exportStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - report
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                report:
+                  type: string
+                  description: Type of reports to inquire about
+                  enum:
+                    - trades
+                    - ledgers
+              example:
+                  nonce: 1695828490
+                  report: "trades"
+      responses:
+        "200":
+          description: Export status retrieved
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Report ID
+                        descr:
+                          type: string
+                        format:
+                          type: string
+                        report:
+                          type: string
+                        subtype:
+                          type: string
+                        status:
+                          type: string
+                          description: Status of the report
+                          enum:
+                            - Queued
+                            - Processing
+                            - Processed
+                        flags:
+                          type: string
+                          deprecated: true
+                        fields:
+                          type: string
+                        createdtm:
+                          type: string
+                          description: UNIX timestamp of report request
+                        expiretm:
+                          type: string
+                          deprecated: true
+                        starttm:
+                          type: string
+                          description: UNIX timestamp report processing began
+                        completedtm:
+                          type: string
+                          description: UNIX timestamp report processing finished
+                        datastarttm:
+                          type: string
+                          description: UNIX timestamp of the report data start time
+                        dataendtm:
+                          type: string
+                          description: UNIX timestamp of the report data end time
+                        aclass:
+                          type: string
+                          deprecated: true
+                        asset:
+                          type: string
+
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      [
+                        {
+                          "id": "VSKC",
+                          "descr": "my_trades_1",
+                          "format": "CSV",
+                          "report": "trades",
+                          "subtype": "all",
+                          "status": "Processed",
+                          "flags": "0",
+                          "fields": "all",
+                          "createdtm": "1688669085",
+                          "expiretm": "1688878685",
+                          "starttm": "1688669093",
+                          "completedtm": "1688669093",
+                          "datastarttm": "1683556800",
+                          "dataendtm": "1688669085",
+                          "aclass": "forex",
+                          "asset": "all",
+                        },
+                        {
+                          "id": "TCJA",
+                          "descr": "my_trades_1",
+                          "format": "CSV",
+                          "report": "trades",
+                          "subtype": "all",
+                          "status": "Processed",
+                          "flags": "0",
+                          "fields": "all",
+                          "createdtm": "1688363637",
+                          "expiretm": "1688573237",
+                          "starttm": "1688363664",
+                          "completedtm": "1688363664",
+                          "datastarttm": "1683235200",
+                          "dataendtm": "1688363637",
+                          "aclass": "forex",
+                          "asset": "all",
+                        },
+                      ],
+                  }
+
+
+  /private/RetrieveExport:
+    post:
+      summary: Retrieve Data Export
+      description: |
+        Retrieve a processed data export 
+
+        **API Key Permissions Required:** `Data - Export data`
+      tags:
+        - Account Data
+      operationId: retrieveExport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - id
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                id:
+                  type: string
+                  description: Report ID to retrieve
+              example:
+                  nonce: 1695828490
+                  id: "1234556"
+      responses:
+        "200":
+          description: Data export report retrieved
+          content:
+            application/octet-stream:
+              schema:
+                properties:
+                  report:
+                    type: string
+                    format: binary
+                    description: Binary zip archive containing the report
+
+               # example: {"error":[],"result":[{"id":"VSKC","descr":"my_trades_1","format":"CSV","report":"trades","subtype":"all","status":"Processed","flags":"0","fields":"all","createdtm":"1616669085","expiretm":"1617878685","starttm":"1616669093","completedtm":"1616669093","datastarttm":"1614556800","dataendtm":"1616669085","aclass":"forex","asset":"all"},{"id":"TCJA","descr":"my_trades_1","format":"CSV","report":"trades","subtype":"all","status":"Processed","flags":"0","fields":"all","createdtm":"1617363637","expiretm":"1618573237","starttm":"1617363664","completedtm":"1617363664","datastarttm":"1617235200","dataendtm":"1617363637","aclass":"forex","asset":"all"}]}
+
+
+  /private/RemoveExport:
+    post:
+      summary: Delete Export Report
+      description: |
+        Delete exported trades/ledgers report
+
+        **API Key Permissions Required:** `Data - Export data`
+      tags:
+        - Account Data
+      operationId: removeExport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - id
+                - type
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                id:
+                  type: string
+                  description: ID of report to delete or cancel
+                type:
+                  type: string
+                  description: |
+                    `delete` can only be used for reports that have already been processed. Use `cancel` for queued or processing reports.
+                  enum:
+                    - cancel
+                    - delete
+              example:
+                  nonce: 1695828490
+                  id: "1234556"
+                  type: "cancel"
+      responses:
+        "200":
+          description: Export report deleted or cancelled
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      delete:
+                        type: boolean
+                        description: Whether deletion was successful
+                      cancel:
+                        type: boolean
+                        description: Whether cancellation was successful
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example: { "error": [], "result": { "delete": True } }
+
+
+  /private/AddOrder:
+    post:
+      summary: Add Order
+      description: |
+        Place a new order.
+
+        **Note**: See the [AssetPairs](/docs/rest-api/get-tradable-asset-pairs) endpoint for details on the available trading pairs, their price and quantity precisions, order minimums, available leverage, etc.
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders`
+      tags:
+        - Trading
+      operationId: addOrder
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/trading/orders/add.yaml"
+
+
+      responses:
+        "200":
+          description: Order added.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/trading/orders/add.yaml"
+              examples:
+                  Limit with conditional stop-loss:
+                    value:
+                      $ref: "./examples/responses/trading/orders/add.yaml"
+
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/AmendOrder:
+    post:
+      summary: Amend Order
+      description: |
+        The amend request enables clients to modify the order parameters in-place without the need to cancel the existing order and create a new one.
+
+        * The order identifiers assigned by Kraken and/or client will stay the same.
+        * Queue priority in the order book will be maintained where possible. 
+        * If an amend request will reduce the order quantity below the existing filled quantity, the remaining quantity will be cancelled.
+
+        For more detail, see [amend transaction guide](/docs/guides/spot-amends).
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders` or `Orders and trades - Cancel & close orders`
+      tags:
+        - Trading
+      operationId: amendOrder
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/trading/orders/amend.yaml"
+
+      responses:
+        "200":
+          description: |
+            A successful amend request will return the unique Kraken amend identifier.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/trading/orders/amend.yaml"
+
+
+  /private/CancelOrder:
+    post:
+      summary: Cancel Order
+      description: |
+        Cancel a particular open order (or set of open orders) by `txid`, `userref` or `cl_ord_id`
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders` or `Orders and trades - Cancel & close orders`
+      tags:
+        - Trading
+      operationId: cancelOrder
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/trading/orders/cancel.yaml"
+
+      responses:
+        "200":
+          description: Open order cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/trading/orders/cancel.yaml"
+
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/CancelAll:
+    post:
+      summary: Cancel All Orders
+      description: |
+        Cancel all open orders
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders` or `Orders and trades - Cancel & close orders`
+      tags:
+        - Trading
+      operationId: cancelAllOrders
+
+      # parameters:
+      #   - name: user_iiban
+      #     $ref: "./partials/parameters/query/user_iiban.yaml"
+
+      requestBody:
+        $ref: "./schemas/requests/nonceOnly.yaml"
+
+      responses:
+        "200":
+          description: Open orders cancelled.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/trading/orders/cancel.yaml"
+
+
+  /private/CancelAllOrdersAfter:
+    post:
+      summary: Cancel All Orders After X
+      tags:
+        - Trading
+      operationId: cancelAllOrdersAfter
+      description: |
+        CancelAllOrdersAfter provides a "Dead Man's Switch" mechanism to protect the client from network malfunction, extreme latency or unexpected matching engine downtime. The client can send a request with a timeout (in seconds), that will start a countdown timer which will cancel *all* client orders when the timer expires. The client has to keep sending new requests to push back the trigger time, or deactivate the mechanism by specifying a timeout of 0. If the timer expires, all orders are cancelled and then the timer remains disabled until the client provides a new (non-zero) timeout.
+
+        The recommended use is to make a call every 15 to 30 seconds, providing a timeout of 60 seconds. This allows the client to keep the orders in place in case of a brief disconnection or transient delay, while keeping them safe in case of a network breakdown. It is also recommended to disable the timer ahead of regularly scheduled trading engine maintenance (if the timer is enabled, all orders will be cancelled when the trading engine comes back from downtime - planned or otherwise).
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders` or `Orders and trades - Cancel & close orders`
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - timeout
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                timeout:
+                  type: integer
+                  description: Duration (in seconds) to set/extend the timer, it should be less than 86400 seconds.
+
+              example:
+                  nonce: 1695828490
+                  timeout: 120
+      responses:
+        "200":
+          description: Dead man's switch timer reset or disabled.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      currentTime:
+                        description: Timestamp (RFC3339 format) at which the request was received
+                        type: string
+                      triggerTime:
+                        description: Timestamp (RFC3339 format) after which all orders will be cancelled, unless the timer is extended or disabled
+                        type: string
+                  error:
+                    # type: array
+                    # items:
+                    $ref: "schemas/objects/errors/error.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "currentTime": "2023-03-24T17:41:56Z",
+                        "triggerTime": "2023-03-24T17:42:56Z",
+                      },
+                  }
+
+
+  /private/GetWebSocketsToken:
+    post:
+      summary: Get Websockets Token
+      description: |
+        An authentication token must be requested via this REST API endpoint in order to connect to and authenticate with our [Websockets API](../guides/spot-ws-auth). The token should be used within 15 minutes of creation, but it does not expire once a successful Websockets connection and private subscription has been made and is maintained.
+
+        **API Key Permissions Required:** `WebSocket interface - On`
+      tags:
+        - Trading
+      operationId: getWebsocketsToken
+      requestBody:
+        $ref: "./schemas/requests/nonceOnly.yaml"
+
+      responses:
+        "200":
+          description: Websockets token retrieved.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    # title: ServerTime
+                    type: object
+                    properties:
+                      token:
+                        description: Websockets token
+                        type: string
+                      expires:
+                        description: Time (in seconds) after which the token expires
+                        type: integer
+                  error:
+                    # type: array
+                    # items:
+                    $ref: "schemas/objects/errors/error.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "token": "1Dwc4lzSwNWOAwkMdqhssNNFhs1ed606d1WcF3XfEMw",
+                        "expires": 900,
+                      },
+                  }
+
+
+  /private/AddOrderBatch:
+    post:
+      summary: Add Order Batch
+      description: |
+        Sends a collection of orders (minimum of 2 and maximum 15): 
+        * Validation is performed on the whole batch prior to submission to the engine. If an order fails validation, the whole batch will be rejected.
+        * On submission to the engine, if an order fails pre-match checks (i.e. funding), then the individual order will be rejected and remainder of the batch will be processed. 
+        * All orders in batch are limited to a single pair.
+
+        **Note**: See the [AssetPairs](/docs/rest-api/get-tradable-asset-pairs) endpoint for details on the available trading pairs, their price and quantity precisions, order minimums, available leverage, etc.
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders` and `Orders and trades - Cancel & close orders`
+
+      tags:
+        - Trading
+      operationId: addOrderBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/trading/orders/batchadd.yaml"
+      responses:
+        "200":
+          description: The order of returned `orders` in the response array is the same as the order of the order list sent in request.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/trading/orders/batchadd.yaml"
+              examples:
+                Limits, one with conditional stop-loss:
+                  value:
+                    $ref: "./examples/responses/trading/orders/batchadd.yaml"
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/CancelOrderBatch:
+    post:
+      summary: Cancel Order Batch
+      description: |
+        Cancel multiple open orders  by `txid`, `userref` or `cl_ord_id`(maximum 50 total unique IDs/references)
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders` or `Orders and trades - Cancel & close orders`
+      tags:
+        - Trading
+      operationId: cancelOrderBatch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/trading/orders/batchcancel.yaml"
+
+      responses:
+        "200":
+          description: Open order cancelled.
+          content:
+            application/json:
+              example:
+                $ref: "./examples/responses/trading/orders/batchcancel.yaml"
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/EditOrder:
+    post:
+      summary: Edit Order
+      description: |
+        Sends a request to edit the order parameters of a live order. When an order has been successfully modified, the original order will be cancelled and a new order will be 
+        created with the adjusted parameters a new `txid` will be returned in the response.
+
+        :::note
+        The new [AmendOrder](/docs/rest-api/amend-order) endpoint resolves the caveats listed below and has additional performance gains.
+
+        There are a number of caveats for `EditOrder`:
+        * triggered stop loss or profit take profit orders are not supported.
+        * orders with conditional close terms attached are not supported.
+        * orders where the executed volume is greater than the newly supplied volume will be rejected.
+        * `cl_ord_id` is not supported.
+        * existing executions will are associated with the original order and not copied to the amended order.
+        * queue position will not be maintained.
+        :::
+
+        **API Key Permissions Required:** `Orders and trades - Create & modify orders` and `Orders and trades - Cancel & close orders`
+      tags:
+        - Trading
+      operationId: editOrder
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/trading/orders/edit.yaml"
+      responses:
+        "200":
+          description: Order edited.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/trading/orders/edit.yaml"
+              examples:
+                Limit with conditional stop-loss:
+                  value:
+                    $ref: "./examples/responses/trading/orders/edit.yaml"
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/DepositMethods:
+    post:
+      summary: Get Deposit Methods
+      description: |
+        Retrieve methods available for depositing a particular asset.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Deposit`
+      tags:
+        - Funding
+      operationId: getDepositMethods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/deposits/methods.yaml"
+
+      responses:
+        "200":
+          description: Deposit methods retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/deposits/methods.yaml"
+
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/DepositAddresses:
+    post:
+      summary: Get Deposit Addresses
+      description: |
+        Retrieve (or generate a new) deposit addresses for a particular asset and method.
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      tags:
+        - Funding
+      operationId: getDepositAddresses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/deposits/addresses.yaml"
+
+      responses:
+        "200":
+          description: Deposit addresses retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/deposits/addresses.yaml"
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/DepositStatus:
+    post:
+      summary: Get Status of Recent Deposits
+      description: |
+        Retrieve information about recent deposits. Results are sorted by recency, use the `cursor` parameter to iterate through list of deposits (page size equal to value of `limit`) from newest to oldest.
+        **API Key Permissions Required:** `Funds permissions - Query`
+      tags:
+        - Funding
+      operationId: getStatusRecentDeposits
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/deposits/recent.yaml"
+
+      responses:
+        "200":
+          description: Recent deposits retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/deposits/recent.yaml"
+
+        # '500':
+        #   $ref: './partials/responses/500.yaml'
+
+
+  /private/WithdrawMethods:
+    post:
+      summary: Get Withdrawal Methods
+      description: |
+        Retrieve a list of withdrawal methods available for the user.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Withdraw`
+      tags:
+        - Funding
+      operationId: getWithdrawalMethods
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/withdrawals/methods.yaml"
+      responses:
+        "200":
+          description: Withdrawal methods retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/withdrawals/methods.yaml"
+
+
+  /private/WithdrawAddresses:
+    post:
+      summary: Get Withdrawal Addresses
+      description: |
+        Retrieve a list of withdrawal addresses available for the user.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Withdraw`
+      tags:
+        - Funding
+      operationId: getWithdrawalAddresses
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/withdrawals/addresses.yaml"
+      responses:
+        "200":
+          description: Withdrawal addresses retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/withdrawals/addresses.yaml"
+
+
+  /private/WithdrawInfo:
+    post:
+      summary: Get Withdrawal Information
+      description: |
+        Retrieve fee information about potential withdrawals for a particular asset, key and amount.
+
+        **API Key Permissions Required:** `Funds permissions - Query` and `Funds permissions - Withdraw`
+      tags:
+        - Funding
+      operationId: getWithdrawalInformation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/withdrawals/info.yaml"
+
+      responses:
+        "200":
+          description: Withdrawal information retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/withdrawals/info.yaml"
+
+
+  /private/Withdraw:
+    post:
+      summary: Withdraw Funds
+      description: |
+        Make a withdrawal request.    
+
+        **API Key Permissions Required:** `Funds permissions - Withdraw`
+      tags:
+        - Funding
+      operationId: withdrawFunds
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/withdrawals/withdrawal.yaml"
+
+      responses:
+        "200":
+          description: Withdrawal created.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/withdrawals/withdrawal.yaml"
+
+
+  /private/WithdrawStatus:
+    post:
+      summary: Get Status of Recent Withdrawals
+      description: |
+        Retrieve information about recent withdrawals. Results are sorted by recency, use the `cursor` parameter to iterate through list of withdrawals (page size equal to value of `limit`) from newest to oldest.
+
+        **API Key Permissions Required:** `Funds permissions - Withdraw` or `Data - Query ledger entries`
+      tags:
+        - Funding
+      operationId: getStatusRecentWithdrawals
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/withdrawals/recent.yaml"
+
+      responses:
+        "200":
+          description: Recent withdrawals retrieved.
+          content:
+            application/json:
+              schema:
+                $ref: "./schemas/responses/funding/withdrawals/recent.yaml"
+
+
+  /private/WithdrawCancel:
+    post:
+      summary: Request Withdrawal Cancellation
+      description: |
+        Cancel a recently requested withdrawal, if it has not already been successfully processed.
+
+        **API Key Permissions Required:** `Funds permissions - Withdraw`, unless withdrawal is a `WalletTransfer`, then no permissions are required.
+      tags:
+        - Funding
+      operationId: cancelWithdrawal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "./schemas/requests/funding/withdrawals/cancel.yaml"
+
+
+      responses:
+        "200":
+          description: Withdrawal cancellation requested.
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: boolean
+                    description: Whether cancellation was successful or not.
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example: { "error": [], "result": true }
+
+
+  /private/WalletTransfer:
+    post:
+      summary: Request Wallet Transfer
+      description: |
+        Transfer from a Kraken spot wallet to a Kraken Futures wallet. Note that a transfer in the other direction must be requested via the Kraken Futures API endpoint for [withdrawals to Spot wallets](../futures-api/trading/withdrawal).
+
+        **API Key Permissions Required:** `Funds permissions - Query`
+      tags:
+        - Funding
+      operationId: walletTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - asset
+                - from
+                - to
+                - amount
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                asset:
+                  type: string
+                  description: Asset to transfer (asset ID or `altname`)
+                  example: XBT
+                from:
+                  type: string
+                  description: Source wallet
+                  enum:
+                    - Spot Wallet
+                to:
+                  type: string
+                  description: Destination wallet
+                  enum:
+                    - Futures Wallet
+                amount:
+                  type: string
+                  description: Amount to transfer
+              example:
+                  nonce: 1695828271
+                  asset: "XBT"
+                  from: "Spot Wallet"
+                  to: "Futures Wallet"
+                  amount: "2.54"
+
+      responses:
+        "200":
+          description: Transfer created.
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      refid:
+                        type: string
+                        description: Reference ID
+                        example: FTQcuak-V6Za8qrWnhzTx67yYHz8Tg
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+              #   $ref: './schemas/responses/funding/withdrawals/recent.yaml'
+                example:
+                  {
+                    "error": [],
+                    "result": { "refid": "FTQcuak-V6Za8qrWnhzTx67yYHz8Tg" },
+                  }
+
+
+  /private/CreateSubaccount:
+    post:
+      summary: Create Subaccount
+      description: |
+        Create a trading subaccount. **Note:** `CreateSubaccount` must be called using an API key from the master account.
+
+        **API Key Permissions Required:** `Funds permissions - Withdraw`
+      tags:
+        - Subaccounts
+      operationId: createSubaccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - email
+                - username
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                username:
+                  type: string
+                  description: Username for the subaccount
+                email:
+                  type: string
+                  description: Email address for the subaccount
+              example:
+                  nonce: 1695828271
+                  username: "abc123"
+                  email: "abc123@gmail.com"
+      responses:
+        "200":
+          description: Subaccount created.
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: boolean
+                    description: Whether subaccount creation was successful or not.
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example: { "error": [], "result": true }
+
+
+  /private/AccountTransfer:
+    post:
+      summary: Account Transfer
+      description: |
+        Transfer funds to and from master and subaccounts. **Note:** `AccountTransfer` must be called using an API key from the master account.
+
+        **API Key Permissions Required:** `Funds permissions - Withdraw`
+      tags:
+        - Subaccounts
+      operationId: accountTransfer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - nonce
+                - asset
+                - amount
+                - from
+                - to
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                asset:
+                  type: string
+                  description: Asset being transferred
+                asset_class:
+                  description: Specify the asset class of the asset being transferred
+                  type: string
+                  enum:
+                    - currency
+                    - tokenized_asset
+                  default: currency
+                amount:
+                  type: string
+                  description: Amount of asset to transfer
+                from:
+                  type: string
+                  description: IIBAN of the source account
+                to:
+                  type: string
+                  description: IIBAN of the destination account
+
+              example:
+                  nonce: 1695828271
+                  asset: "XBT"
+                  from: "ABCD 1234 EFGH 5678"
+                  to: "IJKL 0987 MNOP 6543"
+                  amount: "2.54"
+
+      responses:
+        "200":
+          description: Funds transferred between accounts.
+          content:
+            application/json:
+              schema:
+                properties:
+                  result:
+                    type: object
+                    properties:
+                      transfer_id:
+                        type: string
+                        description: Transfer ID
+                      status:
+                        type: string
+                        description: Transfer status, either `"pending"` or `"complete"`
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                example:
+                  {
+                    "error": [],
+                    "result":
+                      {
+                        "transfer_id": "TOH3AS2-LPCWR8-JDQGEU",
+                        "status": "complete",
+                      },
+                  }
+
+  /private/Earn/Allocate:
+    post:
+      tags:
+        - Earn
+      summary: Allocate Earn Funds
+      description: |-
+        Allocate funds to the Strategy.
+
+        Requires the `Earn Funds` API key permission.
+        The amount must always be defined.
+
+        This method is asynchronous. A couple of preflight checks are
+        performed synchronously on behalf of the method before it is dispatched
+        further. The client is required to poll
+        the result using the `/0/private/Earn/AllocateStatus` endpoint.
+
+        There can be only one (de)allocation request in progress for given user and
+        strategy at any time. While the operation is in progress:
+
+        1. `pending` attribute in `/Earn/Allocations` response for the strategy
+          indicates that funds are being allocated,
+        2. `pending` attribute in `/Earn/AllocateStatus` response will be true.
+
+        Following specific errors within `Earnings` class can be returned by this
+        method:
+        - Minimum allocation: `EEarnings:Below min:(De)allocation operation amount less than minimum`
+        - Allocation in progress: `EEarnings:Busy:Another (de)allocation for the same strategy is in progress`
+        - Service temporarily unavailable: `EEarnings:Busy`. Try again in a few minutes.
+        - User tier verification: `EEarnings:Permission denied:The user's tier is not high enough`
+        - Strategy not found: `EGeneral:Invalid arguments:Invalid strategy ID`
+      operationId: allocateStrategy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Allocation amount in asset specified in the strategy
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                amount:
+                  description: The amount to allocate.
+                  type: string
+                strategy_id:
+                  description: A unique identifier of the chosen earn strategy, as returned from `/0/private/Earn/Strategies`.
+                  type: string
+              required:
+                - amount
+                - nonce
+                - strategy_id
+              example:
+                amount: "4.3"
+                nonce: 30295839
+                strategy_id: ESRFUO3-Q62XD-WIOIL7
+        required: true
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                  result:
+                    description: Will return `true` when the operation is successful, null when an error occurred.
+                    nullable: true
+                    type: boolean
+                example: { "error": [], "result": true }
+
+  /private/Earn/Deallocate:
+    post:
+      tags:
+        - Earn
+      summary: Deallocate Earn Funds
+      description: |-
+        Deallocate funds from a strategy.
+
+        Requires the `Earn Funds` API key permission.
+        The amount must always be defined.
+
+        This method is asynchronous. A couple of preflight checks are
+        performed synchronously on behalf of the method before it is dispatched
+        further. If the method returns HTTP 202 code, the client is required to poll
+        the result using the `/Earn/DeallocateStatus` endpoint.
+
+        There can be only one (de)allocation request in progress for given user and
+        strategy.  While the operation is in progress:
+
+        1. `pending` attribute in `Allocations` response for the strategy will hold
+           the amount that is being deallocated (negative amount)
+        2. `pending` attribute in `DeallocateStatus` response will be true.
+
+        Following specific errors within `Earnings` class can be returned by this
+        method:
+        - Minimum allocation: `EEarnings:Below min:(De)allocation operation amount less than minimum`
+          allowed
+        - Allocation in progress: `EEarnings:Busy:Another (de)allocation for the same strategy is in progress`
+        - Strategy not found: `EGeneral:Invalid arguments:Invalid strategy ID`
+      operationId: deallocateStrategy
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Allocation amount in asset specified in the strategy
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                amount:
+                  description: The amount to deallocate. This field is required.
+                  type: string
+                strategy_id:
+                  description: A unique identifier per earn strategy.
+                  type: string
+              required:
+                - amount
+                - nonce
+                - strategy_id
+              example:
+                amount: "4.3"
+                nonce: 30295839
+                strategy_id: ESRFUO3-Q62XD-WIOIL7
+        required: true
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                  result:
+                    description: Will return `true` when the operation is successful, null when an error occurred.
+                    nullable: true
+                    type: boolean
+                example: { "error": [], "result": true }
+
+  /private/Earn/AllocateStatus:
+    post:
+      tags:
+        - Earn
+      summary: Get Allocation Status
+      description: |-
+        Get the status of the last allocation request.
+
+        Requires either the `Earn Funds` or `Query Funds` API key permission.
+
+        (De)allocation operations are asynchronous and this endpoint allows client
+        to retrieve the status of the last dispatched operation. There can be only
+        one (de)allocation request in progress for given user and strategy.
+
+        The `pending` attribute in the response indicates if the previously
+        dispatched operation is still in progress (true) or has successfully
+        completed (false).  If the dispatched request failed with an error, then
+        HTTP error is returned to the client as if it belonged to the original
+        request.
+
+        Following specific errors within `Earnings` class can be returned by this
+        method:
+        - Insufficient funds: `EEarnings:Insufficient funds:Insufficient funds to complete the (de)allocation request`
+        - User cap exceeded: `EEarnings:Above max:The allocation exceeds user limit for the strategy`
+        - Total cap exceeded: `EEarnings:Above max:The allocation exceeds the total strategy limit`
+        - Minimum allocation: `EEarnings:Below min:(De)allocation operation amount less than minimum`
+      operationId: getAllocateStrategyStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                strategy_id:
+                  description: ID of the earn strategy, call `Earn/Strategies` to list available strategies
+                  type: string
+              required:
+                - nonce
+                - strategy_id
+              example:
+                nonce: 30295839
+                strategy_id: ESRFUO3-Q62XD-WIOIL7
+        required: true
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                  result:
+                    nullable: true
+                    description: Status of async earn operation
+                    type: object
+                    properties:
+                      pending:
+                        description: "`true` if an operation is still in progress on the same strategy."
+                        type: boolean
+                example: { "error": [], "result": { "pending": false } }
+
+  /private/Earn/DeallocateStatus:
+    post:
+      tags:
+        - Earn
+      summary: Get Deallocation Status
+      description: |-
+        Get the status of the last deallocation request.
+
+        Requires either the `Earn Funds` or `Query Funds` API key permission.
+
+        (De)allocation operations are asynchronous and this endpoint allows client
+        to retrieve the status of the last dispatched operation. There can be only
+        one (de)allocation request in progress for given user and strategy.
+
+        The `pending` attribute in the response indicates if the previously
+        dispatched operation is still in progress (true) or has successfully
+        completed (false).  If the dispatched request failed with an error, then
+        HTTP error is returned to the client as if it belonged to the original
+        request.
+
+        Following specific errors within `Earnings` class can be returned by this
+        method:
+        - Insufficient funds: `EEarnings:Insufficient funds:Insufficient funds to complete the (de)allocation request`
+        - Minimum allocation: `EEarnings:Below min:(De)allocation operation amount less than minimum`
+      operationId: getDeallocateStrategyStatus
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                strategy_id:
+                  description: ID of the earn strategy, call `Earn/Strategies` to list available strategies
+                  type: string
+              required:
+                - nonce
+                - strategy_id
+              example:
+                nonce: 30295839
+                strategy_id: ESRFUO3-Q62XD-WIOIL7
+        required: true
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                  result:
+                    nullable: true
+                    description: Status of async earn operation
+                    type: object
+                    properties:
+                      pending:
+                        description: "`true` if an operation is still in progress on the same strategy."
+                        type: boolean
+                example: { "error": [], "result": { "pending": false } }
+
+  /private/Earn/Strategies:
+    post:
+      tags:
+        - Earn
+      summary: List Earn Strategies
+      description: |-
+        List earn strategies along with their parameters.
+
+        Requires a valid API key but not specific permission is required.
+
+        Returns only strategies that are available to the user
+        based on geographic region.
+
+        When the user does not meet the tier restriction, `can_allocate` will be
+        false and `allocation_restriction_info` indicates `Tier` as the restriction
+        reason. Earn products generally require Intermediate tier. Get your account verified
+        to access earn.
+
+        A note about `lock_type`:
+        - `instant`: can be deallocated without an unbonding period. This is called flexible in the UI.
+        - `bonded`: has an unbonding period. Deallocation will not happen until this period has passed.
+        - `flex`: "Kraken rewards". This is earning on your spot balances where eligible. It's turned on account wide
+          from the UI and you cannot manually allocate to these strategies.
+
+        Paging isn't yet implemented, so the endpoint always returns all
+        data in the first page.
+      operationId: listStrategies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: List strategies parameters
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                ascending:
+                  nullable: true
+                  description: "`true` to sort ascending, `false` (the default) for descending."
+                  type: boolean
+                asset:
+                  nullable: true
+                  description: Filter strategies by asset name
+                  type: string
+                cursor:
+                  nullable: true
+                  description: None to start at beginning/end, otherwise next page ID
+                  type: string
+                limit:
+                  nullable: true
+                  description: How many items to return per page. Note that the limit may be cap'd to lower value in the application code.
+                  type: integer
+                  format: uint16
+                lock_type:
+                  nullable: true
+                  description: Filter strategies by lock type
+                  type: array
+                  items:
+                    description: Type of a strategy
+                    type: string
+                    enum:
+                      - flex
+                      - bonded
+                      - timed
+                      - instant
+              required:
+                - nonce
+              example:
+                nonce: 30295839
+                asset: DOT
+        required: true
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                  result:
+                    nullable: true
+                    type: object
+                    properties:
+                      items:
+                        type: array
+                        items:
+                          description: Parameters for a single strategy
+                          type: object
+                          properties:
+                            allocation_fee:
+                              description: Fee applied when allocating to this strategy
+                              oneOf:
+                                - type: string
+                                  title: string
+                                - type: integer
+                                  title: integer
+                                - type: number
+                                  title: number
+                            allocation_restriction_info:
+                              description: Reason list why user is not eligible for allocating to the strategy
+                              type: array
+                              items:
+                                description: Recoverable strategy restriction reasons, which are no preventing strategy from being returned by [`ListStrategiesResponse`].
+                                type: string
+                                enum:
+                                  - tier
+                            apr_estimate:
+                              nullable: true
+                              description: The estimate is based on previous revenues from the strategy. Optional hint, not always present.
+                              type: object
+                              properties:
+                                high:
+                                  description: Maximal yield percentage for one year
+                                  type: string
+                                low:
+                                  description: Minimal yield percentage for one year
+                                  type: string
+                            asset:
+                              description: The asset to invest for this earn strategy
+                              type: string
+                            auto_compound:
+                              description: Auto compound choices for the earn strategy
+                              oneOf:
+                                - description: Auto compound is not possible for any allocation
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      enum:
+                                        - disabled
+                                - description: Auto compound is forced for all allocations
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      enum:
+                                        - enabled
+                                - description: Auto compound depends on user's preference and it comes with default value
+                                  type: object
+                                  properties:
+                                    default:
+                                      type: boolean
+                                    type:
+                                      type: string
+                                      enum:
+                                        - optional
+                            can_allocate:
+                              description: Is allocation available for this strategy
+                              type: boolean
+                            can_deallocate:
+                              description: Is deallocation available for this strategy
+                              type: boolean
+                            deallocation_fee:
+                              description: Fee applied when deallocating from this strategy
+                              oneOf:
+                                - type: string
+                                - type: integer
+                                - type: number
+                            id:
+                              description: The unique identifier for this strategy
+                              type: string
+                            lock_type:
+                              description: Type of the strategy
+                              oneOf:
+                                - description: Either the whole asset balance or part of it is allocated to earn strategy and users are free to deallocate it anytime and most importantly the deallocation can be implicit (triggered by a trade, withdrawal from exchange, etc.).
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      enum:
+                                        - flex
+                                - description: Explicit allocate and deallocate action by user is required and bonding/unbonding parameters apply.
+                                  type: object
+                                  properties:
+                                    bonding_period:
+                                      description: Duration of the bonding period, in seconds
+                                      type: integer
+                                    bonding_period_variable:
+                                      description: Is the bonding period length variable (`true`) or static (`false`)
+                                      type: boolean
+                                    bonding_rewards:
+                                      description: Whether rewards are earned during the bonding period (payouts occur after bonding is complete)
+                                      type: boolean
+                                    exit_queue_period:
+                                      description: |-
+                                        In order to remove funds, if this value is greater than 0, funds will first have to enter an exit queue and will have to wait for the exit queue period to end. Once ended, her funds will then follow and respect the `unbonding_period`.
+
+                                        If the value of the exit queue period is 0, then no waiting will have to occur and the exit queue will be skipped
+
+                                        Rewards are always paid out for the exit queue
+                                      type: integer
+                                    payout_frequency:
+                                      description: At what intervals are rewards distributed and credited to the user’s ledger, in seconds
+                                      type: integer
+                                    type:
+                                      type: string
+                                      enum:
+                                        - bonded
+                                    unbonding_period:
+                                      description: Duration of the unbonding period in seconds. In order to remove funds, you must wait for the unbonding period to pass after requesting removal before funds become available in her spot wallet
+                                      type: integer
+                                    unbonding_period_variable:
+                                      description: Is the unbonding period length variable (`true`) or static (`false`)
+                                      type: boolean
+                                    unbonding_rewards:
+                                      description: Whether rewards are earned and payouts are done during the unbonding period
+                                      type: boolean
+                                - description: Instant strategy lock type is a special case of bonded strategy with no bonding/unbonding period. It is equivalent of what used to be called "flex" in legacy staking system (not to be confused with Flex defined above). Explicit allocate/deallocate action is required.
+                                  type: object
+                                  properties:
+                                    payout_frequency:
+                                      description: At what intervals are rewards distributed and credited to the user’s ledger, in seconds
+                                      type: integer
+                                    type:
+                                      type: string
+                                      enum:
+                                        - instant
+                            user_cap:
+                              nullable: true
+                              type: "string"
+                              description: The maximum amount of funds that any given user may allocate to an account. Absence of value means there is no limit. Zero means that all new allocations will return an error (though auto-compound is unaffected).
+                            user_min_allocation:
+                              nullable: true
+                              type: "string"
+                              description: Minimum amount (in USD) for an allocation or deallocation. Absence means no minimum.
+                            yield_source:
+                              description: Yield generation mechanism of this strategy
+                              oneOf:
+                                - description: Funds are staked on-chain, PoS is the source of yield.
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      enum:
+                                        - staking
+                                - description: Funds are put at work in another yield-generation financial mechanism.
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      enum:
+                                        - off_chain
+                      next_cursor:
+                        nullable: true
+                        description: index to send into PageRequest for next page, None means you've reached the end.
+                        type: string
+                example:
+                  error: []
+                  result:
+                    next_cursor: "2"
+                    items:
+                      - id: ESRFUO3-Q62XD-WIOIL7
+                        asset: DOT
+                        lock_type:
+                          type: instant
+                          payout_frequency: 604800
+                        apr_estimate:
+                          low: "8.0000"
+                          high: "12.0000"
+                        user_min_allocation: "0.01"
+                        allocation_fee: "0.0000"
+                        deallocation_fee: "0.0000"
+                        auto_compound:
+                          type: enabled
+                        yield_source:
+                          type: staking
+                        can_allocate: true
+                        can_deallocate: true
+                        allocation_restriction_info: []
+
+  /private/Earn/Allocations:
+    post:
+      tags:
+        - Earn
+      summary: List Earn Allocations
+      description: |-
+        List all allocations for the user.
+
+        Requires the `Query Funds` API key permission.
+
+        By default all allocations are returned, even for strategies that have been
+        used in the past and have zero balance now. That is so that the user can see
+        how much was earned with given strategy in the past.
+        `hide_zero_allocations` parameter can be used to remove zero balance entries
+        from the output.  Paging hasn't been implemented for this method as we don't
+        expect the result for a particular user to be overwhelmingly large.
+
+        All amounts in the output can be denominated in a currency of user's choice
+        (the `converted_asset` parameter).
+
+        Information about when the next reward will be paid to the client is also
+        provided in the output.
+
+        Allocated funds can be in up to 4 states:
+        - bonding
+        - allocated
+        - exit_queue (ETH only)
+        - unbonding
+
+        Any funds in `total` not in `bonding`/`unbonding` are simply allocated and
+        earning rewards. Depending on the strategy funds in the other 3 states can
+        also be earning rewards. Consult the output of `/Earn/Strategies` to know
+        whether `bonding`/`unbonding` earn rewards. `ETH` in `exit_queue` still
+        earns rewards.
+
+        Note that for `ETH`, when the funds are in the `exit_queue` state, the
+        `expires` time given is the time when the funds will have finished
+        unbonding, not when they go from exit queue to unbonding.
+
+        (Un)bonding time estimate can be inaccurate right after having (de)allocated the
+        funds. Wait 1-2 minutes after (de)allocating to get an accurate result.
+      operationId: listAllocations
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: Page request
+              type: object
+              properties:
+                nonce:
+                  $ref: "./partials/properties/nonce.yaml"
+                ascending:
+                  nullable: true
+                  description: "`true` to sort ascending, `false` (the default) for descending."
+                  type: boolean
+                converted_asset:
+                  nullable: true
+                  description: A secondary currency to express the value of your allocations (the default is USD).
+                  type: string
+                hide_zero_allocations:
+                  nullable: true
+                  description: Omit entries for strategies that were used in the past but now they don't hold any allocation (the default is `false`)
+                  type: boolean
+              required:
+                - nonce
+              example:
+                nonce: 30295839
+                converted_asset: "EUR"
+                hide_zero_allocations: true
+        required: true
+      responses:
+        "200":
+          description: Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    $ref: "./schemas/objects/errors/error.yaml"
+                  result:
+                    nullable: true
+                    description: Page response
+                    type: object
+                    properties:
+                      converted_asset:
+                        description: |-
+                          A secondary asset to show the value of allocations. (Eg. you also want to
+                          see the value of your allocations in USD). Choose this in the request
+                          parameters.
+                        type: string
+                      items:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            amount_allocated:
+                              description: Amounts allocated to this Earn strategy
+                              type: object
+                              properties:
+                                bonding:
+                                  nullable: true
+                                  description: Amount allocated in bonding status. Only present when there are bonding allocations.
+                                  type: object
+                                  properties:
+                                    allocation_count:
+                                      description: The total number of allocations in this state for this asset
+                                      type: integer
+                                      format: uint
+                                    allocations:
+                                      description: Details about when each allocation will expire and move to the next state
+                                      type: array
+                                      items:
+                                        description: Additional information about the allocation describing the amount contained within the allocation and when it will transition to the next state
+                                        type: object
+                                        properties:
+                                          converted:
+                                            description: Amount converted into the requested asset
+                                            type: string
+                                          created_at:
+                                            description: |-
+                                              The date and time which a request to either allocate was received and
+                                              the funds started bonding.
+                                            type: string
+                                            format: date-time
+                                          expires:
+                                            description: The date at which the `Bonded` allocation will move to the `Earning` state.
+                                            type: string
+                                            format: date-time
+                                          native:
+                                            description: Amount in the native asset
+                                            type: string
+                                    converted:
+                                      description: Amount converted into the requested asset
+                                      type: string
+                                    native:
+                                      description: Amount in the native asset
+                                      type: string
+                                exit_queue:
+                                  nullable: true
+                                  description: Amount allocated in the exit-queue status. Only present when there are exit_queue allocations.
+                                  type: object
+                                  properties:
+                                    allocation_count:
+                                      description: The total number of allocations in this state for this asset
+                                      type: integer
+                                      format: uint
+                                    allocations:
+                                      description: Details about when each allocation will expire and move to the next state
+                                      type: array
+                                      items:
+                                        description: Additional information about the allocation describing the amount contained within the allocation and when it will transition to the next state
+                                        type: object
+                                        properties:
+                                          converted:
+                                            description: Amount converted into the requested asset
+                                            type: string
+                                          created_at:
+                                            description: |-
+                                              The date and time which a request to deallocate was received and processed.
+                                              For a deallocation request to a strategy with an `exit-queue`, this will be the time the funds joined the exit queue.
+                                            type: string
+                                            format: date-time
+                                          expires:
+                                            description: The date/time when the funds will be unbonded.
+                                            type: string
+                                            format: date-time
+                                          native:
+                                            description: Amount in the native asset
+                                            type: string
+                                    converted:
+                                      description: Amount converted into the requested asset
+                                      type: string
+                                    native:
+                                      description: Amount in the native asset
+                                      type: string
+                                pending:
+                                  nullable: true
+                                  description: Pending allocation amount - can be negative if the pending operation is deallocation. Only present when there are pending allocations.
+                                  type: object
+                                  properties:
+                                    converted:
+                                      description: Amount converted into the requested asset
+                                      type: string
+                                    native:
+                                      description: Amount in the native asset
+                                      type: string
+                                total:
+                                  description: Total amount allocated to this Earn strategy
+                                  type: object
+                                  properties:
+                                    converted:
+                                      description: Amount converted into the requested asset
+                                      type: string
+                                    native:
+                                      description: Amount in the native asset
+                                      type: string
+                                unbonding:
+                                  nullable: true
+                                  description: Amount allocated in unbonding status. Only present when there are unbonding allocations.
+                                  type: object
+                                  properties:
+                                    allocation_count:
+                                      description: The total number of allocations in this state for this asset
+                                      type: integer
+                                      format: uint
+                                    allocations:
+                                      description: Details about when each allocation will expire and move to the next state
+                                      type: array
+                                      items:
+                                        description: Additional information about the allocation describing the amount contained within the allocation and when it will transition to the next state
+                                        type: object
+                                        properties:
+                                          converted:
+                                            description: Amount converted into the requested asset
+                                            type: string
+                                          created_at:
+                                            description: |-
+                                              The date and time which a request to either allocate or deallocate was received and processed.
+
+                                              For a deallocation request to a strategy with an `exit-queue`, this will be the time the funds joined the exit queue. For a deallocation request to a strategy without exit queue, this will be the time the funds started unbonding
+                                            type: string
+                                            format: date-time
+                                          expires:
+                                            description: The date/time the funds will be unbonded.
+                                            type: string
+                                            format: date-time
+                                          native:
+                                            description: Amount in the native asset
+                                            type: string
+                                    converted:
+                                      description: Amount converted into the requested asset
+                                      type: string
+                                    native:
+                                      description: Amount in the native asset
+                                      type: string
+                            native_asset:
+                              description: The asset of the native currency of this allocation
+                              type: string
+                            payout:
+                              nullable: true
+                              description: Information about the current payout period, absent if when there is no current payout period.
+                              type: object
+                              properties:
+                                accumulated_reward:
+                                  description: Reward accumulated in the payout period until now
+                                  type: object
+                                  properties:
+                                    converted:
+                                      description: Amount converted into the requested asset
+                                      type: string
+                                    native:
+                                      description: Amount in the native asset
+                                      type: string
+                                estimated_reward:
+                                  description: Estimated reward from now until the payout
+                                  type: object
+                                  properties:
+                                    converted:
+                                      description: Amount converted into the requested asset
+                                      type: string
+                                    native:
+                                      description: Amount in the native asset
+                                      type: string
+                                period_end:
+                                  description: Tentative date of the next reward payout.
+                                  type: string
+                                  format: date-time
+                                period_start:
+                                  description: When the current payout period started. Either the date of the last payout or when it was enabled.
+                                  type: string
+                                  format: date-time
+                            strategy_id:
+                              description: Unique ID for Earn Strategy
+                              type: string
+                            total_rewarded:
+                              description: Amount earned using the strategy during the whole lifetime of user account
+                              type: object
+                              properties:
+                                converted:
+                                  description: Amount converted into the requested asset
+                                  type: string
+                                native:
+                                  description: Amount in the native asset
+                                  type: string
+                      total_allocated:
+                        description: The total amount allocated across all strategies, denominated in the `converted_asset` currency
+                        type: string
+                      total_rewarded:
+                        description: Amount earned across all strategies during the whole lifetime of user account, denominated in `converted_asset` currency
+                        type: string
+                example:
+                  error: []
+                  result:
+                    converted_asset: USD
+                    total_allocated: "49.2398"
+                    total_rewarded: "0.0675"
+                    next_cursor: "2"
+                    items:
+                      - strategy_id: ESDQCOL-WTZEU-NU55QF
+                        native_asset: ETH
+                        amount_allocated:
+                          bonding:
+                            native: "0.0210000000"
+                            converted: "39.0645"
+                            allocation_count: 2
+                            allocations:
+                              - created_at: "2023-07-06T10:52:05Z"
+                                expires: "2023-08-19T02:34:05.807Z"
+                                native: "0.0010000000"
+                                converted: "1.8602"
+                              - created_at: "2023-08-01T11:25:52Z"
+                                expires: "2023-09-06T07:55:52.648Z"
+                                native: "0.0200000000"
+                                converted: "37.2043"
+                          total:
+                            native: "0.0210000000"
+                            converted: "39.0645"
+                        total_rewarded:
+                          native: "0"
+                          converted: "0.0000"
+
+components:
+  securitySchemes:
+    API-Key:
+      type: apiKey
+      description: The "API-Key" header should contain your API key.
+      name: API-Key
+      in: header
+
+    API-Sign:
+      type: apiKey
+      description: Authenticated requests should be signed with the "API-Sign" header, using a signature generated with your private key, nonce, encoded payload, and URI path.
+      name: API-Sign
+      in: header
+
+security:
+  - API-Key: []
+    API-Sign: []
+
+tags:
+  - name: Market Data
+  - name: Account Data
+  - name: Trading
+  - name: Funding
+  - name: Subaccounts
+    description: Subaccounts are currently only available to institutional clients. Please contact your Account Manager for more details.
+  - name: Earn
+    description: |
+      The earn API allows interacting with all of Kraken's yield generating products. It replaces the old `/staking` part of the API.
+
+      The different available earn products are represented by earn strategies. This corresponds to the legacy `Staking/Assets`. `Stake`/`Unstake` are replaced by `Allocate`/`Deallocate`.
+
+      ### Overview of the available endpoints under `/Earn`:
+
+      - `Strategies` - list all earn strategies for which you are eligible or have a balance.
+      - `Allocations` - lists the balance in your earn account for each strategy. Requires the `Query Funds` API key permission.
+      - `Allocate`/`Deallocate` - allocate/deallocate to an earn strategy through an async operation. Requires the `Earn Funds` API key permission.
+      - `AllocateStatus`/`DeallocateStatus` - verifies the state of the last allocation/deallocation. Requires the `Earn Funds` or `Query Funds` API key permission.
+
+      ### Example usage:
+
+      ### Determine which funds are earning rewards:
+
+      1. Call `Strategies` to obtain information about the relevant strategy. The `lock_type` field shows whether bonding/unbonding funds are earning yield. The relevant fields are `bonding_rewards`/`unbonding_rewards`.
+      2. Call `Allocations` for the relevant strategy. From the previous step, for strategies where bonding/unbonding does not earn yield, substract these balances from `amount_allocated.total` to determine which balances are currently earning.
+
+      ### Get allocatable balance:
+
+      Call `/0/private/BalanceEx`, subtract `hold_trading` amount. Remaining balance is available for allocation to a strategy.
+
+      ### Geo restrictions:
+
+      Some earn strategies are not available in all geographic regions. `Strategies` will return only strategies available to the caller.
+
+x-tagGroups:
+  - name: Public Endpoints
+    tags:
+      - Market Data
+
+  - name: Authenticated Endpoints
+    tags:
+      - Account Data
+      - Trading
+      - Funding
+      - Subaccounts
+      - Earn
+
+  

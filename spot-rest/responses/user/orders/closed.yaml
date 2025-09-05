@@ -1,0 +1,85 @@
+error: []
+result:
+  closed:
+    OT5JQ3-MNZQI-GDXY7O:
+      refid:
+      userref: 1000
+      status: canceled
+      reason: User requested
+      opentm: 1550101012.7873
+      closetm: 1550101338.364
+      starttm: 0
+      expiretm: 0
+      descr:
+        pair: DASHUSD
+        type: buy
+        ordertype: limit
+        price: '1.000'
+        price2: '0'
+        leverage: none
+        order: buy 10.00000000 DASHUSD @ limit 1.000
+        close: ''
+      vol: '10.00000000'
+      vol_exec: '0.00000000'
+      cost: '0.000000'
+      fee: '0.000000'
+      price: '0.000000'
+      stopprice: '0.000000'
+      limitprice: '0.000000'
+      misc: ''
+      oflags: fciq
+    OQB6D2-O5QMF-QBBAWZ:
+      refid:
+      userref: 3000
+      status: canceled
+      reason: User requested
+      opentm: 1550101013.9522
+      closetm: 1550101338.0032
+      starttm: 0
+      expiretm: 0
+      descr:
+        pair: XBTEUR
+        type: buy
+        ordertype: limit
+        price: '1.0'
+        price2: '0'
+        leverage: none
+        order: buy 10.00000000 XBTEUR @ limit 1.0
+        close: ''
+      vol: '10.00000000'
+      vol_exec: '0.00000000'
+      cost: '0.00000'
+      fee: '0.00000'
+      price: '0.00000'
+      stopprice: '0.00000'
+      limitprice: '0.00000'
+      misc: ''
+      oflags: fciq
+    OFESQG-RLWJQ-ZV5AME:
+      refid:
+      userref: 2000
+      status: canceled
+      reason: User requested
+      opentm: 1550101013.2046
+      closetm: 1550101337.6203
+      starttm: 0
+      expiretm: 0
+      descr:
+        pair: XBTUSD
+        type: buy
+        ordertype: limit
+        price: '1.0'
+        price2: '0'
+        leverage: none
+        order: buy 10.00000000 XBTUSD @ limit 1.0
+        close: ''
+      vol: '10.00000000'
+      vol_exec: '0.00000000'
+      cost: '0.00000'
+      fee: '0.00000'
+      price: '0.00000'
+      stopprice: '0.00000'
+      limitprice: '0.00000'
+      misc: ''
+      oflags: fciq
+  count: 3

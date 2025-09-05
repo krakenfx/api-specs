@@ -1,0 +1,1172 @@
+openapi: 3.1.0
+info:
+    title: History
+    version: v3.0
+servers:
+    - url: https://futures.kraken.com/api/history/v3
+      description: Kraken Futures
+      x-kfOnly: true
+tags:
+    - name: Account History
+      description: |
+        Account History provides account-specific data, including account logs ( history of all balance and position changes) and history for executions, orders, and triggers.
+
+        * The `/account-log` endpoint provides a paginated JSON response, with access to all account log history specified by ranges of timestamp or ID.
+        * The `/accountlogcsv` endpoint provides a CSV formatted response of 500,000 rows of most recent account logs.
+         See also the websocket feed of account log snapshots
+        * The `/executions` endpoint provides a paginated JSON response, with access to all private execution history specified by ranges of timestamp or ID
+        * The `/orders` endpoint provides a paginated JSON response, with access to all private order history specified by ranges of timestamp or ID
+        * The `/triggers` endpoint provides a paginated JSON response, with access to all private trigger history specified by ranges of timestamp or ID
+    - name: Market History
+paths:
+    /market/{tradeable}/executions:
+        get:
+            operationId: getPublicExecutionEvents
+            tags:
+                - Market History
+            summary: Get public execution events
+            description: |
+                Lists trades for a market.
+            parameters:
+                - $ref: "_parameters.yml#/SinceDateFilter"
+                - $ref: "_parameters.yml#/BeforeDateFilter"
+                - $ref: "_parameters.yml#/SortOrder"
+                - $ref: "_parameters.yml#/ContinuationToken"
+                - $ref: "_parameters.yml#/Count"
+                - name: tradeable
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: ""
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    len:
+                                        type: integer
+                                        format: uint64
+                                    elements:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/HistoricalExecutionElementSanitized"
+                                    continuationToken:
+                                        $ref: "#/components/schemas/NextContinuationToken"
+                                required:
+                                    - elements
+                                    - len
+    /market/{tradeable}/orders:
+        get:
+            operationId: getPublicOrderEvents
+            tags:
+                - Market History
+            summary: Get public order events
+            description: |
+                Lists order events for a market.
+            parameters:
+                - $ref: "_parameters.yml#/SinceDateFilter"
+                - $ref: "_parameters.yml#/BeforeDateFilter"
+                - $ref: "_parameters.yml#/SortOrder"
+                - $ref: "_parameters.yml#/ContinuationToken"
+                - $ref: "_parameters.yml#/Count"
+                - name: tradeable
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: ""
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    len:
+                                        type: integer
+                                        format: uint64
+                                    elements:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/HistoricalOrderElementSanitized"
+                                    continuationToken:
+                                        $ref: "#/components/schemas/NextContinuationToken"
+                                required:
+                                    - len
+                                    - elements
+    /market/{tradeable}/price:
+        get:
+            operationId: getPublicPriceEvents
+            tags:
+                - Market History
+            summary: Get public mark price events
+            description: |
+                Lists price events for a market.
+            parameters:
+                - $ref: "_parameters.yml#/SinceDateFilter"
+                - $ref: "_parameters.yml#/BeforeDateFilter"
+                - $ref: "_parameters.yml#/SortOrder"
+                - $ref: "_parameters.yml#/ContinuationToken"
+                - $ref: "_parameters.yml#/Count"
+                - name: tradeable
+                  in: path
+                  required: true
+                  schema:
+                    type: string
+            responses:
+                "200":
+                    description: ""
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    len:
+                                        type: integer
+                                        format: uint64
+                                    elements:
+                                        type: array
+                                        items:
+                                            $ref: "_schemas.yml#/PriceElement"
+                                    continuationToken:
+                                        $ref: "#/components/schemas/NextContinuationToken"
+                                required:
+                                    - len
+                                    - elements
+    /executions:
+        get:
+            operationId: getExecutionEvents
+            tags:
+                - Account History
+            summary: Get execution events
+            description: |
+                Lists executions/trades for authenticated account.
+            security:
+                - general-api-key-read-only: []
+                  authent: []
+            parameters:
+                - $ref: "_parameters.yml#/SinceDateFilter"
+                - $ref: "_parameters.yml#/BeforeDateFilter"
+                - $ref: "_parameters.yml#/SortOrder"
+                - $ref: "_parameters.yml#/ContinuationToken"
+                - $ref: "_parameters.yml#/Count"
+                - $ref: "#/components/parameters/Tradeable"
+            responses:
+                "200":
+                    description: ""
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accountUid:
+                                        type: string
+                                        format: uuid
+                                    len:
+                                        type: integer
+                                        format: uint64
+                                    serverTime:
+                                        type: string
+                                        format: date-time
+                                    elements:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/HistoricalExecutionElement"
+                                    continuationToken:
+                                        $ref: "#/components/schemas/NextContinuationToken"
+                                required:
+                                    - accountUid
+                                    - len
+                                    - elements
+    /orders:
+        get:
+            operationId: getOrderEvents
+            tags:
+                - Account History
+            summary: Get order events
+            description: |
+                Lists order events for authenticated account.
+            security:
+                - general-api-key-read-only: []
+                  authent: []
+            parameters:
+                - $ref: "_parameters.yml#/SinceDateFilter"
+                - $ref: "_parameters.yml#/BeforeDateFilter"
+                - $ref: "_parameters.yml#/SortOrder"
+                - $ref: "_parameters.yml#/ContinuationToken"
+                - $ref: "_parameters.yml#/Count"
+                - $ref: "#/components/parameters/Tradeable"
+                - $ref: "_parameters.yml#/OpenedOrder"
+                - $ref: "_parameters.yml#/ClosedOrder"
+            responses:
+                "200":
+                    description: ""
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accountUid:
+                                        type: string
+                                        format: uuid
+                                    len:
+                                        type: integer
+                                        format: uint64
+                                    serverTime:
+                                        type: string
+                                        format: date-time
+                                    elements:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/HistoricalOrderElement"
+                                    continuationToken:
+                                        $ref: "#/components/schemas/NextContinuationToken"
+                                required:
+                                    - accountUid
+                                    - len
+                                    - elements
+    /triggers:
+        get:
+            operationId: getTriggerEvents
+            tags:
+                - Account History
+            summary: Get trigger events
+            description: |
+                Lists trigger events for authenticated account.
+            security:
+                - general-api-key-read-only: []
+                  authent: []
+            parameters:
+                - $ref: "_parameters.yml#/SinceDateFilter"
+                - $ref: "_parameters.yml#/BeforeDateFilter"
+                - $ref: "_parameters.yml#/SortOrder"
+                - $ref: "_parameters.yml#/ContinuationToken"
+                - $ref: "_parameters.yml#/Count"
+                - $ref: "#/components/parameters/Tradeable"
+                - $ref: "_parameters.yml#/OpenedTrigger"
+                - $ref: "_parameters.yml#/ClosedTrigger"
+            responses:
+                "200":
+                    description: ""
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accountUid:
+                                        type: string
+                                        format: uuid
+                                    len:
+                                        type: integer
+                                        format: uint64
+                                    serverTime:
+                                        type: string
+                                        format: date-time
+                                    elements:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/HistoricalTriggerElement"
+                                    continuationToken:
+                                        $ref: "#/components/schemas/NextContinuationToken"
+                                required:
+                                    - accountUid
+                                    - len
+                                    - elements
+    /positions:
+        get:
+            operationId: getPositionEvents
+            tags:
+                - Account History
+            summary: Get position update events
+            description: Lists position events for authenticated account.
+            security:
+                - general-api-key-read-only: []
+                  authent: []
+            parameters:
+                - $ref: "_parameters.yml#/SinceDateFilter"
+                - $ref: "_parameters.yml#/BeforeDateFilter"
+                - $ref: "_parameters.yml#/SortOrder"
+                - $ref: "_parameters.yml#/ContinuationToken"
+                - $ref: "_parameters.yml#/Count"
+                - $ref: "_parameters.yml#/IncludeOpenedPositions"
+                - $ref: "_parameters.yml#/IncludeClosedPositions"
+                - $ref: "_parameters.yml#/IncludeIncreasedPositions"
+                - $ref: "_parameters.yml#/IncludeDecreasedPositions"
+                - $ref: "_parameters.yml#/IncludeReversedPositions"
+                - $ref: "_parameters.yml#/IncludeNoChangePositions"
+                - $ref: "_parameters.yml#/IncludeTradePositions"
+                - $ref: "_parameters.yml#/IncludeFundingRealizationPositions"
+                - $ref: "_parameters.yml#/IncludeSettlementPositions"
+                - $ref: "#/components/parameters/Tradeable"
+            responses:
+                "200":
+                    description: ""
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accountUid:
+                                        type: string
+                                        format: uuid
+                                    len:
+                                        type: integer
+                                        format: uint64
+                                    serverTime:
+                                        type: string
+                                        format: date-time
+                                    elements:
+                                        type: array
+                                        items:
+                                            $ref: "_schemas.yml#/HistoricalPositionUpdateElement"
+                                    continuationToken:
+                                        $ref: "#/components/schemas/NextContinuationToken"
+                                required:
+                                    - accountUid
+                                    - len
+                                    - elements
+    /account-log:
+        get:
+            operationId: accountLog
+            tags:
+                - Account History
+            summary: Get account log
+            description: |
+                Lists account log entries, paged by timestamp or by ID.
+
+                To request entries by time range, use the `since` and `before` parameters.
+                To request entries by ID range, use the `from` and `to` parameters.
+                Any combination of `since`, `before`, `from` and `to` can be used to restrict the requested range of entries.
+            security:
+                - general-api-key-read-only: []
+                  authent: []
+            parameters:
+                - description: "Unix timestamp in milliseconds."
+                  name: since
+                  in: query
+                  required: false
+                  schema: {$ref: "_schemas.yml#/TimestampMilliseconds"}
+                - description: "Unix timestamp in milliseconds."
+                  name: before
+                  in: query
+                  required: false
+                  schema: {$ref: "_schemas.yml#/TimestampMilliseconds"}
+                - description: "ID of the first entry (inclusive). IDs start at 1."
+                  name: from
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    example: 1
+                - description: "ID of the last entry (inclusive)."
+                  name: to
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    example: 100
+                - description: |
+                    Order of events in response. `asc` = chronological, `desc` = reverse-chronological.
+                  name: sort
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    enum:
+                        - asc
+                        - desc
+                    default: desc
+                - description: "Type of entry to filter by. Only this type will be returned."
+                  name: info
+                  in: query
+                  required: false
+                  schema:
+                    type: string
+                    enum:
+                        - futures trade
+                        - futures liquidation
+                        - futures assignor
+                        - futures assignee
+                        - futures unwind counterparty
+                        - futures unwind bankrupt
+                        - covered liquidation
+                        - funding rate change
+                        - conversion
+                        - interest payment
+                        - transfer
+                        - cross-exchange transfer
+                        - kfee applied
+                        - subaccount transfer
+                        - settlement
+                        - admin transfer
+                        - tax withheld
+                        - tax refund
+                    example: futures trade
+                - description: Amount of entries to be returned.
+                  name: count
+                  in: query
+                  required: false
+                  schema:
+                    type: integer
+                    default: 500
+                - description: Include exchange rate and conversion fee for conversions.
+                  name: conversion_details
+                  in: query
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+            responses:
+                "200":
+                    description: Account log.
+                    content:
+                        application/json:
+                            schema:
+                                title: "Account Log Response"
+                                type: object
+                                properties:
+                                    accountUid:
+                                        $ref: "_schemas.yml#/AccountUid"
+                                    logs:
+                                        type: array
+                                        items:
+                                            $ref: "_schemas.yml#/AccountLogEntry"
+                                required:
+                                    - accountUid
+                                    - logs
+                "429":
+                    $ref: _responses.yml#/RateLimited
+    /accountlogcsv:
+        get:
+            operationId: accountLogCsv
+            tags:
+                - Account History
+            summary: Account log (CSV)
+            description: |
+                Lists recent account log entries in CSV format.
+            security:
+                - general-api-key-read-only: []
+                  authent: []
+            parameters:
+                - description: Include exchange rate, exchange rate from currency, and conversion fee for conversions.
+                  name: conversion_details
+                  in: query
+                  required: false
+                  schema:
+                    type: boolean
+                    default: false
+            responses:
+                "200":
+                    description: A CSV formatted response of most recent account log entries.
+                "401":
+                    description: Credentials required.
+                "429":
+                    $ref: _responses.yml#/RateLimited
+components:
+    securitySchemes:
+        authent:
+            type: apiKey
+            description: Authentication string
+            in: header
+            name: Authent
+            x-inlineDescription: true
+        general-api-key-read-only:
+            type: apiKey
+            description: General API key with at least **read-only** access
+            in: header
+            name: APIKey
+            x-inlineDescription: true
+    parameters:
+        Tradeable:
+            description: If present events of other tradeables are filtered out.
+            name: tradeable
+            in: query
+            required: false
+            schema:
+                type: string
+    schemas:
+        FeeCalculationInfoElement:
+            type: object
+            properties:
+                percentageFee:
+                    $ref: "_schemas.yml#/Decimal"
+                userFeeDiscountApplied:
+                    oneOf:
+                        - $ref: "_schemas.yml#/Decimal"
+                        - type: "null"
+                marketShareRebateCredited:
+                    oneOf:
+                        - $ref: "_schemas.yml#/Decimal"
+                        - type: "null"
+            required:
+                - percentageFee
+                - userFeeDiscountApplied
+                - marketShareRebateCredited
+        HistoricalExecution:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                makerOrder:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                takerOrder:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                quantity:
+                    $ref: "_schemas.yml#/Decimal"
+                price:
+                    $ref: "_schemas.yml#/Decimal"
+                markPrice:
+                    $ref: "_schemas.yml#/Decimal"
+                limitFilled:
+                    type: boolean
+                oldTakerOrder:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                usdValue:
+                    $ref: "_schemas.yml#/Decimal"
+                makerOrderData:
+                    $ref: "#/components/schemas/MakerOrderData"
+                    nullable: true
+                takerOrderData:
+                    $ref: "#/components/schemas/TakerOrderData"
+                    nullable: true
+                regulatoryData:
+                    $ref: "_schemas.yml#/RegulatoryData"
+            required:
+                - uid
+                - makerOrder
+                - takerOrder
+                - timestamp
+                - quantity
+                - price
+                - markPrice
+                - limitFilled
+                - usdValue
+                - makerOrderData
+                - takerOrderData
+        HistoricalExecutionDetails:
+            type: object
+            properties:
+                execution:
+                    $ref: "#/components/schemas/HistoricalExecution"
+                takerReducedQuantity:
+                    description: sometimes empty string
+                    type: string
+            required:
+                - execution
+                - takerReducedQuantity
+        HistoricalExecutionDetailsSanitized:
+            type: object
+            properties:
+                execution:
+                    $ref: "#/components/schemas/HistoricalExecutionSanitized"
+                takerReducedQuantity:
+                    description: sometimes empty string
+                    type: string
+            required:
+                - execution
+                - takerReducedQuantity
+        HistoricalExecutionElement:
+            type: object
+            properties:
+                uid:
+                    type: string
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                event:
+                    $ref: "#/components/schemas/HistoricalExecutionEvent"
+            required:
+                - uid
+                - timestamp
+                - event
+        HistoricalExecutionElementSanitized:
+            type: object
+            properties:
+                uid:
+                    type: string
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                event:
+                    $ref: "#/components/schemas/HistoricalExecutionEventSanitized"
+            required:
+                - uid
+                - timestamp
+                - event
+        HistoricalExecutionEvent:
+            type: object
+            properties:
+                Execution:
+                    $ref: "#/components/schemas/HistoricalExecutionDetails"
+            required:
+                - Execution
+        HistoricalExecutionEventSanitized:
+            type: object
+            properties:
+                Execution:
+                    $ref: "#/components/schemas/HistoricalExecutionDetailsSanitized"
+            required:
+                - Execution
+        HistoricalExecutionSanitized:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                makerOrder:
+                    $ref: "#/components/schemas/HistoricalOrderSanitized"
+                takerOrder:
+                    $ref: "#/components/schemas/HistoricalOrderSanitized"
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                quantity:
+                    $ref: "_schemas.yml#/Decimal"
+                price:
+                    $ref: "_schemas.yml#/Decimal"
+                markPrice:
+                    $ref: "_schemas.yml#/Decimal"
+                limitFilled:
+                    type: boolean
+                oldTakerOrder:
+                    $ref: "#/components/schemas/HistoricalOrderSanitized"
+                usdValue:
+                    $ref: "_schemas.yml#/Decimal"
+            required:
+                - uid
+                - makerOrder
+                - takerOrder
+                - timestamp
+                - quantity
+                - price
+                - markPrice
+                - limitFilled
+                - usdValue
+        HistoricalOrder:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                accountUid:
+                    type: string
+                    format: uuid
+                tradeable:
+                    type: string
+                direction:
+                    type: string
+                    enum:
+                        - Buy
+                        - Sell
+                quantity:
+                    $ref: "_schemas.yml#/Decimal"
+                filled:
+                    $ref: "_schemas.yml#/Decimal"
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                limitPrice:
+                    $ref: "_schemas.yml#/Decimal"
+                orderType:
+                    type: string
+                    enum:
+                        - Limit
+                        - IoC
+                        - Post
+                        - Market
+                        - Liquidation
+                        - Assignment
+                        - Unwind
+                clientId:
+                    type: string
+                reduceOnly:
+                    type: boolean
+                lastUpdateTimestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                spotData:
+                    type:
+                        - string
+                        - "null"
+                regulatoryExternalUid:
+                    type: string
+                    format: uuid
+            required:
+                - uid
+                - accountUid
+                - tradeable
+                - direction
+                - quantity
+                - filled
+                - timestamp
+                - limitPrice
+                - orderType
+                - clientId
+                - reduceOnly
+                - lastUpdateTimestamp
+                - spotData
+        HistoricalOrderElement:
+            type: object
+            properties:
+                uid:
+                    type: string
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                event:
+                    $ref: "#/components/schemas/HistoricalOrderEvent"
+            required:
+                - uid
+                - timestamp
+                - event
+        HistoricalOrderElementSanitized:
+            type: object
+            properties:
+                uid:
+                    type: string
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                event:
+                    $ref: "#/components/schemas/HistoricalOrderEventSanitized"
+            required:
+                - uid
+                - timestamp
+                - event
+        HistoricalOrderEvent:
+            type: object
+            oneOf:
+                - type: object
+                  properties:
+                    OrderPlaced: {$ref: "#/components/schemas/OrderPlaced"}
+                  required:
+                    - OrderPlaced
+                - type: object
+                  properties:
+                    OrderUpdated: {$ref: "#/components/schemas/OrderUpdated"}
+                  required:
+                    - OrderUpdated
+                - type: object
+                  properties:
+                    OrderRejected: {$ref: "#/components/schemas/OrderRejected"}
+                  required:
+                    - OrderRejected
+                - type: object
+                  properties:
+                    OrderCancelled: {$ref: "#/components/schemas/OrderCancelled"}
+                  required:
+                    - OrderCancelled
+                - type: object
+                  properties:
+                    OrderNotFound: {$ref: "#/components/schemas/OrderNotFound"}
+                  required:
+                    - OrderNotFound
+                - type: object
+                  properties:
+                    OrderEditRejected: {$ref: "#/components/schemas/OrderEditRejected"}
+                  required:
+                    - OrderEditRejected
+        HistoricalOrderEventSanitized:
+            type: object
+            oneOf:
+                - type: object
+                  properties:
+                    OrderPlaced: {$ref: "#/components/schemas/OrderPlacedSanitized"}
+                  required:
+                    - OrderPlaced
+                - type: object
+                  properties:
+                    OrderUpdated: {$ref: "#/components/schemas/OrderUpdatedSanitized"}
+                  required:
+                    - OrderUpdated
+                - type: object
+                  properties:
+                    OrderCancelled: {$ref: "#/components/schemas/OrderCancelledSanitized"}
+                  required:
+                    - OrderCancelled
+        HistoricalOrderSanitized:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                tradeable:
+                    type: string
+                direction:
+                    type: string
+                    enum:
+                        - Buy
+                        - Sell
+                quantity:
+                    $ref: "_schemas.yml#/Decimal"
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                limitPrice:
+                    $ref: "_schemas.yml#/Decimal"
+                orderType:
+                    type: string
+                reduceOnly:
+                    type: boolean
+                lastUpdateTimestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+            required:
+                - uid
+                - tradeable
+                - direction
+                - quantity
+                - timestamp
+                - limitPrice
+                - orderType
+                - reduceOnly
+                - lastUpdateTimestamp
+        HistoricalTrigger:
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                accountId:
+                    type: number
+                    format: uint64
+                accountUid:
+                    type: string
+                    format: uuid
+                tradeable:
+                    type: string
+                direction:
+                    type: string
+                    enum:
+                        - Buy
+                        - Sell
+                quantity:
+                    $ref: "_schemas.yml#/Decimal"
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                limitPrice:
+                    $ref: "_schemas.yml#/Decimal"
+                orderType:
+                    type: string
+                clientId:
+                    type: string
+                reduceOnly:
+                    type: boolean
+                lastUpdateTimestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                triggerOptions:
+                    $ref: "#/components/schemas/TriggerOptions"
+            required:
+                - uid
+                - accountId
+                - accountUid
+                - tradeable
+                - direction
+                - quantity
+                - timestamp
+                - limitPrice
+                - orderType
+                - clientId
+                - reduceOnly
+                - lastUpdateTimestamp
+                - triggerOptions
+        HistoricalTriggerElement:
+            type: object
+            properties:
+                uid:
+                    type: string
+                timestamp:
+                    $ref: "_schemas.yml#/TimestampMilliseconds"
+                event:
+                    $ref: "#/components/schemas/HistoricalTriggerEvent"
+            required:
+                - uid
+                - timestamp
+                - event
+        HistoricalTriggerEvent:
+            type: object
+            oneOf:
+                - type: object
+                  properties:
+                    OrderTriggerPlaced: {$ref: "#/components/schemas/TriggerPlaced"}
+                  required:
+                    - OrderTriggerPlaced
+                - type: object
+                  properties:
+                    OrderTriggerCancelled: {$ref: "#/components/schemas/TriggerCancelled"}
+                  required:
+                    - OrderTriggerCancelled
+                - type: object
+                  properties:
+                    OrderTriggerUpdated: {$ref: "#/components/schemas/TriggerUpdated"}
+                  required:
+                    - OrderTriggerUpdated
+                - type: object
+                  properties:
+                    OrderTriggerActivated: {$ref: "#/components/schemas/TriggerActivated"}
+                  required:
+                    - OrderTriggerActivated
+                - type: object
+                  properties:
+                    OrderTriggerEditRejected: {$ref: "#/components/schemas/TriggerEditRejected"}
+                  required:
+                    - OrderTriggerEditRejected
+        MakerOrderData:
+            type: object
+            properties:
+                fee:
+                    $ref: "_schemas.yml#/Decimal"
+                positionSize:
+                    $ref: "_schemas.yml#/Decimal"
+                feeCalculationInfo:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/FeeCalculationInfoElement"
+            required:
+                - fee
+                - positionSize
+                - feeCalculationInfo
+        NextContinuationToken:
+            description: |
+                Opaque token to pass to the next request to continue listing events. The `sort` parameter
+                must be the same as in the previous request to continue listing in the same direction.
+            type: string
+            format: base64
+        OrderCancelled:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                reason:
+                    type: string
+            required:
+                - order
+                - reason
+        OrderCancelledSanitized:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalOrderSanitized"
+                reason:
+                    type: string
+            required:
+                - order
+                - reason
+        OrderEditRejected:
+            type: object
+            properties:
+                oldOrder:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                attemptedOrder:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                orderError:
+                    type: string
+            required:
+                - oldOrder
+                - attemptedOrder
+                - orderError
+        OrderNotFound:
+            type: object
+            properties:
+                accountUid:
+                    type: string
+                    format: uuid
+                orderId:
+                    type: string
+                    example: Uuid(uuid=2ceb1d31-f619-457b-870c-fd4ddbb10d45)
+            required:
+                - accountUid
+                - orderId
+        OrderPlaced:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                reason:
+                    type: string
+                reducedQuantity:
+                    description: always empty string
+                    type: string
+            required:
+                - order
+                - reason
+                - reducedQuantity
+        OrderPlacedSanitized:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalOrderSanitized"
+                reason:
+                    type: string
+                reducedQuantity:
+                    description: always empty string
+                    type: string
+            required:
+                - order
+                - reason
+                - reducedQuantity
+        OrderRejected:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                orderError:
+                    type: string
+                reason:
+                    type: string
+            required:
+                - order
+                - orderError
+                - reason
+        OrderUpdated:
+            type: object
+            properties:
+                oldOrder:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                newOrder:
+                    $ref: "#/components/schemas/HistoricalOrder"
+                reason:
+                    type: string
+                reducedQuantity:
+                    $ref: "_schemas.yml#/Decimal"
+            required:
+                - oldOrder
+                - newOrder
+                - reason
+                - reducedQuantity
+        OrderUpdatedSanitized:
+            type: object
+            properties:
+                oldOrder:
+                    $ref: "#/components/schemas/HistoricalOrderSanitized"
+                newOrder:
+                    $ref: "#/components/schemas/HistoricalOrderSanitized"
+                reason:
+                    type: string
+                reducedQuantity:
+                    $ref: "_schemas.yml#/Decimal"
+            required:
+                - oldOrder
+                - newOrder
+                - reason
+                - reducedQuantity
+        PriceOffset:
+            type: object
+            properties:
+                priceOffset:
+                    $ref: "_schemas.yml#/Decimal"
+                unit:
+                    type: string
+                    enum:
+                        - Percent
+                        - QuoteCurrency
+            required:
+                - priceOffset
+                - unit
+        TakerOrderData:
+            type: object
+            properties:
+                fee:
+                    $ref: "_schemas.yml#/Decimal"
+                positionSize:
+                    $ref: "_schemas.yml#/Decimal"
+                feeCalculationInfo:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/FeeCalculationInfoElement"
+            required:
+                - fee
+                - positionSize
+                - feeCalculationInfo
+        TrailingStopOptions:
+            type: object
+            properties:
+                maxDeviation:
+                    $ref: "_schemas.yml#/Decimal"
+                unit:
+                    type: string
+                    enum:
+                        - Percent
+                        - QuoteCurrency
+            required:
+                - maxDeviation
+                - unit
+        TriggerActivated:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalTrigger"
+            required:
+                - order
+        TriggerCancelled:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalTrigger"
+                reason:
+                    type: string
+            required:
+                - order
+                - reason
+        TriggerEditRejected:
+            type: object
+            properties:
+                attemptedOrderTrigger:
+                    $ref: "#/components/schemas/HistoricalTrigger"
+                oldOrderTrigger:
+                    $ref: "#/components/schemas/HistoricalTrigger"
+                reason:
+                    type: string
+                orderError:
+                    type: string
+            required:
+                - attemptedOrderTrigger
+                - oldOrderTrigger
+                - reason
+                - orderError
+        TriggerOptions:
+            type: object
+            properties:
+                triggerPrice:
+                    $ref: "_schemas.yml#/Decimal"
+                triggerSignal:
+                    type: string
+                    enum:
+                        - "MarkPrice"
+                        - "LastPrice"
+                        - "SpotPrice"
+                triggerSide:
+                    type: string
+                    enum:
+                        - "Above"
+                        - "Below"
+                trailingStopOptions:
+                    $ref: "#/components/schemas/TrailingStopOptions"
+                limitPriceOffset:
+                    $ref: "#/components/schemas/PriceOffset"
+            required:
+                - triggerPrice
+                - triggerSignal
+                - triggerSide
+                - trailingStopOptions
+                - limitPriceOffset
+        TriggerPlaced:
+            type: object
+            properties:
+                order:
+                    $ref: "#/components/schemas/HistoricalTrigger"
+                reason:
+                    type: string
+            required:
+                - order
+                - reason
+        TriggerUpdated:
+            type: object
+            properties:
+                oldOrderTrigger:
+                    $ref: "#/components/schemas/HistoricalTrigger"
+                newOrderTrigger:
+                    $ref: "#/components/schemas/HistoricalTrigger"
+                reason:
+                    type: string
+            required:
+                - oldOrderTrigger
+                - newOrderTrigger
+                - reason

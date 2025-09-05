@@ -1,0 +1,16 @@
+title: Get Order Amends Request Body
+required:
+  - nonce
+  - txid
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  order_id:
+    description: The Kraken order identifier for the amended order.
+    type: string
+  rebase_multiplier:
+    $ref: '../../../../partials/properties/rebase_multiplier.yaml'
+example:
+    nonce: 1695828490
+    order_id: OVITN3-BFK3H-63K37C

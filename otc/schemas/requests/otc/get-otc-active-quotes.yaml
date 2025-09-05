@@ -1,0 +1,18 @@
+# Not used, we don't expose the vault id.
+title: Get OTC Active Quotes Request Body
+description: |
+  Request body for retrieving active OTC quotes. This endpoint allows filtering of active quotes
+  based on specific criteria. All parameters are optional and can be used to refine the search results.
+type: object
+properties:
+  nonce:
+    $ref: "../../../partials/properties/nonce.yaml"
+  vault_id:
+    type: string
+    description: |
+      The unique identifier of the vault associated with the OTC trade. This parameter is specifically used
+      for custody OTC trades to filter quotes related to a particular vault.
+    example: "456TR123"
+additionalProperties: false
+required:
+  - nonce

@@ -1,0 +1,24 @@
+title: AssetInfo
+description: Asset Info
+type: object
+# additionalProperties:
+#   type: object
+properties:
+  aclass:
+    description: Asset Class
+    type: string
+  altname:
+    description: Alternate name
+    type: string
+  decimals:
+    description: Number of decimal places for record keeping amounts of this asset
+    type: integer
+  display_decimals:
+    description: Number of decimal places shown for display purposes in frontends
+    type: integer
+  collateral_value:
+    description: Valuation as margin collateral (if applicable)
+    type: number
+  status:
+    description: 'Status of asset. Possible values: `enabled`, `deposit_only`, `withdrawal_only`, `funding_temporarily_disabled`.'
+    type: string

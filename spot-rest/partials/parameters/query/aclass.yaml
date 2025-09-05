@@ -1,0 +1,12 @@
+in: query
+name: aclass
+schema:
+  type: string
+  enum:
+    - currency
+    - tokenized_asset
+  default: currency
+description: |
+  Filters the asset class to retrieve (optional)
+    * `currency` = spot currency pairs.
+    * `tokenized_asset` = xstocks.

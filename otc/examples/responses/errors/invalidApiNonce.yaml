@@ -1,0 +1,7 @@
+value:
+  errors:
+  - field: Kraken-Nonce
+    type: Invalid nonce
+    msg: Invalid API nonce
+    severity: E
+    errorClass: API

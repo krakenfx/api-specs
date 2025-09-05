@@ -1,0 +1,19 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Get Trade Volume
+      required:
+        - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../../partials/properties/nonce.yaml'
+        pair:
+          description: Comma delimited list of asset pairs to get fee info on (optional, but required if any fee info is desired)
+          type: string
+        rebase_multiplier:
+          $ref: '../../../../partials/properties/rebase_multiplier.yaml'
+      example:
+          nonce: 1695828490
+          pair: "XXBT/ZUSD, XETH/ZEUR"

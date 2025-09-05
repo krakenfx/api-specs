@@ -1,0 +1,38 @@
+title: AccountBalance
+description: Account Balance
+type: object
+additionalProperties:
+  x-additionalPropertiesName: asset
+  type: string
+  description: balance
+example:
+  ZUSD: "2970172.7962"
+  # $ref: '../../../../schemas/objects/user/orders/open.yaml'
+  # ZEUR:
+  #   description: EUR Balance
+  #   type: string
+  #   example: "102559.9012"
+  # ZCAD:
+  #   description: CAD Balance
+  #   type: string
+  #   example: "32300.0000"
+  # KFEE:
+  #   description: Kraken Fee
+  #   type: string
+  #   example: "0.00"
+  # XXBT:
+  #   description: XBT Balance
+  #   type: string
+  #   example: "3.2223768244"
+  # XXRP:
+  #   description: XRP Balance
+  #   type: string
+  #   example: "0.00000000"
+  # XETH:
+  #   description: ETH Balance
+  #   type: string
+  #   example: "995.0000000000"
+  # XDAO:
+  #   description: DAO Balance
+  #   type: string
+  #   example: "100000.0000000000"

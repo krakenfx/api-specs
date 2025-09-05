@@ -1,0 +1,8 @@
+title: 401 Unauthorized
+description: Unauthorized response
+type: object
+properties:
+  errors:
+    type: array
+    items:
+      $ref: '../objects/errors/error.yaml'

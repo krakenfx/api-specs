@@ -1,0 +1,708 @@
+openapi: 3.1.0
+info:
+    title: Charts
+    version: v1.0
+servers:
+    - url: 'https://futures.kraken.com/api/charts/v1'
+      description: Kraken Futures
+      x-kfOnly: true
+tags:
+    - name: Candles
+    - name: Analytics
+paths:
+    /:
+        get:
+            operationId: tickTypes
+            tags:
+                - Candles
+            summary: Tick Types
+            description: |-
+                Returns all available tick types to use with the [markets](#operation/symbols) endpoint.
+            security: []
+            responses:
+                '200':
+                    description: Tick types list
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/TickTypes'
+    /analytics/liquidity-pool:
+        get:
+            operationId: liquidityPoolStats
+            tags:
+                - Analytics
+            summary: Get liquidity pool statistic
+            description: Get liquidity pool statistic including usd value
+            security: []
+            parameters:
+                - name: since
+                  in: query
+                  required: true
+                  description: epoch time in seconds
+                  schema:
+                    type: integer
+                    format: int64
+                    example: 1676556478
+                - name: interval
+                  in: query
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Interval'
+                - name: to
+                  in: query
+                  required: false
+                  description: epoch time in seconds, default now
+                  schema:
+                    type: integer
+                    example: 1676556478
+            responses:
+                '200':
+                    description: Available analytics by type and symbol
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AnalyticsResponse'
+                '400':
+                    description: Query has invalid arguments
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AnalyticsResponse'
+                '404':
+                    description: Symbol or analytics type could not be found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AnalyticsResponse'
+    /analytics/{symbol}/{analytics_type}:
+        get:
+            operationId: marketAnalytics
+            tags:
+                - Analytics
+            summary: Market Analytics
+            description: Analytics data divided into time buckets
+            security: []
+            parameters:
+                - name: symbol
+                  in: path
+                  required: true
+                  description: Market symbol
+                  schema:
+                    type: string
+                - name: analytics_type
+                  in: path
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/AnalyticsType'
+                - name: since
+                  in: query
+                  required: true
+                  description: epoch time in seconds
+                  schema:
+                    type: integer
+                    format: int64
+                    example: 1676556478
+                - name: interval
+                  in: query
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Interval'
+                - name: to
+                  in: query
+                  required: false
+                  description: epoch time in seconds, default now
+                  schema:
+                    type: integer
+                    example: 1676556478
+            responses:
+                '200':
+                    description: Available analytics by type and symbol
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AnalyticsResponse'
+                '400':
+                    description: Query has invalid arguments
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AnalyticsResponse'
+                '404':
+                    description: Symbol or analytics type could not be found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/AnalyticsResponse'
+    /{tick_type}:
+        get:
+            operationId: symbols
+            tags:
+                - Candles
+            summary: Markets
+            description: |-
+                Markets available for specified tick type.
+
+                List of available tick types can be fetched from the [tick types](#operation/tickTypes)
+                endpoint.
+            security: []
+            parameters:
+                - name: tick_type
+                  in: path
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/TickTypes'
+            responses:
+                '200':
+                    description: Markets list
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: string
+                            example:
+                                - PI_XRPUSD
+                                - FI_XRPUSD_210625
+                                - FI_XBTUSD_210528
+                                - PI_XBTUSD
+    /{tick_type}/{symbol}:
+        get:
+            operationId: resolutions
+            tags:
+                - Candles
+            summary: Resolutions
+            description: |-
+                Candle resolutions available for specified tick type and market.
+
+                List of available tick types can be fetched from the [tick types](#operation/tickTypes)
+                endpoint. List of available markets can be fetched from the [markets](#operation/symbols)
+                endpoint.
+            security: []
+            parameters:
+                - name: tick_type
+                  in: path
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/TickTypes'
+                - name: symbol
+                  in: path
+                  required: true
+                  description: Market symbol
+                  schema:
+                    type: string
+            responses:
+                '200':
+                    description: All resolutions for the given `tick_type` and `symbol`
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/Resolution'
+    /{tick_type}/{symbol}/{resolution}:
+        get:
+            operationId: candles
+            tags:
+                - Candles
+            summary: Market Candles
+            description: |-
+                Candles for specified tick type, market, and resolution.
+
+                List of available tick types can be fetched from the [tick types](#operation/tickTypes)
+                endpoint. List of available markets can be fetched from the [markets](#operation/symbols)
+                endpoint. List of available resolutions can be fetched from the
+                [resolutions](#operation/resolutions) endpoint.
+            security: []
+            parameters:
+                - name: tick_type
+                  in: path
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/TickTypes'
+                - name: symbol
+                  in: path
+                  required: true
+                  description: Market symbol
+                  schema:
+                    type: string
+                - name: resolution
+                  in: path
+                  required: true
+                  schema:
+                    $ref: '#/components/schemas/Resolution'
+                - name: from
+                  in: query
+                  description: From date in epoch seconds
+                  schema:
+                    type: number
+                - name: to
+                  in: query
+                  description: To date in epoch seconds
+                  schema:
+                    type: number
+                - name: count
+                  in: query
+                  description: Number of candles to return.
+                  schema:
+                    type: integer
+                    minimum: 0
+            responses:
+                '200':
+                    $ref: '#/components/responses/Candles'
+components:
+    responses:
+        Candles:
+            description: OHLC candles
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/CandlesResponse'
+    schemas:
+        AnalyticsLiquidityData:
+            title: Orderbook liquidity data
+            type: object
+            properties:
+                liquidity_005:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity_01:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity_025:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity_05:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity_10:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity_100:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+            required:
+                - liquidity_005
+                - liquidity_01
+                - liquidity_025
+                - liquidity_05
+                - liquidity_10
+                - liquidity_100
+        AnalyticsOrderbookData:
+            title: Orderbook analytics data
+            type: object
+            properties:
+                bid:
+                    title: 'Bids statistics'
+                    oneOf:
+                        - $ref: '#/components/schemas/AnalyticsSpreadsData'
+                        - $ref: '#/components/schemas/AnalyticsLiquidityData'
+                        - $ref: '#/components/schemas/AnalyticsSlippageData'
+                        - $ref: '#/components/schemas/AnalyticsFullOrderbookData'
+                ask:
+                    title: 'Asks statistics'
+                    oneOf:
+                        - $ref: '#/components/schemas/AnalyticsSpreadsData'
+                        - $ref: '#/components/schemas/AnalyticsLiquidityData'
+                        - $ref: '#/components/schemas/AnalyticsSlippageData'
+                        - $ref: '#/components/schemas/AnalyticsFullOrderbookData'
+            required:
+                - bid
+                - ask
+        AnalyticsResponse:
+            title: Analytics response
+            type: object
+            properties:
+                result:
+                    $ref: '#/components/schemas/AnalyticsResponseResult'
+                errors:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/AnalyticsResponseError'
+            required:
+                - result
+                - errors
+        AnalyticsResponseError:
+            title: Analytics response error
+            type: object
+            properties:
+                severity:
+                    type: string
+                error_class:
+                    type: string
+                type:
+                    type: string
+                msg:
+                    type: string
+                value:
+                    type: string
+                field:
+                    type: string
+            required:
+                - severity
+                - error_class
+                - type
+        AnalyticsResponseResult:
+            title: Result container for analytics response
+            type: object
+            properties:
+                timestamp:
+                    type: array
+                    items:
+                        type: integer
+                more:
+                    type: boolean
+                    description: True if there are more candles in time range
+                data:
+                    oneOf:
+                        - type: array
+                          items:
+                            oneOf:
+                                - type: number
+                                - type: string
+                                  format: big-decimal
+                                - type: array
+                                  title: Ohlc
+                                  minItems: 4
+                                  maxItems: 4
+                                  items:
+                                    type: number
+                        - $ref: '#/components/schemas/AnalyticsLongShortData'
+                        - $ref: '#/components/schemas/AnalyticsOrderbookData'
+                        - $ref: '#/components/schemas/AnalyticsCvdData'
+                        - $ref: '#/components/schemas/AnalyticsTopTradersData'
+                        - $ref: '#/components/schemas/AnalyticsLiquidityPoolData'
+                        - $ref: '#/components/schemas/AnalyticsFutureBasisData'
+            required:
+                - timestamp
+                - data
+                - more
+        AnalyticsSlippageData:
+            title: Orderbook slippage data
+            type: object
+            properties:
+                slippage_1k:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                slippage_10k:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                slippage_100k:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                slippage_1m:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+            required:
+                - slippage_1k
+                - slippage_10k
+                - slippage_100k
+                - slippage_1m
+        AnalyticsFullOrderbookData:
+            title: Combination of all orderbook metrics
+            type: object
+            properties:
+                slippage1k:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                slippage10k:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                slippage100k:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                slippage1m:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                bestPrice:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity005:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity01:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity025:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity05:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity10:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+                liquidity100:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+            required:
+                - slippage1k
+                - slippage10k
+                - slippage100k
+                - slippage1m
+                - bestPrice
+                - liquidity005
+                - liquidity01
+                - liquidity025
+                - liquidity05
+                - liquidity10
+                - liquidity100
+        AnalyticsSpreadsData:
+            title: Orderbook spread data
+            type: object
+            properties:
+                best_price:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/NullableBigDecimal'
+            required:
+                - best_price
+        AnalyticsLongShortData:
+            title: Statistic of long and short positions
+            type: 'object'
+            properties:
+                longCount:
+                    type: 'array'
+                    items:
+                        type: 'integer'
+                shortCount:
+                    type: 'array'
+                    items:
+                        type: 'integer'
+                longPercent:
+                    type: 'array'
+                    items:
+                        type: 'string'
+                        format: big-decimal
+                shortPercent:
+                    type: 'array'
+                    items:
+                        type: 'string'
+                        format: big-decimal
+                ratio:
+                    type: 'array'
+                    items:
+                        type: 'string'
+                        format: big-decimal
+            required:
+                - long_count
+                - short_count
+                - long_percent
+                - short_percent
+                - ratio
+        AnalyticsCvdData:
+            type: object
+            properties:
+                buyVolume:
+                    type: 'array'
+                    items:
+                        type: string
+                        format: big-decimal
+                sellVolume:
+                    type: 'array'
+                    items:
+                        type: string
+                        format: big-decimal
+                cvd:
+                    type: 'array'
+                    items:
+                        type: string
+                        format: big-decimal
+            required:
+                - buyVolume
+                - sellVolume
+                - cvd
+        AnalyticsLiquidityPoolData:
+            type: object
+            properties:
+                usdValue:
+                    type: 'array'
+                    items:
+                        type: string
+                        format: big-decimal
+            required:
+                - usdValue
+        AnalyticsTopTradersData:
+            type: object
+            properties:
+                top20Percent:
+                    $ref: '#/components/schemas/AnalyticsTopTradersLevelData'
+            required:
+                - top20Percent
+        AnalyticsTopTradersLevelData:
+            type: object
+            properties:
+                openInterest:
+                    type: 'array'
+                    items:
+                        type: string
+                        format: big-decimal
+                longCount:
+                    type: 'array'
+                    items:
+                        type: 'integer'
+                shortCount:
+                    type: 'array'
+                    items:
+                        type: 'integer'
+                longPercent:
+                    type: 'array'
+                    items:
+                        type: 'string'
+                        format: big-decimal
+                shortPercent:
+                    type: 'array'
+                    items:
+                        type: 'string'
+                        format: big-decimal
+                ratio:
+                    type: 'array'
+                    items:
+                        type: 'string'
+                        format: big-decimal
+            required:
+                - openInterest
+                - longCount
+                - shortCount
+                - longPercent
+                - shortPercent
+                - ratio
+        AnalyticsFutureBasisData:
+            type: object
+            properties:
+                basis:
+                    type: 'array'
+                    items:
+                        type: string
+                        format: big-decimal
+            required:
+                - basis
+        AnalyticsType:
+            title: Type of analytics
+            type: string
+            enum:
+                - open-interest
+                - aggressor-differential
+                - trade-volume
+                - trade-count
+                - liquidation-volume
+                - rolling-volatility
+                - long-short-ratio
+                - long-short-info
+                - cvd
+                - top-traders
+                - orderbook
+                - spreads
+                - liquidity
+                - slippage
+                - future-basis
+        Candlestick:
+            title: Candlestick
+            type: object
+            properties:
+                time:
+                    description: Epoch in ms
+                    type: integer
+                    format: int64
+                    example: 1620816960000
+                high:
+                    type: string
+                    format: big-decimal
+                    example: '56475.00000000000'
+                low:
+                    type: string
+                    format: big-decimal
+                    example: '55935.00000000000'
+                open:
+                    type: string
+                    format: big-decimal
+                    example: '56294.00000000000'
+                close:
+                    type: string
+                    format: big-decimal
+                    example: '56250.00000000000'
+                volume:
+                    type: number
+                    format: int64
+                    example: 10824
+            required:
+                - time
+                - high
+                - low
+                - open
+                - close
+                - volume
+        CandlesResponse:
+            type: object
+            properties:
+                candles:
+                    type: array
+                    description: OHLC candles
+                    items:
+                        $ref: '#/components/schemas/Candlestick'
+                more_candles:
+                    type: boolean
+                    description: True if there are more candles in time range
+            required:
+                - candles
+                - more_candles
+        Interval:
+            title: Resolution in seconds
+            type: integer
+            enum:
+                - 60
+                - 300
+                - 900
+                - 1800
+                - 3600
+                - 14400
+                - 43200
+                - 86400
+                - 604800
+        NullableBigDecimal:
+            type:
+                - 'string'
+                - 'null'
+            format: big-decimal
+        Resolution:
+            title: Resolution
+            type: string
+            enum:
+                - 1m
+                - 5m
+                - 15m
+                - 30m
+                - 1h
+                - 4h
+                - 12h
+                - 1d
+                - 1w
+        TickTypes:
+            title: Tick Types
+            type: string
+            enum:
+                - spot
+                - mark
+                - trade

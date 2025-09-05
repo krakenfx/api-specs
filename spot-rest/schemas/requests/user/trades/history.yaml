@@ -1,0 +1,53 @@
+required: true
+content:
+  application/json:
+    schema:
+      title: Get Trades History Request Body
+      required:
+      - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../../../partials/properties/nonce.yaml'
+        type:
+          description: Type of trade
+          type: string
+          default: all
+          enum:
+          - all
+          - any position
+          - closed position
+          - closing position
+          - no position
+        trades:
+          description: Whether or not to include trades related to position in output
+          type: boolean
+          default: false
+        start:
+          description: Starting unix timestamp or trade tx ID of results (exclusive)
+          type: integer
+        end:
+          description: Ending unix timestamp or trade tx ID of results (inclusive)
+          type: integer
+        ofs:
+          description: Result offset for pagination
+          type: integer
+        consolidate_taker:
+          description: Whether or not to consolidate trades by individual taker trades
+          type: boolean
+          default: true
+        ledgers:
+          description: |
+            Whether or not to include related ledger ids for given trade
+            <br><sub><sup>Note that setting this to true will slow request performance</sub></sup>
+          type: boolean
+          default: false
+        rebase_multiplier:
+          $ref: '../../../../partials/properties/rebase_multiplier.yaml'
+
+
+      example:
+          nonce: 1695828490
+          type: "all"
+          trades: false
+          consolidate_taker: true

@@ -1,0 +1,22 @@
+- lang: Shell
+  label: cURL
+  source: curl "https://api.kraken.com/0/public/Time"
+# - lang: ignoreme
+#   source: blahba
+- lang: Python
+  source: |
+    import requests
+
+    resp = requests.get('https://api.kraken.com/0/public/Time')
+
+    print(resp.json())
+
+# - lang: PHP
+#   source: |
+#     require_once('KrakenAPI.php');
+
+#     const KEY = '<YOUR-API-KEY>';
+#     const SECRET = '<YOUR-MSG-SIGNATURE>';
+
+#     $kraken = new KrakenAPI(KEY, SECRET, 'https://api.kraken.com');
+#     $res = $kraken->QueryPublic('Time');

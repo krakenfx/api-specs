@@ -1,0 +1,234 @@
+openapi: 3.1.0
+info:
+    title: Stats
+    version: 1.0.0
+servers:
+    - url: 'https://futures.kraken.com/api/stats/v1'
+      description: Production
+tags:
+    - name: Market Share
+paths:
+    /rebates/self-market-share:
+        get:
+            operationId: rebates::get_self_market_share
+            tags:
+                - Market Share
+            summary: Get account's market share
+            description: |
+                Get account's market share, volumes, and accrued rebates data in contracts configured for
+                rebates.
+
+                The data may not be available immediately. In these cases HTTP 204 is returned.
+            security:
+                - bearerAuth: []
+                - general-api-key-read-only: []
+                  authent: []
+            responses:
+                '200':
+                    description: User's market share in contracts they have traded in.
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UserMarketShareResponse'
+                            examples:
+                                success:
+                                    $ref: "#/components/examples/RebatesMarketShareExample"
+                '204':
+                    description: Market shares not yet aggregated.
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+        authent:
+            description: Authentication string
+            in: header
+            name: authent
+            type: apiKey
+            x-inlineDescription: true
+        general-api-key-read-only:
+            description: General API key with at least **read-only** access
+            in: header
+            name: apikey
+            type: apiKey
+            x-inlineDescription: true
+    parameters:
+        LeaderboardId:
+            description: Id of a leaderboard
+            in: path
+            name: leaderboardId
+            required: true
+            schema:
+                type: string
+                format: uuid
+    examples:
+        RebatesMarketShareExample:
+            value:
+                contracts:
+                    PF_ETHUSD:
+                        marketShare: "0.002"
+                        usdRebateCredited: "500.10"
+                        volume: "120132.45"
+                    PF_FETUSD:
+                        marketShare: "0.08"
+                        usdRebateCredited: "120.00"
+                        volume: "44862.81"
+                    PF_XBTUSD:
+                        marketShare: "0.015"
+                        usdRebateCredited: "1250.75"
+                        volume: "892456.32"
+    schemas:
+        Leaderboard:
+            type: object
+            required:
+                - id
+                - startAt
+                - endAt
+                - refreshedAt
+                - rollDurationMicros
+                - rankBy
+            properties:
+                id:
+                    type: string
+                    format: uuid
+                startAt:
+                    type: string
+                    format: date-time
+                endAt:
+                    type:
+                        - string
+                        - 'null'
+                    format: date-time
+                refreshedAt:
+                    type:
+                        - string
+                        - 'null'
+                    format: date-time
+                rollDurationMicros:
+                    type:
+                        - integer
+                        - 'null'
+                    format: int64
+                rankBy:
+                    $ref: '#/components/schemas/RankBy'
+        RankBy:
+            type: string
+            enum:
+                - 'pnl'
+                - 'roi'
+                - 'volume'
+        Account:
+            type: object
+            required:
+                - nickname
+                - rank
+                - roi
+                - pnl
+                - volume
+            properties:
+                nickname:
+                    type: string
+                rank:
+                    type: integer
+                    format: int64
+                roi:
+                    type: number
+                    format: double
+                pnl:
+                    type: number
+                    format: double
+                volume:
+                    type: number
+                    format: double
+        MyselfResponseRegistrations:
+            type: object
+            required:
+                - leaderboardId
+                - banned
+                - registeredAt
+                - rank
+                - roi
+                - pnl
+                - volume
+            properties:
+                leaderboardId:
+                    type: string
+                    format: uuid
+                banned:
+                    type: boolean
+                registeredAt:
+                    type: string
+                    format: date-time
+                rank:
+                    type:
+                        - integer
+                        - 'null'
+                    format: int64
+                roi:
+                    type:
+                        - number
+                        - 'null'
+                    format: double
+                pnl:
+                    type:
+                        - number
+                        - 'null'
+                    format: double
+                volume:
+                    type:
+                        - number
+                        - 'null'
+                    format: double
+        MyselfResponse:
+            type: object
+            required:
+                - nickname
+                - registeredTo
+            properties:
+                nickname:
+                    type:
+                        - string
+                        - 'null'
+                registeredTo:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/MyselfResponseRegistrations'
+        UserMarketShareResponse:
+            type: object
+            required:
+                - contracts
+            properties:
+                contracts:
+                    type: object
+                    description: |
+                        Map of contracts. The key is the contract symbol and the value is an object containing
+                        user's volume, market share, and rebate accrued in USD terms in that contract
+                        over configured observation period.
+                    additionalProperties:
+                        type: object
+                        required:
+                            - marketShare
+                            - volume
+                            - usdRebateCredited
+                        properties:
+                            marketShare:
+                                type: string
+                                format: decimal
+                            volume:
+                                type: string
+                                format: decimal
+                            usdRebateCredited:
+                                type: string
+                                format: decimal
+            example: {"contracts": {"PF_ETHUSD": {"volume": "120132.45", "marketShare": "0.002", "usdRebateCredited": "500.10"}, "PF_FETUSD": {"volume": "44862.81", "marketShare": "0.08", "usdRebateCredited": "120.00"}}}
+        SerializedError:
+            type: object
+            required:
+                - kind
+                - description
+            properties:
+                kind:
+                    type: string
+                description:
+                    type: string

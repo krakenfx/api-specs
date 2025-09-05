@@ -1,0 +1,1104 @@
+openapi: 3.1.0
+info:
+    title: Auth
+    version: v1.0
+servers:
+    - url: https://futures.kraken.com/api/auth/v1
+      description: Kraken Futures Production
+tags:
+    - name: PoW
+    - name: Authentication
+    - name: MFA
+    - name: Verify
+    - name: Sign Up
+    - name: Password Reset
+    - name: Mobile Token
+    - name: Account
+    - name: API Keys
+    - name: Regions
+paths:
+    /api-keys/v3/check:
+        get:
+            operationId: checkV3ApiKey
+            tags:
+                - API Keys
+            summary: Check v3 API key
+            description: Verify API key access and return the authenticated key's details.
+            responses:
+                '200':
+                    $ref: '#/components/responses/CheckV3ApiKey'
+                '401':
+                    description: API key is not found or request signature is invalid.
+                    $ref: '#/components/responses/Error'
+            security:
+                - api-key-any: []
+                  request-signature: []
+components:
+    schemas:
+        AccountInfo:
+            title: Account Info
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                email:
+                    type: string
+                    format: email
+                    example: ernest@example.com
+                iiban:
+                    $ref: '#/components/schemas/Iiban'
+                platform:
+                    description: Account's platform. Represents a regulatory grouping.
+                    type: string
+                    example: dlt
+                fullname:
+                    type:
+                        - string
+                        - 'null'
+                    example: Ernest Rutherford
+                countryCode:
+                    type:
+                        - string
+                        - 'null'
+                    example: GBR
+                memberSince:
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+                lastLoginDate:
+                    oneOf:
+                        - type: 'null'
+                        - $ref: '#/components/schemas/Rfc3339DateTime'
+                lastLoginIpAddress:
+                    type:
+                        - string
+                        - 'null'
+                roles:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/Role'
+                mfaPriority:
+                    type: array
+                    items:
+                        type: string
+                        enum:
+                            - totp
+                            - fido2
+            required:
+                - uid
+                - email
+                - iiban
+                - platform
+                - fullname
+                - countryCode
+                - memberSince
+                - lastLoginDate
+                - lastLoginIpAddress
+                - roles
+                - mfaPriority
+        ApiKeyPermissionMap:
+            type: object
+            properties:
+                general:
+                    $ref: '#/components/schemas/ApiKeyV3AccessLevel'
+                transfer:
+                    $ref: '#/components/schemas/ApiKeyV3AccessLevel'
+            required:
+                - general
+                - transfer
+        CheckedV3ApiKeyDetails:
+            type: object
+            properties:
+                apiKey:
+                    description: API key that signed the request.
+                    type: string
+                    format: base64
+                    example: Gom9BsP75m41c9fuY6oJk/unMWaDZjYIcTP4/5kqPvtzdbj5JU5/Fyeb
+                accountUid:
+                    description: UID of the account that the API key belongs to.
+                    type: string
+                    format: uuid
+                iiban:
+                    description: IIBAN of the account that the API key belongs to.
+                    oneOf:
+                        - $ref: '#/components/schemas/Iiban'
+                        - type: 'null'
+                createdAt:
+                    description: Date-time that the API key was created.
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+                permissions:
+                    description: Permissions of the API key.
+                    $ref: '#/components/schemas/ApiKeyPermissionMap'
+            required:
+                - apiKey
+                - accountUid
+                - iiban
+                - createdAt
+                - permissions
+        Login:
+            title: Login
+            type: object
+            properties:
+                token:
+                    description: |-
+                        The JWT used to authenticate future requests. Token is parseable with schema `Claims`.
+                        Token could be up to 1KB in size.
+                    type: string
+                    example: eyJ0eXAiO.eyJ2IjoxLCyb2xzIjpbXX0.5Yo8xqCqyYe
+            required:
+                - token
+        MfaConfirmationRequestId:
+            title: MFA Confirmation Request Id
+            type: object
+            properties:
+                mfaRequestId:
+                    type: string
+                    format: uuid
+            required:
+                - mfaRequestId
+        MfaConfirmationRequestInfo:
+            description: MFA Confirmation Request Info
+            type: object
+            allOf:
+                - $ref: '#/components/schemas/MfaConfirmationRequestId'
+                - type: object
+                  properties:
+                    mfaRequired:
+                        description: Precedence list of configured MFA methods
+                        type: array
+                        items:
+                            type: string
+                            enum:
+                                - totp
+                                - fido2
+                    challenge:
+                        description: WebAuthn challenge object
+                        type:
+                            - object
+                            - 'null'
+                  required:
+                    - mfaRequired
+                    - challenge
+        MfaEitherCredentials:
+            title: MFA Credentials
+            oneOf:
+                - type: object
+                  properties:
+                    totp:
+                        type: string
+                  required:
+                    - totp
+                - type: object
+                  properties:
+                    cred:
+                        type: object
+                  required:
+                    - cred
+        MobileTokenConfirmationCode:
+            title: Mobile Token Confirmation Code
+            type: object
+            properties:
+                confirmationCode:
+                    type: string
+                    minLength: 6
+                    maxLength: 6
+                    example: '958531'
+            required:
+                - confirmationCode
+        MobileTokenRequest:
+            title: Mobile Token Request
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                requesterToken:
+                    type: string
+                    format: uuid
+                createdAt:
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+            required:
+                - uid
+                - requesterToken
+                - createdAt
+        NewV3ApiKey:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                permissions:
+                    $ref: '#/components/schemas/ApiKeyPermissionMap'
+                privateKey:
+                    type: string
+                    format: base64
+                publicKey:
+                    type: string
+                    format: base64
+                creationDate:
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+            required:
+                - id
+                - permissions
+                - privateKey
+                - publicKey
+                - creationDate
+        PasswordChangeRequest:
+            title: Password Change Request
+            type: object
+            properties:
+                currentPassword:
+                    type: string
+                newPassword:
+                    type: string
+                newPasswordVerify:
+                    type: string
+                allowPwned:
+                    type: boolean
+                    default: false
+                pow:
+                    $ref: '#/components/schemas/PowSolve'
+            required:
+                - currentPassword
+                - newPassword
+                - newPasswordVerify
+                - pow
+        RefreshForm:
+            title: Refresh Form
+            type: object
+            properties:
+                lifespan:
+                    $ref: '#/components/schemas/TokenLifespanSeconds'
+        RegionRestriction:
+            type: object
+            properties:
+                country:
+                    $ref: '#/components/schemas/CountryCodeAlpha2'
+                province:
+                    description: Province
+                    type:
+                        - string
+                        - 'null'
+                    example: Ontario
+                restrict:
+                    $ref: '#/components/schemas/RegionRestrictionTier'
+            required:
+                - country
+                - province
+                - restrict
+        RegionRestrictionTier:
+            type: string
+            enum:
+                - all
+                - new
+                - none
+        RevokeResult:
+            title: Revoke Result
+            type: object
+            properties:
+                tokensRevoked:
+                    type: array
+                    items:
+                        type: string
+                revokeErrors:
+                    type: array
+                    items:
+                        type: string
+            required:
+                - tokensRevoked
+                - revokeErrors
+        Role:
+            title: Role
+            type: object
+            properties:
+                level:
+                    type: string
+                    enum:
+                        - READ_ONLY
+                        - FULL_ACCESS
+                role:
+                    type: string
+                    example: GENERAL
+            required:
+                - role
+                - level
+        SSOLogin:
+            title: SSO Login Form
+            type: object
+            properties:
+                iiban:
+                    description: IIBAN of user logging in.
+                    $ref: '#/components/schemas/Iiban'
+                key:
+                    description: Base64url-encoded temporary Kraken API key.
+                    type: string
+                    example: WbcGAw7bRytoylN2bH1C16+yLI0Y6w+FCg
+                expires:
+                    description: Validity duration (in seconds) of temporary API key.
+                    type: integer
+                    example: 900
+                exchange:
+                    type: string
+                    example: kraken
+            required:
+                - iiban
+                - key
+                - expires
+        TestResult:
+            title: Test Result
+            type: object
+            properties:
+                valid:
+                    type: boolean
+                    example: true
+                position:
+                    type:
+                        - string
+                        - 'null'
+                    enum:
+                        - cookies
+                        - authorization_header
+                tokenUid:
+                    description: Unique ID of the primary token detected.
+                    type:
+                        - string
+                        - 'null'
+                    format: uuid
+                error:
+                    type:
+                        - string
+                        - 'null'
+                    example:
+            required:
+                - valid
+                - position
+                - tokenUid
+                - error
+        TokenDetails:
+            title: Token Details
+            type: object
+            properties:
+                uid:
+                    type: string
+                    format: uuid
+                token:
+                    type: string
+                issuedAt:
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+                expiresAt:
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+                revokedAt:
+                    oneOf:
+                        - type: 'null'
+                        - $ref: '#/components/schemas/Rfc3339DateTime'
+                revokeReason:
+                    type:
+                        - string
+                        - 'null'
+                createdByIp:
+                    type: string
+                    format: ip
+                createdByUserAgent:
+                    type: string
+            required:
+                - uid
+                - token
+                - issuedAt
+                - expiresAt
+                - revokedAt
+                - revokeReason
+                - createdByIp
+                - createdByUserAgent
+        V3ApiKey:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    format: int64
+                permissions:
+                    $ref: '#/components/schemas/ApiKeyPermissionMap'
+                publicKey:
+                    type: string
+                    format: base64
+                creationDate:
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+            required:
+                - id
+                - permissions
+                - publicKey
+                - creationDate
+        VerifyResult:
+            title: Verify Result
+            type: object
+            properties:
+                token:
+                    type: string
+                    example: eyJ0eXAiOiJKV1.eyJ2IjoxLCJqRfT05MWSJ9XX0.tFPxmuN4xWTLkuUcU
+                valid:
+                    type: boolean
+                invalidReason:
+                    type:
+                        - string
+                        - 'null'
+                    example: invalid signature
+            required:
+                - token
+                - valid
+                - invalidReason
+        Iiban:
+            description: Account IIBAN, if Kraken customer.
+            type: string
+            example: AA08 N84G CPAR UN7A
+            pattern: ^AA[A-Z0-9]{2} [A-Z0-9]{4} [A-Z0-9]{4} [A-Z0-9]{4}$
+            x-rustType: iiban::Iiban
+        AccountExists:
+            description: Whether the provided Futures account exists
+            type: object
+            properties:
+                exists:
+                    type: boolean
+                canTrade:
+                    type: boolean
+            required:
+                - exists
+        TokenLifespanSeconds:
+            title: Token Lifespan
+            description: |-
+                How long (in seconds) the token should be valid for.
+
+                An issued token's lifespan will be clamped to at least 10 seconds and at most 10 years (or 3
+                hours for admin logins).
+            type: integer
+            format: uint64
+            minimum: 10
+            maximum: 316224000
+        PowSolve:
+            title: PoW Solution
+            type: object
+            description: A Proof-of-Work solution.
+            properties:
+                seed:
+                    description: The initial seed to pass into a PoW solver.
+                    type: string
+                    format: hex
+                    minLength: 64
+                    maxLength: 64
+                    pattern: '[0-9a-f]{64}'
+                    example: 079fa564e7574f30c4a64b06d2e363998e55c11cd15f347a1b945ef3d281d039
+                solution:
+                    description: PoW solution is the list of nonces for each step of the process.
+                    type: array
+                    items:
+                        type: integer
+                        format: uint32
+                    example:
+                        - 664
+                        - 99
+                        - 1055
+                        - 116
+                duration:
+                    description: How long it took to solve PoW challenge in milliseconds.
+                    type: integer
+                    format: u64
+                    example: 50
+            required:
+                - seed
+                - solution
+                - duration
+        LoginForm:
+            title: Login Form
+            type: object
+            properties:
+                email:
+                    type: string
+                    format: email
+                    example: ernest@example.com
+                password:
+                    type: string
+                    format: password
+                    example: Password1
+                totp:
+                    description: The TOTP 2FA password (if the account has it set up).
+                    type: string
+                    example: '012345'
+                cred:
+                    description: Authenticator response object. Base64url encoded.
+                    type:
+                        - object
+                        - 'null'
+                    example:
+                scopes:
+                    description: Specifies which type of endpoints should be accessible.
+                    type: array
+                    items:
+                        type: string
+                    example:
+                        - admin
+                lifespan:
+                    $ref: '#/components/schemas/TokenLifespanSeconds'
+                pow:
+                    $ref: '#/components/schemas/PowSolve'
+            required:
+                - email
+                - password
+        ErrorDescriptor:
+            type: object
+            properties:
+                error:
+                    type: string
+                message:
+                    type: string
+                suberror:
+                    type:
+                        - string
+                        - 'null'
+            required:
+                - error
+                - message
+                - suberror
+        Rfc3339DateTime:
+            description: RFC 3339 formatted date-time
+            type: string
+            format: date-time
+            example: '2019-08-24T14:15:22Z'
+        PowChallenge:
+            title: PoW Challenge
+            type: object
+            description: A Proof-of-Work challenge to be solved in order to use certain endpoints.
+            properties:
+                seed:
+                    description: The initial seed to pass into a PoW solver.
+                    type: string
+                    format: hex
+                    minLength: 64
+                    maxLength: 64
+                    pattern: '[0-9a-f]{64}'
+                    example: 079fa564e7574f30c4a64b06d2e363998e55c11cd15f347a1b945ef3d281d039
+                target:
+                    description: |-
+                        Indicates solve difficulty.
+
+                        When represented in binary, number will always be n 0s followed by m 1s.
+                        The lower the number, the harder the solve.
+                    type: integer
+                    example: 4194303
+                steps:
+                    description: |-
+                        Number of steps PoW solver algorithm should make and therefore the number of items in
+                        solution array.
+                    type: integer
+                    format: uint32
+                    example: 16
+                expires:
+                    description: Instant after which a solution will no longer be accepted for this seed.
+                    $ref: '#/components/schemas/Rfc3339DateTime'
+            required:
+                - seed
+                - target
+                - steps
+                - expires
+        WhoAmI:
+            title: Account Identifiers
+            type: object
+            properties:
+                uid:
+                    description: Futures account UID.
+                    type: string
+                    format: uuid
+                iiban:
+                    description: Account IIBAN, if Kraken customer.
+                    type:
+                        - string
+                        - 'null'
+                    example: AA39 N84G C4XO 6B2V
+                    x-rustType: iiban::Iiban
+            required:
+                - uid
+                - iiban
+        ApiKeyV3AccessLevel:
+            description: Tier of access granted to an API key.
+            type: string
+            enum:
+                - NO_ACCESS
+                - READ_ONLY
+                - FULL_ACCESS
+            x-exhaustive: true
+        CountryCodeAlpha2:
+            description: Alpha-2 country code
+            type: string
+            minLength: 2
+            maxLength: 2
+            example: CA
+    requestBodies:
+        ActivateAccount:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            uid:
+                                type: string
+                                format: uuid
+                        required:
+                            - uid
+        AddApiKeyRequest:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        allOf:
+                            - type: object
+                              properties:
+                                permissions:
+                                    $ref: '#/components/schemas/ApiKeyPermissionMap'
+                              required:
+                                - permissions
+                            - $ref: '#/components/schemas/MfaConfirmationRequestId'
+        DeleteApiKeyRequest:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/MfaConfirmationRequestId'
+        MfaConfirmationAuthorize:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        allOf:
+                            - $ref: '#/components/schemas/MfaEitherCredentials'
+                            - $ref: '#/components/schemas/MfaConfirmationRequestId'
+        MfaConfirmationVerify:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        allOf:
+                            - type: object
+                              properties:
+                                accUid:
+                                    type: string
+                                requireMfaConfigured:
+                                    description: |-
+                                        When set to false, the verification result will always be successful on
+                                        accounts without MFA configured.
+                                    type: boolean
+                                    default: true
+                              required:
+                                - accUid
+                            - $ref: '#/components/schemas/MfaConfirmationRequestId'
+        MobileTokenConfirm:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        allOf:
+                            - $ref: '#/components/schemas/MobileTokenConfirmationCode'
+                            - $ref: '#/components/schemas/MobileTokenRequest'
+        MobileTokenRequest:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/MfaConfirmationRequestId'
+        MobileTokenScan:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/MobileTokenRequest'
+        PasswordChange:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/PasswordChangeRequest'
+        PasswordResetConfirm:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            code:
+                                type: string
+                                example: ibxB7BlgHTFfLyQtDaBbJhOmJtc55ZNhe7JcI7v9RSyWjZDd4prkkwOLbNfZ
+                            newPassword:
+                                type: string
+                                example: Password1
+                            newPasswordVerify:
+                                type: string
+                                example: Password1
+                            allowPwned:
+                                type: boolean
+                                default: false
+                            totp:
+                                type: string
+                                example: '000000'
+                                minLength: 6
+                                maxLength: 6
+                        required:
+                            - code
+                            - newPassword
+                            - newPasswordVerify
+        PasswordResetRequest:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            email:
+                                type: string
+                                format: email
+                                example: ernest@example.com
+                        required:
+                            - email
+        RefreshToken:
+            description: Refresh form
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RefreshForm'
+        SSOLogin:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/SSOLogin'
+                application/x-www-form-urlencoded:
+                    schema:
+                        $ref: '#/components/schemas/SSOLogin'
+                    example:
+                        iiban: AA52 E25P MHAW YANF
+                        key: WbcGAw7bRytoylN2bH1C16+yLI0Y6w+FCg
+                        expires: 900
+                        exchange: kraken
+        SignUp:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            email:
+                                type: string
+                                format: email
+                            password:
+                                type: string
+                                minLength: 8
+                            verifyPassword:
+                                type: string
+                                minLength: 8
+                            allowPwned:
+                                type: boolean
+                                default: false
+                            newsletter:
+                                type: boolean
+                            affiliateUid:
+                                type: string
+                                format: uuid
+                            accountType:
+                                type: string
+                                enum:
+                                    - individual
+                                    - corporate
+                                x-exhaustive: true
+                            pow:
+                                $ref: '#/components/schemas/PowSolve'
+                        required:
+                            - email
+                            - password
+                            - verifyPassword
+                            - pow
+        TokenLifespanUpdate:
+            description: Set the default token lifespan (session length)
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            lifespan:
+                                $ref: '#/components/schemas/TokenLifespanSeconds'
+                        required:
+                            - lifespan
+        TokenVerify:
+            required: true
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            token:
+                                type: string
+                                example: eyJ0eXAiOiJKV1.eyJ2IjoxLCJq...RfT05MWSJ9XX0.tFPxmuN4xWTLkuUcU
+                        required:
+                            - token
+                    examples:
+                        revoked:
+                            value:
+                                token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2IjoxLCJqdGkiOiI2YzEwZWYzZi1kOWVkLTQ5YTctOWQ5ZC0yZWUyOWE4YWZhYjgiLCJzdWIiOiI1M2FkMDg0ZS1jYTZlLTQ3NWQtYTlmMy00YjE4NDk5OWIyNDQiLCJpc3MiOiJhbmNpbGUiLCJpYXQiOjE1NjU3ODY3MzEsImV4cCI6MTU2ODM3ODczMSwibGZzcCI6MjU5MjAwMCwidHlwIjoiYXQiLCJyb2xzIjpbeyJyb2xlIjoiR0VORVJBTCIsImxldmVsIjoiUkVBRF9PTkxZIn0seyJyb2xlIjoiQUNDT1VOVF9BQ0NFU1MiLCJsZXZlbCI6IlJFQURfT05MWSJ9XX0.NZIrjIzrgcEmyBPYXe-ELsBXZjHVfFMTx2rXI1YXu84
+        DirectSignin:
+            description: Login form
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/LoginForm'
+                    examples:
+                        basic:
+                            value:
+                                email: admin1account@cryptofacilities.co.uk
+                                password: Password1
+                                pow:
+                                    seed: 079fa564e7574f30c4a64b06d2e363998e55c11cd15f347a1b945ef3d281d039
+                                    solution:
+                                        - 664
+                                        - 99
+                                        - 1055
+                                        - 116
+                                    duration: 50
+                        unregistered:
+                            value:
+                                email: nobody@example.com
+                                password: nobody
+                                pow:
+                                    seed: 079fa564e7574f30c4a64b06d2e363998e55c11cd15f347a1b945ef3d281d039
+                                    solution:
+                                        - 664
+                                        - 99
+                                        - 1055
+                                        - 116
+                                    duration: 50
+        PowSolve:
+            description: A PoW solution.
+            required: true
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/PowSolve'
+    responses:
+        AccountExists:
+            description: Whether a Futures account exists for the Spot account
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AccountExists'
+        AccountInfo:
+            description: Account information relevant to authentication and authorization
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/AccountInfo'
+        CheckV3ApiKey:
+            description: API key authentication is valid and details have been returned.
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/CheckedV3ApiKeyDetails'
+        Login:
+            description: Logged in
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/Login'
+                    examples:
+                        success:
+                            $ref: '#/components/examples/LoginSuccessBody'
+        MfaConfirmRequest:
+            description: MFA Confirmation Request Info
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/MfaConfirmationRequestInfo'
+                    examples:
+                        totpOnly:
+                            $ref: '#/components/examples/MfaConfirmationRequestTotpOnly'
+                        fidoOnly:
+                            $ref: '#/components/examples/MfaConfirmationRequestFido2Only'
+                        both:
+                            $ref: '#/components/examples/MfaConfirmationRequestBoth'
+        MobileTokenConfirmationCode:
+            description: Confirmation code
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/MobileTokenConfirmationCode'
+        MobileTokenRequest:
+            description: Mobile token request payload
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/MobileTokenRequest'
+        RegionRestrictionList:
+            description: Country info list
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            regionRestrictions:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/RegionRestriction'
+                        required:
+                            - regionRestrictions
+        Revoke:
+            description: Results of token revocation process
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/RevokeResult'
+        Test:
+            description: Auth token debug information
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/TestResult'
+        Tokens:
+            description: List of tokens for account
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            tokens:
+                                type: array
+                                items:
+                                    $ref: '#/components/schemas/TokenDetails'
+                        required:
+                            - tokens
+        Verify:
+            description: Token validity information
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/VerifyResult'
+                    examples:
+                        valid:
+                            $ref: '#/components/examples/VerifyValidBody'
+                        revoked:
+                            $ref: '#/components/examples/VerifyRevokedBody'
+        Error:
+            description: Error descriptor
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/ErrorDescriptor'
+        PowChallenge:
+            description: PoW challenge solver inputs
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/PowChallenge'
+        PowTester:
+            description: PoW test result
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            valid:
+                                type: boolean
+                        required:
+                            - valid
+        WhoAmI:
+            description: Account identifiers extracted from auth token
+            content:
+                application/json:
+                    schema:
+                        $ref: '#/components/schemas/WhoAmI'
+    examples:
+        LoginSuccessBody:
+            value:
+                token: eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJ2IjoxLCJqdGkiOiJkMDJlMDUzZS01NzRjLTQ5MWMtOWZiNi0xMjY0YTIyNzA2MDAiLCJzdWIiOiI1M2FkMDg0ZS1jYTZlLTQ3NWQtYTlmMy00YjE4NDk5OWIyNDQiLCJpc3MiOiJhbmNpbGUiLCJpYXQiOjE1NjU3ODY4OTksImV4cCI6MTU2ODM3ODg5OSwibGZzcCI6MjU5MjAwMCwidHlwIjoiYXQiLCJyb2xzIjpbeyJyb2xlIjoiR0VORVJBTCIsImxldmVsIjoiUkVBRF9PTkxZIn0seyJyb2xlIjoiQUNDT1VOVF9BQ0NFU1MiLCJsZXZlbCI6IlJFQURfT05MWSJ9XX0.oIU1_3Ap5Ytc6ox3_b4S3e60moRVdxth39tGOu-2baM
+        MfaConfirmationRequestBoth:
+            summary: Both FIDO (Yubikey) and TOTP configured
+            value:
+                mfaRequestId: 67caff42-2d8d-4dd2-bf47-898f097641a1
+                mfaRequired:
+                    - fido2
+                    - totp
+                challenge: {}
+        MfaConfirmationRequestFido2Only:
+            summary: Only FIDO (Yubikey) configured
+            value:
+                mfaRequestId: 67caff42-2d8d-4dd2-bf47-898f097641a1
+                mfaRequired:
+                    - fido2
+                challenge: {}
+        MfaConfirmationRequestTotpOnly:
+            summary: Only TOTP configured
+            value:
+                mfaRequestId: 67caff42-2d8d-4dd2-bf47-898f097641a1
+                mfaRequired:
+                    - totp
+                challenge: null
+        VerifyRevokedBody:
+            value:
+                token: <jwt>
+                valid: false
+                invalidReason: token revoked
+        VerifyValidBody:
+            value:
+                token: <jwt>
+                valid: true
+                invalidReason: null
+    parameters:
+        TokensFilter:
+            name: filter
+            in: query
+            description: Filter for tokens list.
+            schema:
+                type: string
+                enum:
+                    - active
+                    - inactive
+                    - all
+        UserAgentHeader:
+            name: User-Agent
+            in: header
+            required: true
+            description: User agent
+            schema:
+                type: string
+        HostHeader:
+            name: Host
+            in: header
+            description: Host and port number of the server to which the request is being sent
+            schema:
+                type: string
+        XForwardedForHeader:
+            name: X-Forwarded-For
+            in: header
+            description: Client's IP sourced from trusted X-Forwarded-For header.
+            schema:
+                type: string
+                format: ip
+            x-internalOnly: true
+        ApiKeyId:
+            name: keyId
+            in: path
+            required: true
+            schema:
+                type: integer
+                format: int64
+    securitySchemes:
+        api-key-any:
+            type: apiKey
+            description: API Key with any permissions.
+            in: header
+            name: apikey
+            x-inlineDescription: true
+        header_jwt:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+        request-signature:
+            type: apiKey
+            description: Request signature.
+            in: header
+            name: authent
+            x-inlineDescription: true

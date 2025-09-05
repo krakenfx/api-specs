@@ -1,0 +1,20 @@
+title: ExtendedBalance
+description: Extended Balance
+type: object
+properties:
+  balance:
+    description: "Total balance amount for an asset"
+    type: string
+    example: "3.46840030"
+  credit:
+    description: "Total credit amount (only applicable if account has a credit line)"
+    type: string
+    example: "1.26844502"
+  credit_used:
+    description: "Used credit amount (only applicable if account has a credit line)"
+    type: string
+    example: "0.10002300"
+  hold_trade:
+    description: "Total held amount for an asset"
+    type: string
+    example: "2.14560458"

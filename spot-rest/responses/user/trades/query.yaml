@@ -1,0 +1,28 @@
+error: []
+result:
+  TNGJFU-5CD67-ZV3AEO:
+    ordertxid: O5T7NQ-DH2NO-XCSJ3O
+    postxid: TNJAD2-A56J2-34HIEZ
+    pair: XXBTZUSD
+    time: 1428084298.0983
+    type: buy
+    ordertype: market
+    price: '9.25000'
+    cost: '0.92500'
+    fee: '0.00412'
+    vol: '0.10000000'
+    margin: '0.92500'
+    misc: closing
+  TRWCIF-3MJWU-5DYJG5:
+    ordertxid: OGUSJ2-JCTEN-ZDLPWE
+    postxid: T445PG-PCO2Q-PZTQSG
+    pair: XXBTZUSD
+    time: 1428082705.9649
+    type: buy
+    ordertype: limit
+    price: '9.25000'
+    cost: '0.92500'
+    fee: '0.00412'
+    vol: '0.10000000'
+    margin: '0.92500'
+    misc: closing

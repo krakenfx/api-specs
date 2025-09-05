@@ -1,0 +1,3 @@
+description: "Nonce used in construction of `API-Sign` header"
+type: integer
+format: int64

@@ -1,0 +1,47 @@
+title: AssetTickerInfo
+description: Asset Ticker Info
+type: object
+properties:
+  a:
+    description: Ask `[<price>, <whole lot volume>, <lot volume>]`
+    type: array
+    items:
+      type: string
+  b:
+    description: Bid `[<price>, <whole lot volume>, <lot volume>]`
+    type: array
+    items:
+      type: string
+  c:
+    description: Last trade closed `[<price>, <lot volume>]`
+    type: array
+    items:
+      type: string
+  v:
+    description: Volume `[<today>, <last 24 hours>]`
+    type: array
+    items:
+      type: string
+  p:
+    description: Volume weighted average price `[<today>, <last 24 hours>]`
+    type: array
+    items:
+      type: string
+  t:
+    description: Number of trades `[<today>, <last 24 hours>]`
+    type: array
+    items:
+      type: integer
+  l:
+    description: Low `[<today>, <last 24 hours>]`
+    type: array
+    items:
+      type: string
+  h:
+    description: High `[<today>, <last 24 hours>]`
+    type: array
+    items:
+      type: string
+  o:
+    description: Today's opening price
+    type: string

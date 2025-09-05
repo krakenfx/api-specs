@@ -1,0 +1,40 @@
+error: []
+result:
+  ledger:
+    LGBRJU-SQZ4L-5HLS3C:
+      refid: QGBCOYA-UNP53O-F2JDNS
+      time: 1546992921.8426
+      type: deposit
+      aclass: currency
+      asset: XXBT
+      amount: '0.7812500000'
+      fee: '0.0000000000'
+      balance: '5.4687500000'
+    L3S26P-BHIOV-TTWYYI:
+      refid: QGBQAL5-3F4WQ6-DZQT7G
+      time: 1546992921.8172
+      type: deposit
+      aclass: currency
+      asset: XXBT
+      amount: '0.7812500000'
+      fee: '0.0000000000'
+      balance: '4.6875000000'
+    LT2T4M-YDT75-42KGMU:
+      refid: QGBHWA7-5XFEDC-RIBTM3
+      time: 1546992921.777
+      type: deposit
+      aclass: currency
+      asset: XXBT
+      amount: '0.7812500000'
+      fee: '0.0000000000'
+      balance: '3.9062500000'
+    LILCPJ-DKJ53-CZIG5E:
+      refid: QGB5XCB-NS67CW-D34ZKM
+      time: 1546992921.753
+      type: deposit
+      aclass: currency
+      asset: XXBT
+      amount: '0.7812500000'
+      fee: '0.0000000000'
+      balance: '3.1250000000'
+count: 4

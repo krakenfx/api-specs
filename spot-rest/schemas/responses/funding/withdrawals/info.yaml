@@ -1,0 +1,32 @@
+type: object
+properties:
+  result:
+    title: withdrawalInfo
+    description: Withdrawal Info
+    type: object
+    properties:
+      method:
+        description: Name of the withdrawal method that will be used
+        type: string
+      limit:
+        description: Maximum net amount that can be withdrawn right now
+        type: string
+      amount:
+        description: Net amount that will be sent, after fees
+        type: string        
+      fee:
+        description: Amount of fees that will be paid
+        type: string
+  error:
+    $ref: '../../../../schemas/objects/errors/error.yaml'
+example:
+                {
+                  "error": [],
+                  "result":
+                    {
+                      "method": "Bitcoin",
+                      "limit": "332.00956139",
+                      "amount": "0.72485000",
+                      "fee": "0.00020000",
+                    },
+                }

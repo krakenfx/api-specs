@@ -1,0 +1,16 @@
+title: Update OTC Quote Request Body
+description: Response schema for updating an OTC quote. Contains either a successful result with the quote ID or an error object.
+type: object
+properties:
+  result:
+    type: object
+    properties:
+      quote_id:
+        type: string
+        description: The id of the updated quote.
+        example: "00001c47-8f59-4099-b6f8-b637437ef1ab"
+  error:
+    $ref: '../../../schemas/objects/errors/error.yaml'
+required:
+  - error
+additionalProperties: false

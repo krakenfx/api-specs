@@ -1,0 +1,54 @@
+error: []
+result:
+  ODNLO4-QYFSV-33BKJA:
+    refid:
+    userref: 123456
+    status: open
+    opentm: 1550102482.1954
+    starttm: 0
+    expiretm: 0
+    descr:
+      pair: XMRUSD
+      type: buy
+      ordertype: limit
+      price: '1.00'
+      price2: '0'
+      leverage: none
+      order: buy 10.00000000 XMRUSD @ limit 1.00
+      close: ''
+    vol: '10.00000000'
+    vol_exec: '0.00000000'
+    cost: '0.00000000'
+    fee: '0.00000000'
+    price: '0.00000000'
+    stopprice: '0.00000000'
+    limitprice: '0.00000000'
+    misc: ''
+    oflags: fciq
+  OQB6D2-O5QMF-QBBAWZ:
+    refid:
+    userref: 3000
+    status: canceled
+    reason: User requested
+    opentm: 1550101013.9522
+    closetm: 1550101338.0032
+    starttm: 0
+    expiretm: 0
+    descr:
+      pair: XBTEUR
+      type: buy
+      ordertype: limit
+      price: '1.0'
+      price2: '0'
+      leverage: none
+      order: buy 10.00000000 XBTEUR @ limit 1.0
+      close: ''
+    vol: '10.00000000'
+    vol_exec: '0.00000000'
+    cost: '0.00000'
+    fee: '0.00000'
+    price: '0.00000'
+    stopprice: '0.00000'
+    limitprice: '0.00000'
+    misc: ''
+    oflags: fciq

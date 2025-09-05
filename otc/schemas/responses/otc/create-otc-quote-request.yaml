@@ -1,0 +1,27 @@
+title: createOtcQuoteRequest
+description: Response schema for creating an OTC quote request.
+type: object
+properties:
+  result:
+    type: object
+    title: OTC Request for Quote
+    properties:
+      quote:
+        type: object
+        description: Quote created
+        $ref: '../../objects/otc/quote-props.yaml'
+        required:
+          - base
+          - quote
+          - type
+          - amount
+          - settlement
+        additionalProperties: false
+    required:
+      - quote
+    additionalProperties: false
+  error:
+    $ref: '../../../schemas/objects/errors/error.yaml'
+required:
+  - error
+additionalProperties: false

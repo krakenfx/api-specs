@@ -1,0 +1,9 @@
+description: Success response
+type: object
+properties:
+  result:
+    type: boolean
+    example: true
+  error:
+    $ref: '../objects/errors/error.yaml'
+    

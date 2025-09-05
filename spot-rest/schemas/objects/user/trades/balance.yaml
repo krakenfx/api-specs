@@ -1,0 +1,44 @@
+title: AccountBalance
+description: Account Balance
+type: object
+properties:
+  eb:
+    description: "Equivalent balance (combined balance of all currencies)"
+    type: string
+    example: "3224744.0162"
+  tb:
+    description: "Trade balance (combined balance of all equity currencies)"
+    type: string
+    example: "3224744.0162"
+  m:
+    description: "Margin amount of open positions"
+    type: string
+    example: "0.0000"
+  n:
+    description: "Unrealized net profit/loss of open positions"
+    type: string
+    example: "0.0000"
+  c:
+    description: "Cost basis of open positions"
+    type: string
+    example: "0.0000"
+  v:
+    description: "Current floating valuation of open positions"
+    type: string
+    example: "0.0000"
+  e:
+    description: "Equity: `trade balance + unrealized net profit/loss`"
+    type: string
+    example: "3224744.0162"
+  mf:
+    description: "Free margin: `Equity - initial margin (maximum margin available to open new positions)`"
+    type: string
+    example: "3224744.0162"
+  ml:
+    description: "Margin level: `(equity / initial margin) * 100`"
+    type: string
+    example: "0.0000"
+  uv:
+    description: "Unexecuted value: Value of unfilled and partially filled orders"
+    type: string
+    example: "0.0000"

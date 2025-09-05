@@ -1,0 +1,11 @@
+  type: object
+  properties:
+    result:
+      type: object
+      description: txid of the order.
+      oneOf:
+          - $ref: '../../../../schemas/objects/user/orders/open.yaml'
+          - $ref: '../../../../schemas/objects/user/orders/closed.yaml'
+    error:
+        $ref: '../../../../schemas/objects/errors/error.yaml'
+

@@ -1,0 +1,12 @@
+required: true
+content:
+  application/json:
+    schema:
+      required:
+      - nonce
+      type: object
+      properties:
+        nonce:
+          $ref: '../../partials/properties/nonce.yaml'
+      example:
+          nonce: 1695828436

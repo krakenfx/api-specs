@@ -1,0 +1,9 @@
+type: object
+properties:
+  result:
+    type: object
+    additionalProperties:
+      x-additionalPropertiesName: asset
+      $ref: '../../../../schemas/objects/public/assets/info.yaml'
+  error:
+    $ref: '../../../../schemas/objects/errors/error.yaml'

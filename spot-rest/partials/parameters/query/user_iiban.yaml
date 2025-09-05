@@ -1,0 +1,9 @@
+name: user_iiban
+description: Applies the request to the specified user / subaccount. Available to master account holders only.
+in: query
+example: AA96N74GCGEFN8KI
+schema:
+  type: string
+  format: Kraken user identifier
+  minLength: 16
+  maxLength: 16

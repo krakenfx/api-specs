@@ -1,0 +1,11 @@
+# Schema for Get OTC Historical Quotes request
+# This endpoint does not require any request body parameters
+title: Get OTC Historical Quotes Request Body
+description: Request body schema for retrieving historical quotes for OTC instruments. This endpoint does not require any request body parameters.
+type: object
+properties: 
+    nonce:
+      $ref: "../../../partials/properties/nonce.yaml"
+additionalProperties: false
+required:
+  - nonce

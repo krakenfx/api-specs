@@ -1,0 +1,7 @@
+value:
+  errors:
+  - field: Kraken-Api-Key
+    type: Invalid key
+    msg: Invalid API key
+    severity: E
+    errorClass: API

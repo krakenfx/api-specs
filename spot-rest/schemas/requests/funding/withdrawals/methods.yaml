@@ -1,0 +1,19 @@
+required:
+  - nonce
+type: object
+properties:
+  nonce:
+    $ref: '../../../../partials/properties/nonce.yaml'
+  asset:
+    description: Filter methods for specific asset
+    type: string
+  aclass:
+    description: Filter methods for specific asset class
+    type: string
+    enum:
+      - currency
+      - tokenized_asset
+    default: currency
+  network:
+    description: Filter methods for specific network
+    type: string

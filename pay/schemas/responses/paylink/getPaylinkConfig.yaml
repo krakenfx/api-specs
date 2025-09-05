@@ -1,0 +1,38 @@
+type: object
+required:
+  - error
+properties:
+  error:
+    items:
+      description: General API error.
+      properties:
+        errorClass:
+          type: string
+        errorMessage:
+          nullable: true
+          type: string
+        severity:
+          description: API error severity.
+          enum:
+            - E
+            - W
+          type: string
+        type:
+          type: string
+      required:
+        - errorClass
+        - severity
+        - type
+      type: object
+    type: array
+  result:
+    nullable: true
+    properties:
+      expire_time:
+        description: Paylink expiration time (in seconds)
+        format: uint64
+        minimum: 0
+        type: integer
+    required:
+      - expire_time
+    type: object

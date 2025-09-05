@@ -1,0 +1,4 @@
+type: number
+description: Unsigned byte (u8)
+minimum: 0
+maximum: 255

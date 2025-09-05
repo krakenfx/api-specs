@@ -1,0 +1,14 @@
+# Schema for checking OTC client status
+# This endpoint is used to verify the status and eligibility of an OTC client
+title: Check OTC Client Request Body
+description: |
+  This schema represents the request body for checking an OTC client's status.
+  No request body is required as the client information is typically passed through
+  authentication headers.
+type: object
+properties:
+  nonce:
+    $ref: "../../../partials/properties/nonce.yaml"
+additionalProperties: false
+required:
+  - nonce
